@@ -1,0 +1,202 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["tracing"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL") // For migrations
+}
+
+model Warn {
+  id        String   @id @default(uuid())
+  userId    String
+  guildId   String
+  reason    String?
+  warnedBy  String
+  warnedAt  DateTime @default(now())
+
+  @@map("warns")
+}
+
+model Mute {
+  id        String    @id @default(uuid())
+  userId    String
+  guildId   String
+  reason    String?
+  mutedBy   String
+  expiresAt DateTime?
+  mutedAt   DateTime  @default(now())
+
+  @@map("mutes")
+}
+
+model Kick {
+  id       String   @id @default(uuid())
+  userId   String
+  guildId  String
+  reason   String?
+  kickedBy String
+  kickedAt DateTime @default(now())
+
+  @@map("kicks")
+}
+
+model Ban {
+  id       String   @id @default(uuid())
+  userId   String
+  guildId  String
+  reason   String?
+  bannedBy String
+  bannedAt DateTime @default(now())
+
+  @@map("bans")
+}
+
+model GuildSettings {
+  id             String  @id @default(uuid())
+  guildId        String  @unique
+  prefix         String  @default("!")
+  welcomeChannel String?
+  welcomeMessage String?
+  welcomeCardEnabled Boolean? @default(false)
+  welcomeBackgroundUrl String?
+  welcomeTextColor String?
+  welcomeAccentColor String?
+  leaveChannel   String?
+  leaveMessage   String?
+  logChannel     String?
+  muteRoleId     String?
+  joinRole       String?
+  adminRoles     String  @default("Admin,Moderator")
+  helperRoles    String  @default("Helper,Staff")
+  
+  // Server lock fields
+  serverLocked   Boolean? @default(false)
+  lockReason     String?
+  lockExpires    DateTime?
+  lockedBy       String?
+  
+  // AutoMod fields
+  autoMod        Boolean? @default(false)
+  autoModFilters String?
+  autoModActions String?
+  
+  // AntiSpam fields  
+  antiSpam       Boolean? @default(false)
+  spamMaxMessages Int?
+  spamTimeframe  Int?
+  spamActions    String?
+  
+  // AntiRaid fields
+  antiRaid       Boolean? @default(false)
+  antiRaidLevel  String?
+  antiRaidActions String?
+  
+  // Ticket system
+  ticketCategory String?
+  ticketStaffRoles String?
+  
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("guild_settings")
+}
+
+model User {
+  id      String @id @default(uuid())
+  userId  String @unique
+  guildId String
+  xp      Int    @default(0)
+  level   Int    @default(1)
+  money   Int    @default(0)
+
+  @@map("users")
+}
+
+model CultivationUser {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  exp             Int      @default(0)
+  currentLevel    String   @default("Phàm Nhân")
+  messageCount    Int      @default(0)
+  voiceTime       Int      @default(0)  // in seconds
+  lastFarmTime    DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("cultivation_users")
+}
+
+model UserInventory {
+  id       String @id @default(uuid())
+  userId   String
+  itemType String // "material" hoặc "medicine"
+  itemId   String // id của item (1-7 cho material, z1-z4 cho medicine)
+  quantity Int    @default(1)
+
+  @@unique([userId, itemType, itemId])
+  @@map("user_inventory")
+}
+
+model Ticket {
+  id          String   @id @default(uuid())
+  ticketId    String   @unique
+  guildId     String
+  channelId   String
+  userId      String
+  category    String?
+  reason      String?
+  status      String   @default("open") // open, closed
+  createdBy   String
+  closedBy    String?
+  claimedBy   String?
+  createdAt   DateTime @default(now())
+  closedAt    DateTime?
+  claimedAt   DateTime?
+
+  @@map("tickets")
+}
+
+model Invite {
+  id        String   @id @default(uuid())
+  code      String   @unique
+  guildId   String
+  inviterId String
+  uses      Int      @default(0)
+  maxUses   Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@map("invites")
+}
+
+model TempBan {
+  id          String   @id @default(uuid())
+  userId      String
+  guildId     String
+  reason      String?
+  moderatorId String
+  bannedAt    DateTime @default(now())
+  unbanAt     DateTime
+  active      Boolean  @default(true)
+  
+  @@map("tempbans")
+}
+
+model TempRole {
+  id          String   @id @default(uuid())
+  userId      String
+  guildId     String
+  roleId      String
+  reason      String?
+  grantedBy   String
+  grantedAt   DateTime @default(now())
+  expiresAt   DateTime
+  active      Boolean  @default(true)
+  
+  @@map("temproles")
+} 
