@@ -1,0 +1,25 @@
+{
+  "bot": {
+    "name": "Moderation Bot",
+    "description": "Discord Bot với 70+ lệnh moderation và quản lý",
+    "version": "1.0.0",
+    "author": "Viet Linh"
+  },
+  "defaultSettings": {
+    "prefix": "!",
+    "embedColor": "#0099ff",
+    "errorColor": "#ff0000",
+    "successColor": "#00ff00",
+    "warningColor": "#ffaa00"
+  },
+  "permissions": {
+    "botOwners": [],
+    "defaultAdminRoles": ["Admin", "Moderator"],
+    "defaultHelperRoles": ["Helper", "Staff"]
+  },
+  "moderation": {
+    "defaultMuteRole": "Muted",
+    "maxWarnings": 3,
+    "autoModerationEnabled": false
+  }
+} 

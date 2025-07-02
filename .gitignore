@@ -150,7 +150,6 @@ dist
 .pnp.*
 
 # Discord Bot specific
-config.json
 token.json
 .token
 bot.log
@@ -197,7 +196,6 @@ local.json
 development.json
 
 # PM2 process files
-ecosystem.config.js.backup
 .pm2/
 
 # Audio/Video files (if any)
