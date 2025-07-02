@@ -95,7 +95,7 @@ module.exports = {
         }));
 
         const result = productionStyle.createInfoEmbed(
-            'PEANHELP BOT - COMMAND CENTER',
+            'PHONG ƯNG BANG BOT - COMMAND CENTER',
             { tag: 'Advanced Discord Management' },
             message.author,
             '🚀 **Advanced Discord Management System**\n\n💡 **Navigation:** Use buttons below to browse categories\n🔍 **Specific Help:** `!help <command>` for detailed info\n📋 **Category Help:** `!help <category>`',

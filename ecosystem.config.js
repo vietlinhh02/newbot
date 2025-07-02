@@ -1,6 +1,6 @@
 module.exports = {
   apps: [{
-    name: 'newbot',
+    name: 'phong-ung-bang-bot',
     script: 'index.js',
     instances: 1,
     autorestart: true,

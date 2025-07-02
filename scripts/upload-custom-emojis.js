@@ -46,15 +46,15 @@ async function selectGuild(guilds) {
         console.log(`${index + 1}. ${guild.name} (ID: ${guild.id}) - ${guild.memberCount} members`);
     });
 
-    // Auto-select PeanHelp server if available
-    const peanHelpGuild = guildArray.find(guild => guild.name.toLowerCase().includes('peanhelp'));
-    if (peanHelpGuild) {
-        console.log(`\n🎯 Found PeanHelp server: ${peanHelpGuild.name}`);
-        console.log('🤖 Auto-selecting PeanHelp server for bot setup...');
-        return peanHelpGuild;
+    // Auto-select Phong Ung Bang server if available
+    const Phong Ung BangGuild = guildArray.find(guild => guild.name.toLowerCase().includes('Phong Ung Bang'));
+    if (Phong Ung BangGuild) {
+        console.log(`\n🎯 Found Phong Ung Bang server: ${Phong Ung BangGuild.name}`);
+        console.log('🤖 Auto-selecting Phong Ung Bang server for bot setup...');
+        return Phong Ung BangGuild;
     }
 
-    // If no PeanHelp server, let user choose
+    // If no Phong Ung Bang server, let user choose
     const rl = createReadlineInterface();
     
     return new Promise((resolve) => {
@@ -92,7 +92,7 @@ async function checkBotPermissions(guild) {
 
 async function uploadCustomEmojis() {
     try {
-        console.log('🚀 Starting PeanHelp custom emoji upload process...');
+        console.log('🚀 Starting Phong Ung Bang custom emoji upload process...');
         
         // Auto-detect guild
         const guilds = client.guilds.cache;
@@ -121,10 +121,10 @@ async function uploadCustomEmojis() {
         // Get current emojis
         await guild.emojis.fetch();
         const currentEmojis = guild.emojis.cache;
-        const peanHelpEmojis = currentEmojis.filter(emoji => emoji.name.startsWith('peanhelp_'));
+        const Phong Ung BangEmojis = currentEmojis.filter(emoji => emoji.name.startsWith('Phong Ung Bang_'));
         
         console.log(`\n📊 Current emojis: ${currentEmojis.size}/${guild.maximumEmojis || 50}`);
-        console.log(`📊 PeanHelp emojis: ${peanHelpEmojis.size}`);
+        console.log(`📊 Phong Ung Bang emojis: ${Phong Ung BangEmojis.size}`);
 
         // Read icon directory
         const iconFiles = fs.readdirSync(ICON_DIR).filter(file => file.endsWith('.png'));
@@ -132,7 +132,7 @@ async function uploadCustomEmojis() {
 
         // Check if we have space
         const availableSlots = (guild.maximumEmojis || 50) - currentEmojis.size;
-        const newEmojisNeeded = iconFiles.length - peanHelpEmojis.size;
+        const newEmojisNeeded = iconFiles.length - Phong Ung BangEmojis.size;
         
         if (newEmojisNeeded > availableSlots) {
             console.warn(`⚠️  Need ${newEmojisNeeded} slots but only ${availableSlots} available!`);
@@ -150,7 +150,7 @@ async function uploadCustomEmojis() {
                 // Generate emoji name
                 const baseName = file.replace('.png', '').toLowerCase();
                 const emojiName = EMOJI_NAMES[file] || baseName.replace(/[^a-z0-9_]/g, '_');
-                const fullEmojiName = `peanhelp_${emojiName}`;
+                const fullEmojiName = `Phong Ung Bang_${emojiName}`;
                 
                 // Check if emoji already exists
                 const existingEmoji = currentEmojis.find(emoji => emoji.name === fullEmojiName);
@@ -176,7 +176,7 @@ async function uploadCustomEmojis() {
                 const emoji = await guild.emojis.create({
                     attachment: imageBuffer,
                     name: fullEmojiName,
-                    reason: 'PeanHelp Bot custom icons upload'
+                    reason: 'Phong Ung Bang Bot custom icons upload'
                 });
 
                 console.log(`✅ Uploaded :${emoji.name}: (ID: ${emoji.id})`);
@@ -198,22 +198,22 @@ async function uploadCustomEmojis() {
         console.log(`📋 Total: ${uploadCount + skipCount + errorCount}/${iconFiles.length} processed`);
 
         // Generate emoji mapping for customEmbeds.js
-        if (uploadCount > 0 || peanHelpEmojis.size > 0) {
+        if (uploadCount > 0 || Phong Ung BangEmojis.size > 0) {
             console.log('\n🔧 Generated Custom Emoji Mapping (copy this to customEmbeds.js):');
             console.log('```javascript');
             console.log('const CUSTOM_EMOJI_MAP = {');
             
             const updatedEmojis = await guild.emojis.fetch();
-            const allPeanHelpEmojis = updatedEmojis.filter(emoji => emoji.name.startsWith('peanhelp_'));
+            const allPhong Ung BangEmojis = updatedEmojis.filter(emoji => emoji.name.startsWith('Phong Ung Bang_'));
             
-            allPeanHelpEmojis.forEach(emoji => {
-                const key = emoji.name.replace('peanhelp_', '').toUpperCase();
+            allPhong Ung BangEmojis.forEach(emoji => {
+                const key = emoji.name.replace('Phong Ung Bang_', '').toUpperCase();
                 console.log(`    '${key}': '<:${emoji.name}:${emoji.id}>',`);
             });
             console.log('};');
             console.log('```');
 
-            console.log(`\n🎉 Successfully set up ${allPeanHelpEmojis.size} custom emojis for PeanHelp Bot!`);
+            console.log(`\n🎉 Successfully set up ${allPhong Ung BangEmojis.size} custom emojis for Phong Ung Bang Bot!`);
         } else {
             console.log('\n📝 No new emojis uploaded. All icons already exist as custom emojis.');
         }

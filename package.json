@@ -1,7 +1,7 @@
 {
-  "name": "discord-moderation-bot",
+  "name": "phong-ung-bang-bot",
   "version": "1.0.0",
-  "description": "Discord Bot với 70+ lệnh moderation và quản lý",
+  "description": "Phong Ưng Bang Bot - Discord Bot với 70+ lệnh moderation và quản lý",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",

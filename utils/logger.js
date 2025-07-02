@@ -68,7 +68,7 @@ class Logger {
         console.clear();
         
         // ASCII art header
-        const title = figlet.textSync('PeanHelp', {
+        const title = figlet.textSync('Phong Ung Bang', {
             font: 'ANSI Shadow',
             horizontalLayout: 'default',
             verticalLayout: 'default'

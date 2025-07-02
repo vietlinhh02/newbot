@@ -3,44 +3,44 @@ const { iconManager } = require('./iconManager');
 
 // Custom Emoji Mapping (auto-generated from upload script)
 const CUSTOM_EMOJI_MAP = {
-    'BAKA': '<:peanhelp_baka:1387763776996245516>',
-    'CAREFREE': '<:peanhelp_carefree:1387763784285683734>',
-    'CAT_SIP': '<:peanhelp_cat_sip:1387763791436976201>',
-    'DIRTY_LAUGH': '<:peanhelp_dirty_laugh:1387763799469068321>',
-    'EH': '<:peanhelp_eh:1387763806985388092>',
-    'GOJO_BYE': '<:peanhelp_gojo_bye:1387763814497386516>',
-    'HAPPI_CRI': '<:peanhelp_happi_cri:1387763821501747220>',
-    'HAPPY_SMILE': '<:peanhelp_happy_smile:1387763829110472846>',
-    'HEHE': '<:peanhelp_hehe:1387763836773466122>',
-    'HELLO_POLICE': '<:peanhelp_hello_police:1387763844088074273>',
-    'THINKING_FACE': '<:peanhelp_thinking_face:1387763851675701410>',
-    'HMMP': '<:peanhelp_hmmp:1387763858738774077>',
-    'HMP': '<:peanhelp_hmp:1387763865814827090>',
-    'HUH': '<:peanhelp_huh:1387763873171640370>',
-    'JERRY_MEME': '<:peanhelp_jerry_meme:1387763880671051899>',
-    'APPROVE': '<:peanhelp_approve:1387763888153694229>',
-    'NOSEBLEED': '<:peanhelp_nosebleed:1387763895439196180>',
-    'NYAA': '<:peanhelp_nyaa:1387763903735271465>',
-    'OK': '<:peanhelp_ok:1387763910714851339>',
-    'OMOSHIROI': '<:peanhelp_omoshiroi:1387763918746816543>',
-    'PANIK': '<:peanhelp_panik:1387763926342565970>',
-    'PHEW': '<:peanhelp_phew:1387763933116502171>',
-    'PURPLEBUTTERFLIES': '<:peanhelp_purplebutterflies:1387763940125184163>',
-    'PURPLEHEART': '<:peanhelp_purpleheart:1387763947196780614>',
-    'RAM_GLARE': '<:peanhelp_ram_glare:1387763953907667025>',
-    'RAM_SIP': '<:peanhelp_ram_sip:1387772691108597781>',
-    'PAT_HEAD': '<:peanhelp_pat_head:1387772698285052006>',
-    'SHTAP': '<:peanhelp_shtap:1387772705155059762>',
-    'SUS': '<:peanhelp_sus:1387772712075788371>',
-    'TAKELOVE': '<:peanhelp_takelove:1387772719713615893>',
-    'TATAKAE': '<:peanhelp_tatakae:1387772726617444362>',
-    'TOMIOKAHI': '<:peanhelp_tomiokahi:1387772733668200549>',
-    'ANGRY_FACE': '<:peanhelp_angry_face:1387772740584607754>',
-    'HAPPY_FACE': '<:peanhelp_happy_face:1387772747685564609>',
-    'LITTLE_MAD': '<:peanhelp_little_mad:1387772754844975196>',
-    'URNOTALIVE': '<:peanhelp_urnotalive:1387772761723633875>',
-    'VICTOR_GLARE': '<:peanhelp_victor_glare:1387772769005080751>',
-    'WHAAA': '<:peanhelp_whaaa:1387772775891992698>',
+    'BAKA': '<:phongungbang_baka:1387763776996245516>',
+    'CAREFREE': '<:phongungbang_carefree:1387763784285683734>',
+    'CAT_SIP': '<:phongungbang_cat_sip:1387763791436976201>',
+    'DIRTY_LAUGH': '<:phongungbang_dirty_laugh:1387763799469068321>',
+    'EH': '<:phongungbang_eh:1387763806985388092>',
+    'GOJO_BYE': '<:phongungbang_gojo_bye:1387763814497386516>',
+    'HAPPI_CRI': '<:phongungbang_happi_cri:1387763821501747220>',
+    'HAPPY_SMILE': '<:phongungbang_happy_smile:1387763829110472846>',
+    'HEHE': '<:phongungbang_hehe:1387763836773466122>',
+    'HELLO_POLICE': '<:phongungbang_hello_police:1387763844088074273>',
+    'THINKING_FACE': '<:phongungbang_thinking_face:1387763851675701410>',
+    'HMMP': '<:phongungbang_hmmp:1387763858738774077>',
+    'HMP': '<:phongungbang_hmp:1387763865814827090>',
+    'HUH': '<:phongungbang_huh:1387763873171640370>',
+    'JERRY_MEME': '<:phongungbang_jerry_meme:1387763880671051899>',
+    'APPROVE': '<:phongungbang_approve:1387763888153694229>',
+    'NOSEBLEED': '<:phongungbang_nosebleed:1387763895439196180>',
+    'NYAA': '<:phongungbang_nyaa:1387763903735271465>',
+    'OK': '<:phongungbang_ok:1387763910714851339>',
+    'OMOSHIROI': '<:phongungbang_omoshiroi:1387763918746816543>',
+    'PANIK': '<:phongungbang_panik:1387763926342565970>',
+    'PHEW': '<:phongungbang_phew:1387763933116502171>',
+    'PURPLEBUTTERFLIES': '<:phongungbang_purplebutterflies:1387763940125184163>',
+    'PURPLEHEART': '<:phongungbang_purpleheart:1387763947196780614>',
+    'RAM_GLARE': '<:phongungbang_ram_glare:1387763953907667025>',
+    'RAM_SIP': '<:phongungbang_ram_sip:1387772691108597781>',
+    'PAT_HEAD': '<:phongungbang_pat_head:1387772698285052006>',
+    'SHTAP': '<:phongungbang_shtap:1387772705155059762>',
+    'SUS': '<:phongungbang_sus:1387772712075788371>',
+    'TAKELOVE': '<:phongungbang_takelove:1387772719713615893>',
+    'TATAKAE': '<:phongungbang_tatakae:1387772726617444362>',
+    'TOMIOKAHI': '<:phongungbang_tomiokahi:1387772733668200549>',
+    'ANGRY_FACE': '<:phongungbang_angry_face:1387772740584607754>',
+    'HAPPY_FACE': '<:phongungbang_happy_face:1387772747685564609>',
+    'LITTLE_MAD': '<:phongungbang_little_mad:1387772754844975196>',
+    'URNOTALIVE': '<:phongungbang_urnotalive:1387772761723633875>',
+    'VICTOR_GLARE': '<:phongungbang_victor_glare:1387772769005080751>',
+    'WHAAA': '<:phongungbang_whaaa:1387772775891992698>',
 };
 
 // Field icon types
@@ -162,7 +162,7 @@ const EMBED_THEMES = {
 class CustomEmbedFactory {
     constructor() {
         this.defaultFooter = {
-            text: 'PeanHelp Bot • Modern Discord Management',
+            text: 'Phong Ưng Bang Bot • Modern Discord Management',
             iconURL: null
         };
     }
@@ -215,7 +215,7 @@ class CustomEmbedFactory {
         // Add author with custom icon  
         if (themeConfig.authorIcon) {
             embed.setAuthor({
-                name: options.authorName || 'PeanHelp Moderation System',
+                name: options.authorName || 'Phong Ưng Bang Moderation System',
                 icon_url: `attachment://${themeConfig.authorIcon}`
             });
         }
@@ -274,7 +274,7 @@ class CustomEmbedFactory {
                 icon: field.icon || 'SUCCESS'
             })),
             author,
-            authorName: 'Success • PeanHelp System'
+            authorName: 'Success • Phong Ung Bang System'
         });
         
         const attachments = this.getEmbedAttachments('SUCCESS');
@@ -333,7 +333,7 @@ class CustomEmbedFactory {
             description: enhancedDescription,
             fields,
             author,
-            authorName: 'Error • PeanHelp System'
+            authorName: 'Error • Phong Ung Bang System'
         });
         
         const attachments = this.getEmbedAttachments('ERROR');
@@ -372,7 +372,7 @@ class CustomEmbedFactory {
                 icon: field.icon || 'WARNING'
             })),
             author,
-            authorName: 'Warning • PeanHelp System'
+            authorName: 'Warning • Phong Ung Bang System'
         });
         
         const attachments = this.getEmbedAttachments('WARNING');

@@ -161,7 +161,7 @@ const THEMES = {
 class EmbedFactory {
     constructor() {
         this.defaultFooter = {
-            text: '✨ PeanHelp Bot • Modern Discord Management',
+            text: '✨ Phong Ưng Bang Bot • Modern Discord Management',
             iconURL: null
         };
         this.brandColor = '#5865f2'; // Discord brand color
@@ -506,7 +506,7 @@ class EmbedFactory {
         const embed = this.createBase('INFO', author)
             .setTitle(`${ICONS.SERVER} System Information`)
             .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
-            .setDescription(`${ICONS.ROCKET} **${client.user.tag}** - Advanced Discord Management Bot`);
+            .setDescription(`${ICONS.ROCKET} **${client.user.tag}** - Phong Ưng Bang Advanced Management Bot`);
         
         // Enhanced basic stats
         embed.addFields([
