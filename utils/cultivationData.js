@@ -1,15 +1,27 @@
 // Import emoji mapping mới
 const { VATPHAM_EMOJI_MAP } = require('./vatphamEmojis');
 
-// Dữ liệu farming từ FARM.txt (đã giảm tỉ lệ drop) - Updated với emoji mới
+// Dữ liệu farming từ FARM.txt (đã giảm tỉ lệ drop) - Updated với emoji mới + vật phẩm đặc biệt
 const FARM_MATERIALS = {
-    1: { name: 'bạch ngọc sương', dropRate: 35, icon: VATPHAM_EMOJI_MAP.BACH_NGOC_SUONG, fallbackIcon: '🔮' },
-    2: { name: 'tụ linh thảo', dropRate: 20, icon: VATPHAM_EMOJI_MAP.TU_LINH_THAO, fallbackIcon: '🌿' },
-    3: { name: 'tử hoa thảo', dropRate: 18, icon: VATPHAM_EMOJI_MAP.TU_HOA_THAO, fallbackIcon: '🟣' },
-    4: { name: 'hồng tú hoa', dropRate: 15, icon: VATPHAM_EMOJI_MAP.HONG_TU_HOA, fallbackIcon: '🌺' },
-    5: { name: 'ngũ sắc hoa', dropRate: 7, icon: VATPHAM_EMOJI_MAP.NGU_SAC_HOA, fallbackIcon: '🍃' },
+    // Nguyên liệu cơ bản (từ FARM.txt)
+    1: { name: 'bạch ngọc sương', dropRate: 30, icon: VATPHAM_EMOJI_MAP.BACH_NGOC_SUONG, fallbackIcon: '🔮' },
+    2: { name: 'tụ linh thảo', dropRate: 18, icon: VATPHAM_EMOJI_MAP.TU_LINH_THAO, fallbackIcon: '🌿' },
+    3: { name: 'tử hoa thảo', dropRate: 16, icon: VATPHAM_EMOJI_MAP.TU_HOA_THAO, fallbackIcon: '🟣' },
+    4: { name: 'hồng tú hoa', dropRate: 14, icon: VATPHAM_EMOJI_MAP.HONG_TU_HOA, fallbackIcon: '🌺' },
+    5: { name: 'ngũ sắc hoa', dropRate: 6, icon: VATPHAM_EMOJI_MAP.NGU_SAC_HOA, fallbackIcon: '🍃' },
     6: { name: 'ngũ sắc thạch', dropRate: 3, icon: VATPHAM_EMOJI_MAP.NGU_SAC_THACH, fallbackIcon: '🌈' },
-    7: { name: 'huyết ngọc hoa', dropRate: 2, icon: VATPHAM_EMOJI_MAP.HUYET_NGOC_HOA, fallbackIcon: '🩸' }
+    7: { name: 'huyết ngọc hoa', dropRate: 2, icon: VATPHAM_EMOJI_MAP.HUYET_NGOC_HOA, fallbackIcon: '🩸' },
+    
+    // Đan phương cơ bản (cần thiết để craft đan dược)
+    dp1: { name: 'Hạ phẩm đan phương', dropRate: 4, icon: VATPHAM_EMOJI_MAP.DAN_PHUONG_HA_PHAM, fallbackIcon: '📜' },
+    pdp: { name: 'Phiên đan phương', dropRate: 1.5, icon: VATPHAM_EMOJI_MAP.PHIEN_DAN_PHUONG, fallbackIcon: '📈' },
+    dl: { name: 'Đan lò', dropRate: 3, icon: VATPHAM_EMOJI_MAP.DAN_LO, fallbackIcon: '🏺' },
+    
+    // Tụ linh thạch (cần thiết để fusion linh thạch)
+    tlt: { name: 'Tụ linh thạch', dropRate: 1, icon: VATPHAM_EMOJI_MAP.TU_LINH_THACH, fallbackIcon: '💫' },
+    
+    // Linh thạch cơ bản (tỉ lệ thấp, bổ sung cho breakthrough)
+    lt1: { name: 'Hạ phẩm linh thạch', dropRate: 1, icon: VATPHAM_EMOJI_MAP.LINH_THACH_HA_PHAM, fallbackIcon: '💎' }
 };
 
 const MEDICINES = {
@@ -311,6 +323,58 @@ async function applyBreakthroughPenalty(client, userId, levelData) {
     return results;
 }
 
+// Helper function to determine item storage category
+function getItemStorageInfo(itemId) {
+    // Check if it's a number (basic materials 1-7)
+    if (!isNaN(itemId)) {
+        return {
+            category: 'material',
+            actualId: itemId,
+            name: FARM_MATERIALS[itemId]?.name || `Material ${itemId}`,
+            icon: FARM_MATERIALS[itemId]?.icon || '🔮'
+        };
+    }
+    
+    // Check FARM_MATERIALS first (includes dp1, pdp, dl, tlt, lt1)
+    if (FARM_MATERIALS[itemId]) {
+        const category = ['dp1', 'dp2', 'dp3', 'dp4', 'pdp', 'dl'].includes(itemId) ? 'medicine' : 'material';
+        return {
+            category: category,
+            actualId: itemId,
+            name: FARM_MATERIALS[itemId].name,
+            icon: FARM_MATERIALS[itemId].icon
+        };
+    }
+    
+    // Check MEDICINES
+    if (MEDICINES[itemId]) {
+        return {
+            category: 'medicine',
+            actualId: itemId,
+            name: MEDICINES[itemId].name,
+            icon: MEDICINES[itemId].icon
+        };
+    }
+    
+    // Check SPIRIT_STONES (lt2, lt3, lt4)
+    if (SPIRIT_STONES[itemId]) {
+        return {
+            category: 'material',
+            actualId: `spirit_${itemId}`,
+            name: SPIRIT_STONES[itemId].name,
+            icon: SPIRIT_STONES[itemId].icon
+        };
+    }
+    
+    // Default fallback
+    return {
+        category: 'material',
+        actualId: itemId,
+        name: itemId,
+        icon: '❓'
+    };
+}
+
 async function giveBreakthroughRewards(client, userId, levelData) {
     if (!levelData.rewards || levelData.rewards.length === 0) {
         return [];
@@ -322,40 +386,15 @@ async function giveBreakthroughRewards(client, userId, levelData) {
         const [itemType, quantity] = rewardString.split(':');
         const qty = parseInt(quantity);
 
-        // Determine item type and category
-        let itemCategory, itemId, itemName, itemIcon;
-        
-        if (itemType.startsWith('z')) {
-            // Medicine
-            itemCategory = 'medicine';
-            itemId = itemType;
-            itemName = MEDICINES[itemType]?.name || itemType;
-            itemIcon = MEDICINES[itemType]?.icon || '💊';
-        } else if (itemType.startsWith('lt')) {
-            // Spirit stones (treated as special items for now)
-            itemCategory = 'spirit_stone';
-            itemId = itemType;
-            itemName = SPIRIT_STONES[itemType]?.name || itemType;
-            itemIcon = SPIRIT_STONES[itemType]?.icon || '💎';
-        } else {
-            // Default to material
-            itemCategory = 'material';
-            itemId = itemType;
-            itemName = FARM_MATERIALS[itemType]?.name || itemType;
-            itemIcon = FARM_MATERIALS[itemType]?.icon || '🔮';
-        }
+        const storageInfo = getItemStorageInfo(itemType);
 
         try {
-            // For now, store spirit stones as materials with special prefix
-            const actualCategory = itemCategory === 'spirit_stone' ? 'material' : itemCategory;
-            const actualId = itemCategory === 'spirit_stone' ? `spirit_${itemId}` : itemId;
-
             await client.prisma.userInventory.upsert({
                 where: {
                     userId_itemType_itemId: {
                         userId: userId,
-                        itemType: actualCategory,
-                        itemId: actualId
+                        itemType: storageInfo.category,
+                        itemId: storageInfo.actualId
                     }
                 },
                 update: {
@@ -365,16 +404,16 @@ async function giveBreakthroughRewards(client, userId, levelData) {
                 },
                 create: {
                     userId: userId,
-                    itemType: actualCategory,
-                    itemId: actualId,
+                    itemType: storageInfo.category,
+                    itemId: storageInfo.actualId,
                     quantity: qty
                 }
             });
 
             rewardsGiven.push({
-                name: itemName,
+                name: storageInfo.name,
                 quantity: qty,
-                icon: itemIcon
+                icon: storageInfo.icon
             });
 
         } catch (error) {
@@ -424,5 +463,6 @@ module.exports = {
     rollBreakthrough,
     applyBreakthroughPenalty,
     giveBreakthroughRewards,
-    formatRewards
+    formatRewards,
+    getItemStorageInfo
 }; 

@@ -84,24 +84,38 @@ module.exports = {
                 const materialDisplay = [];
                 let totalMaterials = 0;
                 
+                // Basic materials (1-7)
                 for (let i = 1; i <= 7; i++) {
                     const material = materials.find(m => m.itemId === i.toString());
                     const materialData = FARM_MATERIALS[i.toString()];
                     const quantity = material ? material.quantity : 0;
-                    materialDisplay.push(`${materialData.icon}${quantity}`);
+                    if (quantity > 0) {
+                        materialDisplay.push(`${materialData.icon}${quantity}`);
+                    }
                     totalMaterials += quantity;
                 }
                 
-                responseText += materialDisplay.join(' ') + '\n';
+                // Special farmable materials (tlt, lt1)
+                ['tlt', 'lt1'].forEach(itemId => {
+                    const material = materials.find(m => m.itemId === itemId);
+                    const materialData = FARM_MATERIALS[itemId];
+                    const quantity = material ? material.quantity : 0;
+                    if (quantity > 0) {
+                        materialDisplay.push(`${materialData.icon}${quantity}`);
+                    }
+                    totalMaterials += quantity;
+                });
                 
-                if (totalMaterials === 0) {
+                if (materialDisplay.length > 0) {
+                    responseText += materialDisplay.join(' ') + '\n';
+                } else {
                     responseText += '🚫 Chưa có nguyên liệu nào! Dùng `!farm` để thu thập.\n';
                 }
             }
 
             // Show medicines if requested
             if (filterType === 'all' || filterType === 'medicines') {
-                responseText += `\n🧪 **THUỐC ĐÃ CHẾ TẠO:**\n`;
+                responseText += `\n🧪 **THUỐC & ĐAN DƯỢC:**\n`;
                 
                 const medicineDisplay = [];
                 
@@ -125,7 +139,7 @@ module.exports = {
                     }
                 });
                 
-                // Đan phương và đan lò (dp/dl series)
+                // Đan phương và đan lò (dp/dl series) - now farmable!
                 ['dp1', 'dp2', 'dp3', 'dp4', 'pdp', 'dl'].forEach(medicineId => {
                     const medicine = medicines.find(m => m.itemId === medicineId);
                     const medicineData = MEDICINES[medicineId];
@@ -138,7 +152,7 @@ module.exports = {
                 if (medicineDisplay.length > 0) {
                     responseText += medicineDisplay.join(' ') + '\n';
                 } else {
-                    responseText += '🚫 Chưa có thuốc/đan dược nào! Dùng `!craft` để chế tạo.\n';
+                    responseText += '🚫 Chưa có thuốc/đan dược nào! Dùng `!craft` hoặc `!farm` để thu thập.\n';
                 }
             }
 
@@ -175,19 +189,19 @@ module.exports = {
             // Add helpful tips
             if (filterType === 'all') {
                 responseText += `\n💡 **GỢI Ý:**\n`;
-                responseText += `• \`!inv materials\` - Chỉ xem nguyên liệu\n`;
-                responseText += `• \`!inv medicines\` - Chỉ xem thuốc\n`;
-                responseText += `• \`!inv stones\` - Chỉ xem linh thạch\n`;
-                responseText += `• \`!farm\` - Thu thập nguyên liệu (10+ tùy VIP)\n`;
+                responseText += `• \`!inv materials\` - Chỉ xem nguyên liệu & linh thạch farm\n`;
+                responseText += `• \`!inv medicines\` - Chỉ xem thuốc & đan phương\n`;
+                responseText += `• \`!inv stones\` - Chỉ xem linh thạch cao cấp\n`;
+                responseText += `• \`!farm\` - Thu thập nguyên liệu, đan phương, linh thạch (15+ tùy VIP)\n`;
                 responseText += `• \`!craft recipes\` - Xem công thức chế tạo\n`;
                 responseText += `• \`!breakthrough\` - Đột phá để nhận linh thạch\n`;
                 responseText += `• **1 tin nhắn** = 1 EXP | **1 phút voice** = 5 EXP`;
             } else if (filterType === 'materials') {
-                responseText += `\n💡 *Dùng \`!craft recipes\` để xem công thức chế tạo thuốc*`;
+                responseText += `\n💡 *Dùng \`!farm\` để thu thập nguyên liệu, đan lò, tụ linh thạch. Dùng \`!craft recipes\` để xem công thức.*`;
             } else if (filterType === 'medicines') {
-                responseText += `\n💡 *Dùng \`!inv materials\` để xem nguyên liệu farm*`;
+                responseText += `\n💡 *Giờ có thể farm đan phương và đan lò! Dùng \`!farm\` để thu thập.*`;
             } else if (filterType === 'stones') {
-                responseText += `\n💡 *Dùng \`!breakthrough\` để đột phá và nhận thêm linh thạch*`;
+                responseText += `\n💡 *Dùng \`!breakthrough\` để đột phá và \`!farm\` để thu thập tụ linh thạch fusion*`;
             }
 
             await message.reply(responseText);

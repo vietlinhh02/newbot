@@ -1,9 +1,9 @@
-const { getRandomDrop, getLevelByName, getNextLevel, canBreakthrough, rollBreakthrough, FARM_MATERIALS } = require('../../utils/cultivationData');
+const { getRandomDrop, getLevelByName, getNextLevel, canBreakthrough, rollBreakthrough, FARM_MATERIALS, getItemStorageInfo } = require('../../utils/cultivationData');
 
 module.exports = {
     name: 'farm',
     aliases: ['f', 'thu_thap'],
-    description: 'Thu thập nguyên liệu để chế tạo thuốc (1 giờ 1 lần, 10+ nguyên liệu tùy VIP)',
+    description: 'Thu thập nguyên liệu để chế tạo thuốc (1 giờ 1 lần, 15+ nguyên liệu tùy VIP)',
     usage: '!farm',
     examples: [
         '!farm - Thu thập nguyên liệu',
@@ -82,8 +82,8 @@ module.exports = {
                 console.log('Could not calculate role bonus for farm');
             }
 
-            // Calculate total materials to farm (base 10 + bonus)
-            const baseMaterials = 10;
+            // Calculate total materials to farm (base 15 + bonus)
+            const baseMaterials = 15;
             const bonusMaterials = Math.floor(baseMaterials * (roleBonus / 100));
             const totalMaterials = baseMaterials + bonusMaterials;
 
@@ -111,12 +111,14 @@ module.exports = {
 
             // Update inventory for each unique item
             for (const [itemId, quantity] of Object.entries(dropCounts)) {
+                const storageInfo = getItemStorageInfo(itemId);
+                
                 await client.prisma.userInventory.upsert({
                     where: {
                         userId_itemType_itemId: {
                             userId: userId,
-                            itemType: 'material',
-                            itemId: itemId
+                            itemType: storageInfo.category,
+                            itemId: storageInfo.actualId
                         }
                     },
                     update: {
@@ -126,8 +128,8 @@ module.exports = {
                     },
                     create: {
                         userId: userId,
-                        itemType: 'material',
-                        itemId: itemId,
+                        itemType: storageInfo.category,
+                        itemId: storageInfo.actualId,
                         quantity: quantity
                     }
                 });
@@ -164,7 +166,7 @@ module.exports = {
             replyText += `📦 ${dropsText}\n`;
             
             if (roleBonus > 0) {
-                replyText += `✨ *Bonus: ${baseMaterials} + ${bonusMaterials} (VIP +${roleBonus}%)*\n`;
+                replyText += `✨ *Bonus: ${baseMaterials} base + ${bonusMaterials} VIP (+${roleBonus}%)*\n`;
             }
             
             replyText += `\n💡 *EXP: 1 tin nhắn = 1 EXP | 1 phút voice = 5 EXP + VIP bonus*`;

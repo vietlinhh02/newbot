@@ -1,4 +1,4 @@
-const { FARM_MATERIALS, MEDICINES, SPIRIT_STONES, CRAFT_RECIPES, FUSION_RECIPES } = require('../../utils/cultivationData');
+const { FARM_MATERIALS, MEDICINES, SPIRIT_STONES, CRAFT_RECIPES, FUSION_RECIPES, getItemStorageInfo } = require('../../utils/cultivationData');
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType } = require('discord.js');
 
 module.exports = {
@@ -53,15 +53,27 @@ module.exports = {
                 }
             });
 
-            // Convert to easy lookup
+            // Convert to easy lookup using storage info
             const userItems = {};
             inventory.forEach(item => {
+                // Standard lookup key
                 const key = `${item.itemType}_${item.itemId}`;
                 userItems[key] = item.quantity;
-                // Also store spirit stones with prefix
+                
+                // Handle spirit stones - store both ways for compatibility
                 if (item.itemId.startsWith('spirit_')) {
                     const actualId = item.itemId.replace('spirit_', '');
                     userItems[`spirit_${actualId}`] = item.quantity;
+                }
+                
+                // Also create reverse lookup for farmable medicines
+                if (item.itemType === 'medicine') {
+                    userItems[`medicine_${item.itemId}`] = item.quantity;
+                }
+                
+                // Create lookup for numbered materials
+                if (item.itemType === 'material' && !item.itemId.startsWith('spirit_')) {
+                    userItems[`material_${item.itemId}`] = item.quantity;
                 }
             });
 
@@ -110,13 +122,15 @@ module.exports = {
                 // Add materials
                 if (recipe.materials) {
                     for (const [itemId, quantity] of Object.entries(recipe.materials)) {
-                        const key = `material_${itemId}`;
+                        const storageInfo = getItemStorageInfo(itemId);
+                        const key = `${storageInfo.category}_${storageInfo.actualId}`;
                         requiredItems.push({
-                            type: 'material',
+                            type: storageInfo.category,
                             id: itemId,
+                            actualId: storageInfo.actualId,
                             needed: quantity,
                             have: userItems[key] || 0,
-                            name: FARM_MATERIALS[itemId]?.name || itemId
+                            name: storageInfo.name
                         });
                     }
                 }
@@ -124,13 +138,15 @@ module.exports = {
                 // Add medicines
                 if (recipe.medicines) {
                     for (const [itemId, quantity] of Object.entries(recipe.medicines)) {
-                        const key = `medicine_${itemId}`;
+                        const storageInfo = getItemStorageInfo(itemId);
+                        const key = `${storageInfo.category}_${storageInfo.actualId}`;
                         requiredItems.push({
-                            type: 'medicine',
+                            type: storageInfo.category,
                             id: itemId,
+                            actualId: storageInfo.actualId,
                             needed: quantity,
                             have: userItems[key] || 0,
-                            name: MEDICINES[itemId]?.name || itemId
+                            name: storageInfo.name
                         });
                     }
                 }
@@ -141,15 +157,8 @@ module.exports = {
 
             if (missingItems.length > 0) {
                 const missingText = missingItems.map(item => {
-                    let icon;
-                    if (item.type === 'material') {
-                        icon = FARM_MATERIALS[item.id]?.icon;
-                    } else if (item.type === 'spirit') {
-                        icon = SPIRIT_STONES[item.id]?.icon;
-                    } else {
-                        icon = MEDICINES[item.id]?.icon;
-                    }
-                    return `${icon} **${item.name}**: Cần \`${item.needed}\`, có \`${item.have}\``;
+                    const storageInfo = getItemStorageInfo(item.id);
+                    return `${storageInfo.icon} **${item.name}**: Cần \`${item.needed}\`, có \`${item.have}\``;
                 }).join('\n');
 
                 const errorEmbed = new EmbedBuilder()
@@ -176,9 +185,9 @@ module.exports = {
             // Remove materials regardless of success/failure
             for (const item of requiredItems) {
                 let actualType = item.type;
-                let actualId = item.id;
+                let actualId = item.actualId || item.id;
                 
-                // Handle spirit stones
+                // Handle spirit stones (for fusion compatibility)
                 if (item.type === 'spirit') {
                     actualType = 'material';
                     actualId = `spirit_${item.id}`;
@@ -202,21 +211,14 @@ module.exports = {
 
             // If successful, add the crafted item
             if (success) {
-                let resultType = 'medicine';
-                let resultId = targetItem;
-                
-                // Handle spirit stones result
-                if (SPIRIT_STONES[targetItem]) {
-                    resultType = 'material';
-                    resultId = `spirit_${targetItem}`;
-                }
+                const resultStorageInfo = getItemStorageInfo(targetItem);
                 
                 await client.prisma.userInventory.upsert({
                     where: {
                         userId_itemType_itemId: {
                             userId: userId,
-                            itemType: resultType,
-                            itemId: resultId
+                            itemType: resultStorageInfo.category,
+                            itemId: resultStorageInfo.actualId
                         }
                     },
                     update: {
@@ -226,8 +228,8 @@ module.exports = {
                     },
                     create: {
                         userId: userId,
-                        itemType: resultType,
-                        itemId: resultId,
+                        itemType: resultStorageInfo.category,
+                        itemId: resultStorageInfo.actualId,
                         quantity: 1
                     }
                 });
@@ -402,11 +404,11 @@ module.exports = {
         });
         
         craftPillsEmbed.addFields({
-            name: '⚠️ Lưu ý về đan dược',
-            value: '• **Yêu cầu đặc biệt:** Cần đan phương (dp) + đan lò (dl)\n' +
-                   '• **Tỉ lệ thành công:** Trung bình (50%)\n' +
+            name: '✅ Lưu ý về đan dược',
+            value: '• **Đan phương & đan lò:** Giờ có thể farm từ `!farm`!\n' +
+                   '• **Tỉ lệ thành công:** 50% (cần chuẩn bị dự phòng)\n' +
                    '• **Công dụng:** Hiệu quả cao hơn thuốc thường\n' +
-                   '• **Chi phí:** Cao hơn do cần nhiều nguyên liệu quý',
+                   '• **Lợi ích:** Có thể craft đan dược mạnh mẽ',
             inline: false
         });
         pages.push(craftPillsEmbed);
@@ -540,8 +542,8 @@ module.exports = {
                     value: '• `!craft <item>` - Ghép bằng nguyên liệu\n' +
                            '• `!craft <item> fusion` - Dung hợp vật phẩm\n' +
                            '• `!inv` - Xem inventory hiện tại\n' +
-                           '• `!farm` - Thu thập nguyên liệu\n' +
-                           '• `!breakthrough` - Nhận linh thạch',
+                           '• `!farm` - Thu thập tất cả (nguyên liệu, đan phương, linh thạch)\n' +
+                           '• `!breakthrough` - Nhận linh thạch từ đột phá',
                     inline: true
                 },
                 {
