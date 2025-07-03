@@ -3,7 +3,7 @@ const { getRandomDrop, getLevelByName, getNextLevel, canBreakthrough, rollBreakt
 module.exports = {
     name: 'farm',
     aliases: ['f', 'thu_thap'],
-    description: 'Thu thập nguyên liệu để chế tạo thuốc (1 giờ 1 lần, 15+ nguyên liệu tùy VIP)',
+    description: 'Thu thập nguyên liệu để chế tạo đan dược (1 giờ 1 lần, 10+ nguyên liệu tùy VIP)',
     usage: '!farm',
     examples: [
         '!farm - Thu thập nguyên liệu',
@@ -82,17 +82,22 @@ module.exports = {
                 console.log('Could not calculate role bonus for farm');
             }
 
-            // Calculate total materials to farm (base 15 + bonus)
-            const baseMaterials = 15;
+            // Calculate total materials to farm (base 10 + bonus, riêng với linh thạch)
+            const baseMaterials = 10;
             const bonusMaterials = Math.floor(baseMaterials * (roleBonus / 100));
             const totalMaterials = baseMaterials + bonusMaterials;
 
-            // Generate random drops
+            // Generate random drops (không bao gồm linh thạch)
             const drops = [];
             const dropCounts = {}; // Track quantity of each item
 
             for (let i = 0; i < totalMaterials; i++) {
-                const drop = getRandomDrop();
+                let drop = getRandomDrop();
+                
+                // Nếu trúng linh thạch, roll lại để tránh lấy linh thạch trong phần này
+                while (drop && drop.id === 'lt1') {
+                    drop = getRandomDrop();
+                }
                 
                 // If miss, try again (ensure we get all materials)
                 if (!drop) {
@@ -108,6 +113,14 @@ module.exports = {
                 }
                 dropCounts[drop.id]++;
             }
+
+            // Tách riêng farm linh thạch - random từ 1-999 + bonus
+            const baseSpiritStones = Math.floor(Math.random() * 999) + 1; // Random 1-999
+            const bonusSpiritStones = Math.floor(baseSpiritStones * (roleBonus / 100));
+            const totalSpiritStones = baseSpiritStones + bonusSpiritStones;
+            
+            // Add linh thạch vào dropCounts
+            dropCounts['lt1'] = totalSpiritStones;
 
             // Update inventory for each unique item
             for (const [itemId, quantity] of Object.entries(dropCounts)) {
@@ -145,7 +158,7 @@ module.exports = {
                 }
             });
 
-            // Create response message with grouped items
+            // Create response message with grouped items (tách riêng linh thạch)
             const groupedDrops = {};
             drops.forEach(drop => {
                 if (!groupedDrops[drop.id]) {
@@ -162,11 +175,13 @@ module.exports = {
                 .map(item => `${item.icon} ${item.name} x${item.count}`)
                 .join(', ');
 
-            let replyText = `🌾 **${message.author.username}** đã farm và nhận được **${totalMaterials} nguyên liệu:**\n`;
-            replyText += `📦 ${dropsText}\n`;
+            let replyText = `🌾 **${message.author.username}** đã farm và nhận được:\n`;
+            replyText += `📦 **${totalMaterials} nguyên liệu:** ${dropsText}\n`;
+            replyText += `💎 **${totalSpiritStones} linh thạch:** ${FARM_MATERIALS.lt1.icon} ${FARM_MATERIALS.lt1.name} x${totalSpiritStones}\n`;
             
             if (roleBonus > 0) {
-                replyText += `✨ *Bonus: ${baseMaterials} base + ${bonusMaterials} VIP (+${roleBonus}%)*\n`;
+                replyText += `✨ *Bonus nguyên liệu: ${baseMaterials} base + ${bonusMaterials} VIP (+${roleBonus}%)*\n`;
+                replyText += `✨ *Bonus linh thạch: ${baseSpiritStones} base + ${bonusSpiritStones} VIP (+${roleBonus}%)*\n`;
             }
             
             replyText += `\n💡 *EXP: 1 tin nhắn = 1 EXP | 1 phút voice = 5 EXP + VIP bonus*`;

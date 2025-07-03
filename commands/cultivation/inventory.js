@@ -1,16 +1,17 @@
-const { MEDICINES, FARM_MATERIALS, SPIRIT_STONES } = require('../../utils/cultivationData');
+const { MEDICINES, FARM_MATERIALS, SPIRIT_STONES, SHOP_ITEMS } = require('../../utils/cultivationData');
 
 module.exports = {
     name: 'inventory',
     aliases: ['inv', 'kho', 'bag', 'zoo', 'materials', 'farm_items', 'nguyen_lieu', 'z'],
-    description: 'Xem kho đồ tu luyện (nguyên liệu farm + thuốc + linh thạch) của bạn',
+    description: 'Xem kho đồ tu luyện (nguyên liệu + thuốc + linh thạch + shop items) của bạn',
     usage: '!inventory [user] [type]',
     examples: [
         '!inventory - Xem tất cả',
         '!inv @user - Xem của user khác', 
         '!inv materials - Chỉ xem nguyên liệu',
-        '!inv medicines - Chỉ xem thuốc',
+        '!inv medicines - Chỉ xem thuốc/đan dược',
         '!inv stones - Chỉ xem linh thạch',
+        '!inv shop - Chỉ xem vật phẩm shop',
         '!zoo - Alias cũ vẫn hoạt động'
     ],
     permissions: 'everyone',
@@ -45,6 +46,8 @@ module.exports = {
                     filterType = 'medicines';
                 } else if (['stones', 'stone', 'linh_thach', 'lt', 'spirit'].includes(arg.toLowerCase())) {
                     filterType = 'stones';
+                } else if (['shop', 'cua_hang', 'books', 'sach', 'linh_dan', 'ld', 'ly'].includes(arg.toLowerCase())) {
+                    filterType = 'shop';
                 }
             }
 
@@ -69,10 +72,12 @@ module.exports = {
                 orderBy: { itemId: 'asc' }
             });
 
-            // Separate materials, medicines, and spirit stones
+            // Separate materials, medicines, spirit stones, and shop items
             const materials = inventory.filter(item => item.itemType === 'material' && !item.itemId.startsWith('spirit_'));
-            const medicines = inventory.filter(item => item.itemType === 'medicine');
+            const medicines = inventory.filter(item => item.itemType === 'medicine' && !SHOP_ITEMS[item.itemId]);
             const spiritStones = inventory.filter(item => item.itemType === 'material' && item.itemId.startsWith('spirit_'));
+            const shopItems = inventory.filter(item => item.itemType === 'book' || 
+                (item.itemType === 'medicine' && SHOP_ITEMS[item.itemId]));
 
             // Build response
             let responseText = `====== **${targetUser.username}'s Cultivation Inventory** ======\n`;
@@ -119,15 +124,7 @@ module.exports = {
                 
                 const medicineDisplay = [];
                 
-                // Thuốc (z series)
-                ['z1', 'z2', 'z3', 'z4'].forEach(medicineId => {
-                    const medicine = medicines.find(m => m.itemId === medicineId);
-                    const medicineData = MEDICINES[medicineId];
-                    const quantity = medicine ? medicine.quantity : 0;
-                    if (quantity > 0) {
-                        medicineDisplay.push(`${medicineData.icon}${quantity}`);
-                    }
-                });
+                // Không hiển thị thuốc cũ z series nữa
                 
                 // Đan dược (d series)
                 ['d1', 'd2', 'd3', 'd4'].forEach(medicineId => {
@@ -181,6 +178,27 @@ module.exports = {
                 }
             }
 
+            // Show shop items if requested (linh đan, linh dược, sách)
+            if (filterType === 'all' || filterType === 'shop') {
+                responseText += `\n🛍️ **VẬT PHẨM SHOP (mua bằng linh thạch):**\n`;
+                
+                const shopDisplay = [];
+                
+                // Check for shop items
+                shopItems.forEach(item => {
+                    const shopData = SHOP_ITEMS[item.itemId];
+                    if (shopData && item.quantity > 0) {
+                        shopDisplay.push(`${shopData.icon}${item.quantity}`);
+                    }
+                });
+
+                if (shopDisplay.length > 0) {
+                    responseText += shopDisplay.join(' ') + '\n';
+                } else {
+                    responseText += '🚫 Chưa có vật phẩm shop nào! Dùng `!shop` để mua linh đan, linh dược và sách.\n';
+                }
+            }
+
             // Add user stats
             responseText += `\n📊 **THỐNG KÊ:**\n`;
             responseText += `• **Level:** ${cultivationUser.currentLevel}\n`;
@@ -192,7 +210,9 @@ module.exports = {
                 responseText += `• \`!inv materials\` - Chỉ xem nguyên liệu & linh thạch farm\n`;
                 responseText += `• \`!inv medicines\` - Chỉ xem thuốc & đan phương\n`;
                 responseText += `• \`!inv stones\` - Chỉ xem linh thạch cao cấp\n`;
-                responseText += `• \`!farm\` - Thu thập nguyên liệu, đan phương, linh thạch (15+ tùy VIP)\n`;
+                responseText += `• \`!inv shop\` - Chỉ xem vật phẩm từ shop\n`;
+                responseText += `• \`!farm\` - Thu thập nguyên liệu, đan phương, linh thạch (10+ tùy VIP)\n`;
+                responseText += `• \`!shop\` - Mua linh đan, linh dược, sách bằng linh thạch\n`;
                 responseText += `• \`!craft recipes\` - Xem công thức chế tạo\n`;
                 responseText += `• \`!breakthrough\` - Đột phá để nhận linh thạch\n`;
                 responseText += `• **1 tin nhắn** = 1 EXP | **1 phút voice** = 5 EXP`;
@@ -202,6 +222,8 @@ module.exports = {
                 responseText += `\n💡 *Giờ có thể farm đan phương và đan lò! Dùng \`!farm\` để thu thập.*`;
             } else if (filterType === 'stones') {
                 responseText += `\n💡 *Dùng \`!breakthrough\` để đột phá và \`!farm\` để thu thập tụ linh thạch fusion*`;
+            } else if (filterType === 'shop') {
+                responseText += `\n💡 *Dùng \`!shop\` để mua linh đan, linh dược và sách. Dùng \`!shop buy <id>\` để mua.*`;
             }
 
             await message.reply(responseText);

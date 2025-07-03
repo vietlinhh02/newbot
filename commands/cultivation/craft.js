@@ -284,22 +284,20 @@ module.exports = {
             .setColor(0x9932cc)
             .setTimestamp()
             .setFooter({ 
-                text: `Trang 1/6 • Yêu cầu bởi ${message.author.username}`, 
+                text: `Trang 1/5 • Yêu cầu bởi ${message.author.username}`, 
                 iconURL: message.author.displayAvatarURL() 
             })
             .addFields([
                 {
                     name: '🔨 CRAFT (Ghép nguyên liệu)',
                     value: `**${Object.keys(CRAFT_RECIPES).length} công thức craft:**\n` +
-                           '• **Thuốc:** z1, z2, z3, z4 (từ nguyên liệu)\n' +
-                           '• **Đan dược:** d1, d2, d3, d4 (cần đan phương + đan lò)\n' +
-                           '• **Tỉ lệ thành công:** 50-80%',
+                           '• **Đan dược:** d1, d2, d3, d4 (từ nguyên liệu + đan phương + đan lò)\n' +
+                           '• **Tỉ lệ thành công:** 50%',
                     inline: false
                 },
                 {
                     name: '⚗️ FUSION (Dung hợp)',
                     value: `**${Object.keys(FUSION_RECIPES).length} công thức fusion:**\n` +
-                           '• **Thuốc:** z2 ← 9x z1, z3 ← 9x z2...\n' +
                            '• **Đan dược:** d2 ← 9x d1 + dl, d3 ← 9x d2 + dl...\n' +
                            '• **Đan phương:** dp2 ← 9x dp1 + pdp, dp3 ← 9x dp2 + pdp...\n' +
                            '• **Linh thạch:** lt2 ← 9999x lt1 + tlt...\n' +
@@ -309,68 +307,24 @@ module.exports = {
                 {
                     name: '📖 Navigation',
                     value: '• **Trang 1:** Tổng quan hệ thống\n' +
-                           '• **Trang 2:** CRAFT - Thuốc (z1-z4)\n' +
-                           '• **Trang 3:** CRAFT - Đan dược (d1-d4)\n' +
-                           '• **Trang 4:** FUSION - Thuốc & Đan dược\n' +
-                           '• **Trang 5:** FUSION - Đan phương & Linh thạch\n' +
-                           '• **Trang 6:** Nguyên liệu & Hướng dẫn\n\n' +
+                           '• **Trang 2:** CRAFT - Đan dược (d1-d4)\n' +
+                           '• **Trang 3:** FUSION - Đan dược\n' +
+                           '• **Trang 4:** FUSION - Đan phương & Linh thạch\n' +
+                           '• **Trang 5:** Nguyên liệu & Hướng dẫn\n\n' +
                            '🎮 **Dùng nút bên dưới để chuyển trang!**',
                     inline: false
                 }
             ]);
         pages.push(overviewEmbed);
 
-        // Page 2: CRAFT - Thuốc (z1-z4)
-        const craftMedicinesEmbed = new EmbedBuilder()
-            .setTitle('🔨 CRAFT - Thuốc (z1-z4)')
-            .setDescription('**Ghép nguyên liệu farm thành thuốc**')
-            .setColor(0x00ff00)
-            .setTimestamp()
-            .setFooter({ 
-                text: `Trang 2/6 • Yêu cầu bởi ${message.author.username}`, 
-                iconURL: message.author.displayAvatarURL() 
-            });
-
-        // Filter craft recipes for medicines (z series)
-        const zSeriesRecipes = Object.entries(CRAFT_RECIPES).filter(([itemId]) => itemId.startsWith('z'));
-        zSeriesRecipes.forEach(([itemId, recipe]) => {
-            const itemData = MEDICINES[itemId];
-            
-            if (itemData) {
-                let ingredients = '';
-                if (recipe.materials) {
-                    const materials = Object.entries(recipe.materials).map(([id, qty]) => 
-                        `${FARM_MATERIALS[id]?.icon} \`${qty}\``
-                    ).join(' + ');
-                    ingredients += materials;
-                }
-
-                craftMedicinesEmbed.addFields({
-                    name: `${itemData.icon} ${itemData.name}`,
-                    value: `**Nguyên liệu:** ${ingredients}\n**Tỉ lệ thành công:** \`${recipe.successRate}%\`\n**Lệnh:** \`!craft ${itemId}\`\n**Mô tả:** Thuốc cơ bản từ nguyên liệu farm`,
-                    inline: true
-                });
-            }
-        });
-        
-        craftMedicinesEmbed.addFields({
-            name: '💡 Lưu ý về thuốc',
-            value: '• **Nguồn nguyên liệu:** Thu thập từ lệnh `!farm`\n' +
-                   '• **Tỉ lệ thành công:** Cao (50-80%)\n' +
-                   '• **Công dụng:** Dùng để fusion thành thuốc cấp cao hơn\n' +
-                   '• **Chi phí:** Chỉ cần nguyên liệu farm, không cần đan phương',
-            inline: false
-        });
-        pages.push(craftMedicinesEmbed);
-
-        // Page 3: CRAFT - Đan dược (d1-d4)
+        // Page 2: CRAFT - Đan dược (d1-d4)
         const craftPillsEmbed = new EmbedBuilder()
             .setTitle('🔨 CRAFT - Đan dược (d1-d4)')
             .setDescription('**Chế tạo đan dược từ nguyên liệu + đan phương + đan lò**')
             .setColor(0x0080ff)
             .setTimestamp()
             .setFooter({ 
-                text: `Trang 3/6 • Yêu cầu bởi ${message.author.username}`, 
+                text: `Trang 2/5 • Yêu cầu bởi ${message.author.username}`, 
                 iconURL: message.author.displayAvatarURL() 
             });
 
@@ -413,23 +367,23 @@ module.exports = {
         });
         pages.push(craftPillsEmbed);
 
-        // Page 4: FUSION - Thuốc & Đan dược
+        // Page 3: FUSION - Đan dược  
         const fusionMedPillsEmbed = new EmbedBuilder()
-            .setTitle('⚗️ FUSION - Thuốc & Đan dược')
-            .setDescription('**Dung hợp thuốc và đan dược cấp thấp thành cấp cao hơn**')
+            .setTitle('⚗️ FUSION - Đan dược')
+            .setDescription('**Dung hợp đan dược cấp thấp thành cấp cao hơn**')
             .setColor(0xff6600)
             .setTimestamp()
             .setFooter({ 
-                text: `Trang 4/6 • Yêu cầu bởi ${message.author.username}`, 
+                text: `Trang 3/5 • Yêu cầu bởi ${message.author.username}`, 
                 iconURL: message.author.displayAvatarURL() 
             });
 
-        // Filter fusion recipes for z and d series
-        const zAndDFusionRecipes = Object.entries(FUSION_RECIPES).filter(([itemId]) => 
-            itemId.startsWith('z') || itemId.startsWith('d')
+        // Filter fusion recipes for d series only (bỏ z series)
+        const dFusionRecipes = Object.entries(FUSION_RECIPES).filter(([itemId]) => 
+            itemId.startsWith('d')
         );
         
-        zAndDFusionRecipes.forEach(([itemId, recipe]) => {
+        dFusionRecipes.forEach(([itemId, recipe]) => {
             const itemData = MEDICINES[itemId];
             
             if (itemData) {
@@ -438,35 +392,32 @@ module.exports = {
                     return `${sourceData?.icon} \`${qty}\``;
                 }).join(' + ');
 
-                const categoryIcon = itemId.startsWith('z') ? '💊' : '🔮';
-                const categoryName = itemId.startsWith('z') ? 'Thuốc' : 'Đan dược';
-
                 fusionMedPillsEmbed.addFields({
-                    name: `${itemData.icon} ${itemData.name} ${categoryIcon}`,
-                    value: `**Nguyên liệu:** ${ingredients}\n**Tỉ lệ thành công:** \`${recipe.successRate}%\`\n**Lệnh:** \`!craft ${itemId} fusion\`\n**Loại:** ${categoryName}`,
+                    name: `${itemData.icon} ${itemData.name} 🔮`,
+                    value: `**Nguyên liệu:** ${ingredients}\n**Tỉ lệ thành công:** \`${recipe.successRate}%\`\n**Lệnh:** \`!craft ${itemId} fusion\`\n**Loại:** Đan dược`,
                     inline: true
                 });
             }
         });
         
         fusionMedPillsEmbed.addFields({
-            name: '🔬 Nguyên lý Fusion',
-            value: '• **Thuốc Fusion:** 9x thuốc cấp thấp → 1x thuốc cấp cao\n' +
-                   '• **Đan dược Fusion:** 9x đan dược + đan lò → đan dược cấp cao\n' +
+            name: '🔬 Nguyên lý Fusion Đan dược',
+            value: '• **Đan dược Fusion:** 9x đan dược + đan lò → đan dược cấp cao\n' +
                    '• **Tỉ lệ thành công:** 50% (thấp hơn craft)\n' +
-                   '• **Lợi ích:** Tiết kiệm nguyên liệu khi có nhiều vật phẩm cấp thấp',
+                   '• **Lợi ích:** Tiết kiệm nguyên liệu khi có nhiều đan dược cấp thấp\n' +
+                   '• **Lưu ý:** Luôn cần thêm đan lò cho mọi fusion đan dược',
             inline: false
         });
         pages.push(fusionMedPillsEmbed);
 
-        // Page 5: FUSION - Đan phương & Linh thạch
+        // Page 4: FUSION - Đan phương & Linh thạch
         const fusionAdvancedEmbed = new EmbedBuilder()
             .setTitle('⚗️ FUSION - Đan phương & Linh thạch')
             .setDescription('**Dung hợp đan phương và linh thạch - vật phẩm cao cấp nhất**')
             .setColor(0x8b00ff)
             .setTimestamp()
             .setFooter({ 
-                text: `Trang 5/6 • Yêu cầu bởi ${message.author.username}`, 
+                text: `Trang 4/5 • Yêu cầu bởi ${message.author.username}`, 
                 iconURL: message.author.displayAvatarURL() 
             });
 
@@ -505,14 +456,14 @@ module.exports = {
         });
         pages.push(fusionAdvancedEmbed);
 
-        // Page 6: Materials & Guide
+        // Page 5: Materials & Guide
         const materialsEmbed = new EmbedBuilder()
             .setTitle('📦 Nguyên liệu & Hướng dẫn')
             .setDescription('**Thông tin về nguyên liệu và cách sử dụng hệ thống**')
             .setColor(0x6600ff)
             .setTimestamp()
             .setFooter({ 
-                text: `Trang 6/6 • Yêu cầu bởi ${message.author.username}`, 
+                text: `Trang 5/5 • Yêu cầu bởi ${message.author.username}`, 
                 iconURL: message.author.displayAvatarURL() 
             })
             .addFields([
@@ -607,7 +558,7 @@ module.exports = {
             }
             
             // Quick navigation to specific sections
-            if (totalPages === 6 && currentPage === 0) {
+            if (totalPages === 5 && currentPage === 0) {
                 // Add quick access button on overview page
                 buttons.push(
                     new ButtonBuilder()
@@ -643,18 +594,17 @@ module.exports = {
                 currentPage = 0;
             } else if (interaction.customId === 'craft_jump') {
                 // Show quick navigation info
-                await interaction.followUp({
-                    content: '🚀 **Chuyển nhanh đến trang bằng nút navigation:**\n\n' +
-                             '📖 **Mục lục 6 trang:**\n' +
-                             '• **Trang 1:** 🏠 Tổng quan hệ thống\n' +
-                             '• **Trang 2:** 🔨 CRAFT Thuốc (z1-z4)\n' +
-                             '• **Trang 3:** 🔨 CRAFT Đan dược (d1-d4)\n' +
-                             '• **Trang 4:** ⚗️ FUSION Thuốc & Đan dược\n' +
-                             '• **Trang 5:** ⚗️ FUSION Đan phương & Linh thạch\n' +
-                             '• **Trang 6:** 📦 Nguyên liệu & Hướng dẫn\n\n' +
-                             '💡 **Dùng nút `◀ Trước` và `Sau ▶` để chuyển trang**',
-                    ephemeral: true
-                });
+                                        await interaction.followUp({
+                            content: '🚀 **Chuyển nhanh đến trang bằng nút navigation:**\n\n' +
+                                     '📖 **Mục lục 5 trang:**\n' +
+                                     '• **Trang 1:** 🏠 Tổng quan hệ thống\n' +
+                                     '• **Trang 2:** 🔨 CRAFT Đan dược (d1-d4)\n' +
+                                     '• **Trang 3:** ⚗️ FUSION Đan dược\n' +
+                                     '• **Trang 4:** ⚗️ FUSION Đan phương & Linh thạch\n' +
+                                     '• **Trang 5:** 📦 Nguyên liệu & Hướng dẫn\n\n' +
+                                     '💡 **Dùng nút `◀ Trước` và `Sau ▶` để chuyển trang**',
+                            ephemeral: true
+                        });
                 return; // Don't update main message
             }
 

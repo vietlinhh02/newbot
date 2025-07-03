@@ -55,35 +55,156 @@ const SPIRIT_STONES = {
     tlt: { name: 'Tụ linh thạch', icon: VATPHAM_EMOJI_MAP.TU_LINH_THACH, fallbackIcon: '💫' }
 };
 
-
-
-// Công thức ghép từ FARM.txt và ghép (1).txt
-const CRAFT_RECIPES = {
-    // Thuốc (z series) - từ FARM.txt
-    z1: {
-        materials: { 1: 10, 2: 5, 3: 5, 4: 5 },
-        successRate: 50,
-        type: 'craft'
+// Linh đan, linh dược và sách chỉ có thể mua từ shop
+const SHOP_ITEMS = {
+    // Linh đan series (dùng linh thạch mua) - sử dụng đan dược emoji
+    ld1: { 
+        name: 'Hạ phẩm linh đan', 
+        icon: VATPHAM_EMOJI_MAP.DAN_DUOC_HA_PHAM, 
+        fallbackIcon: '🟢',
+        price: 100, 
+        currency: 'lt1',
+        category: 'medicine',
+        description: 'Linh đan cấp thấp nhất, tăng EXP tu luyện'
     },
-    z2: {
-        materials: { 1: 10, 2: 5, 3: 5, 4: 5, 5: 1 },
-        medicines: { z1: 3 },
-        successRate: 50,
-        type: 'craft'
+    ld2: { 
+        name: 'Trung phẩm linh đan', 
+        icon: VATPHAM_EMOJI_MAP.DAN_DUOC_TRUNG_PHAM, 
+        fallbackIcon: '🔵',
+        price: 1000, 
+        currency: 'lt1',
+        category: 'medicine',
+        description: 'Linh đan trung bình, tăng nhiều EXP hơn'
     },
-    z3: {
-        materials: { 1: 10, 2: 5, 3: 5, 4: 5, 6: 1 },
-        medicines: { z1: 3, z2: 3 },
-        successRate: 50,
-        type: 'craft'
+    ld3: { 
+        name: 'Thượng phẩm linh đan', 
+        icon: VATPHAM_EMOJI_MAP.DAN_DUOC_THUONG_PHAM, 
+        fallbackIcon: '🟣',
+        price: 5000, 
+        currency: 'lt2',
+        category: 'medicine',
+        description: 'Linh đan cấp cao, tăng EXP và tỉ lệ đột phá'
     },
-    z4: {
-        materials: { 1: 10, 2: 5, 3: 5, 4: 5, 7: 1 },
-        medicines: { z1: 3, z2: 3, z3: 3 },
-        successRate: 50,
-        type: 'craft'
+    ld4: { 
+        name: 'Tiên phẩm linh đan', 
+        icon: VATPHAM_EMOJI_MAP.DAN_DUOC_TIEN_PHAM, 
+        fallbackIcon: '🟡',
+        price: 1000, 
+        currency: 'lt3',
+        category: 'medicine',
+        description: 'Linh đan cực phẩm, hiệu quả tuyệt đỉnh'
     },
     
+    // Linh dược series (dùng linh thạch mua) - sử dụng đan phương emoji
+    ly1: { 
+        name: 'Hạ phẩm linh dược', 
+        icon: VATPHAM_EMOJI_MAP.DAN_PHUONG_HA_PHAM, 
+        fallbackIcon: '💚',
+        price: 500, 
+        currency: 'lt1',
+        category: 'medicine',
+        description: 'Linh dược hồi phục và tăng sức mạnh tu luyện'
+    },
+    ly2: { 
+        name: 'Trung phẩm linh dược', 
+        icon: VATPHAM_EMOJI_MAP.DAN_PHUONG_TRUNG_PHAM, 
+        fallbackIcon: '💙',
+        price: 2000, 
+        currency: 'lt1',
+        category: 'medicine',
+        description: 'Linh dược mạnh mẽ, hiệu quả lâu dài'
+    },
+    ly3: { 
+        name: 'Thượng phẩm linh dược', 
+        icon: VATPHAM_EMOJI_MAP.DAN_PHUONG_THUONG_PHAM, 
+        fallbackIcon: '💜',
+        price: 2000, 
+        currency: 'lt2',
+        category: 'medicine',
+        description: 'Linh dược cao cấp, có thể cứu sống trong thời khắc nguy hiểm'
+    },
+    ly4: { 
+        name: 'Tiên phẩm linh dược', 
+        icon: VATPHAM_EMOJI_MAP.DAN_PHUONG_TIEN_PHAM, 
+        fallbackIcon: '💛',
+        price: 500, 
+        currency: 'lt3',
+        category: 'medicine',
+        description: 'Linh dược tiên phẩm, hồi sinh hoàn toàn'
+    },
+    
+    // Sách kỹ thuật (dùng linh thạch mua) - sử dụng nguyên liệu emoji
+    book1: { 
+        name: 'Cơ bản tu tiên', 
+        icon: VATPHAM_EMOJI_MAP.BACH_NGOC_SUONG, 
+        fallbackIcon: '📗',
+        price: 50, 
+        currency: 'lt1',
+        category: 'book',
+        description: 'Sách dạy kỹ thuật tu tiên cơ bản'
+    },
+    book2: { 
+        name: 'Trung cấp võ học', 
+        icon: VATPHAM_EMOJI_MAP.TU_LINH_THAO, 
+        fallbackIcon: '📘',
+        price: 300, 
+        currency: 'lt1',
+        category: 'book',
+        description: 'Sách võ học trung cấp, mở khóa kỹ năng mới'
+    },
+    book3: { 
+        name: 'Cao thủ chiến thuật', 
+        icon: VATPHAM_EMOJI_MAP.NGU_SAC_HOA, 
+        fallbackIcon: '📙',
+        price: 1500, 
+        currency: 'lt2',
+        category: 'book',
+        description: 'Sách chiến thuật cao cấp, tăng khả năng đột phá'
+    },
+    book4: { 
+        name: 'Thiên cơ bí pháp', 
+        icon: VATPHAM_EMOJI_MAP.NGU_SAC_THACH, 
+        fallbackIcon: '📕',
+        price: 200, 
+        currency: 'lt3',
+        category: 'book',
+        description: 'Sách bí truyền, chỉ có trong huyền thoại'
+    },
+    book5: { 
+        name: 'Ma đạo tâm kinh', 
+        icon: VATPHAM_EMOJI_MAP.HUYET_NGOC_HOA, 
+        fallbackIcon: '📓',
+        price: 100, 
+        currency: 'lt4',
+        category: 'book',
+        description: 'Sách cấm thư nguy hiểm, sức mạnh khủng khiếp'
+    },
+    
+    // Special books với giá cực cao - sử dụng emoji hiếm nhất
+    scroll1: { 
+        name: 'Thiên thư kim quyển', 
+        icon: VATPHAM_EMOJI_MAP.TU_LINH_THACH, 
+        fallbackIcon: '📜',
+        price: 10000, 
+        currency: 'lt4',
+        category: 'book',
+        description: 'Bí kíp tối thượng, chỉ dành cho cao thủ'
+    },
+    scroll2: { 
+        name: 'Huyền thiên bảo điển', 
+        icon: VATPHAM_EMOJI_MAP.PHIEN_DAN_PHUONG, 
+        fallbackIcon: '📋',
+        price: 50000, 
+        currency: 'lt4',
+        category: 'book',
+        description: 'Kinh sách thần thoại, power tuyệt đỉnh'
+    }
+};
+
+
+
+// Công thức ghép từ ghép (1).txt - CHỈ ĐAN DƯỢC
+const CRAFT_RECIPES = {
     // Đan dược (d series) - từ ghép (1).txt
     d1: {
         materials: { 1: 9, 2: 9, 3: 9, 4: 9 },
@@ -111,13 +232,8 @@ const CRAFT_RECIPES = {
     }
 };
 
-// Công thức dung hợp từ FARM.txt và ghép (1).txt
+// Công thức dung hợp từ ghép (1).txt - CHỈ ĐAN DƯỢC & ĐAN PHƯƠNG & LINH THẠCH
 const FUSION_RECIPES = {
-    // Thuốc (z series) - từ FARM.txt
-    z2: { required: { z1: 9 }, successRate: 50 },
-    z3: { required: { z2: 9 }, successRate: 50 },
-    z4: { required: { z3: 9 }, successRate: 50 },
-    
     // Đan dược (d series) - từ ghép (1).txt  
     d2: { required: { d1: 9, dl: 1 }, successRate: 50 },
     d3: { required: { d2: 9, dl: 1 }, successRate: 50 },
@@ -143,52 +259,52 @@ const CULTIVATION_LEVELS = [
     { name: 'Vấn Đạo', exp: 1000, breakRate: 100, expPenalty: 0, itemPenalty: 0, rewards: ['lt1:99'] },
     
     // Luyện Khí - Sơ Kỳ
-    { name: 'Luyện Khí - Sơ Kỳ - Tầng 1', exp: 2000, breakRate: 80, expPenalty: 10, itemPenalty: 1, rewards: ['z1:1'] },
-    { name: 'Luyện Khí - Sơ Kỳ - Tầng 2', exp: 4000, breakRate: 80, expPenalty: 10, itemPenalty: 1, rewards: ['z1:1'] },
-    { name: 'Luyện Khí - Sơ Kỳ - Tầng 3', exp: 6000, breakRate: 80, expPenalty: 15, itemPenalty: 1, rewards: ['z1:1'] },
-    { name: 'Luyện Khí - Sơ Kỳ - Tầng 4', exp: 8000, breakRate: 80, expPenalty: 15, itemPenalty: 2, rewards: ['z1:1'] },
-    { name: 'Luyện Khí - Sơ Kỳ - Tầng 5', exp: 10000, breakRate: 80, expPenalty: 20, itemPenalty: 2, rewards: ['z1:1'] },
-    { name: 'Luyện Khí - Sơ Kỳ - Tầng 6', exp: 12000, breakRate: 80, expPenalty: 20, itemPenalty: 2, rewards: ['z1:1'] },
-    { name: 'Luyện Khí - Sơ Kỳ - Tầng 7', exp: 14000, breakRate: 80, expPenalty: 25, itemPenalty: 3, rewards: ['z1:1'] },
-    { name: 'Luyện Khí - Sơ Kỳ - Tầng 8', exp: 16000, breakRate: 80, expPenalty: 25, itemPenalty: 3, rewards: ['z1:1'] },
-    { name: 'Luyện Khí - Sơ Kỳ - Tầng 9', exp: 18000, breakRate: 40, expPenalty: 30, itemPenalty: 5, rewards: ['z1:2'] },
+    { name: 'Luyện Khí - Sơ Kỳ - Tầng 1', exp: 2000, breakRate: 80, expPenalty: 10, itemPenalty: 1, rewards: ['lt1:10'] },
+    { name: 'Luyện Khí - Sơ Kỳ - Tầng 2', exp: 4000, breakRate: 80, expPenalty: 10, itemPenalty: 1, rewards: ['lt1:20'] },
+    { name: 'Luyện Khí - Sơ Kỳ - Tầng 3', exp: 6000, breakRate: 80, expPenalty: 15, itemPenalty: 1, rewards: ['lt1:30'] },
+    { name: 'Luyện Khí - Sơ Kỳ - Tầng 4', exp: 8000, breakRate: 80, expPenalty: 15, itemPenalty: 2, rewards: ['lt1:40'] },
+    { name: 'Luyện Khí - Sơ Kỳ - Tầng 5', exp: 10000, breakRate: 80, expPenalty: 20, itemPenalty: 2, rewards: ['lt1:50'] },
+    { name: 'Luyện Khí - Sơ Kỳ - Tầng 6', exp: 12000, breakRate: 80, expPenalty: 20, itemPenalty: 2, rewards: ['lt1:60'] },
+    { name: 'Luyện Khí - Sơ Kỳ - Tầng 7', exp: 14000, breakRate: 80, expPenalty: 25, itemPenalty: 3, rewards: ['lt1:70'] },
+    { name: 'Luyện Khí - Sơ Kỳ - Tầng 8', exp: 16000, breakRate: 80, expPenalty: 25, itemPenalty: 3, rewards: ['lt1:80'] },
+    { name: 'Luyện Khí - Sơ Kỳ - Tầng 9', exp: 18000, breakRate: 40, expPenalty: 30, itemPenalty: 5, rewards: ['lt1:100'] },
     
     // Luyện Khí - Trung Kỳ
-    { name: 'Luyện Khí - Trung Kỳ - Tầng 1', exp: 22000, breakRate: 80, expPenalty: 15, itemPenalty: 2, rewards: ['z1:1'] },
-    { name: 'Luyện Khí - Trung Kỳ - Tầng 2', exp: 24000, breakRate: 80, expPenalty: 15, itemPenalty: 2, rewards: ['z1:1'] },
-    { name: 'Luyện Khí - Trung Kỳ - Tầng 3', exp: 26000, breakRate: 80, expPenalty: 20, itemPenalty: 3, rewards: ['z1:1'] },
-    { name: 'Luyện Khí - Trung Kỳ - Tầng 4', exp: 28000, breakRate: 80, expPenalty: 20, itemPenalty: 3, rewards: ['z1:1'] },
-    { name: 'Luyện Khí - Trung Kỳ - Tầng 5', exp: 30000, breakRate: 80, expPenalty: 25, itemPenalty: 4, rewards: ['z1:1'] },
-    { name: 'Luyện Khí - Trung Kỳ - Tầng 6', exp: 32000, breakRate: 80, expPenalty: 25, itemPenalty: 4, rewards: ['z1:1'] },
-    { name: 'Luyện Khí - Trung Kỳ - Tầng 7', exp: 34000, breakRate: 80, expPenalty: 30, itemPenalty: 5, rewards: ['z1:1'] },
-    { name: 'Luyện Khí - Trung Kỳ - Tầng 8', exp: 36000, breakRate: 80, expPenalty: 30, itemPenalty: 5, rewards: ['z1:1'] },
-    { name: 'Luyện Khí - Trung Kỳ - Tầng 9', exp: 38000, breakRate: 40, expPenalty: 35, itemPenalty: 7, rewards: ['z1:2'] },
+    { name: 'Luyện Khí - Trung Kỳ - Tầng 1', exp: 22000, breakRate: 80, expPenalty: 15, itemPenalty: 2, rewards: ['lt1:110'] },
+    { name: 'Luyện Khí - Trung Kỳ - Tầng 2', exp: 24000, breakRate: 80, expPenalty: 15, itemPenalty: 2, rewards: ['lt1:120'] },
+    { name: 'Luyện Khí - Trung Kỳ - Tầng 3', exp: 26000, breakRate: 80, expPenalty: 20, itemPenalty: 3, rewards: ['lt1:130'] },
+    { name: 'Luyện Khí - Trung Kỳ - Tầng 4', exp: 28000, breakRate: 80, expPenalty: 20, itemPenalty: 3, rewards: ['lt1:140'] },
+    { name: 'Luyện Khí - Trung Kỳ - Tầng 5', exp: 30000, breakRate: 80, expPenalty: 25, itemPenalty: 4, rewards: ['lt1:150'] },
+    { name: 'Luyện Khí - Trung Kỳ - Tầng 6', exp: 32000, breakRate: 80, expPenalty: 25, itemPenalty: 4, rewards: ['lt1:160'] },
+    { name: 'Luyện Khí - Trung Kỳ - Tầng 7', exp: 34000, breakRate: 80, expPenalty: 30, itemPenalty: 5, rewards: ['lt1:170'] },
+    { name: 'Luyện Khí - Trung Kỳ - Tầng 8', exp: 36000, breakRate: 80, expPenalty: 30, itemPenalty: 5, rewards: ['lt1:180'] },
+    { name: 'Luyện Khí - Trung Kỳ - Tầng 9', exp: 38000, breakRate: 40, expPenalty: 35, itemPenalty: 7, rewards: ['lt1:200'] },
     
     // Luyện Khí - Hậu Kỳ
-    { name: 'Luyện Khí - Hậu Kỳ - Tầng 1', exp: 42000, breakRate: 80, expPenalty: 20, itemPenalty: 3, rewards: ['z1:1'] },
-    { name: 'Luyện Khí - Hậu Kỳ - Tầng 2', exp: 46000, breakRate: 80, expPenalty: 20, itemPenalty: 3, rewards: ['z1:1'] },
-    { name: 'Luyện Khí - Hậu Kỳ - Tầng 3', exp: 48000, breakRate: 80, expPenalty: 25, itemPenalty: 4, rewards: ['z1:1'] },
-    { name: 'Luyện Khí - Hậu Kỳ - Tầng 4', exp: 50000, breakRate: 80, expPenalty: 25, itemPenalty: 4, rewards: ['z1:1'] },
-    { name: 'Luyện Khí - Hậu Kỳ - Tầng 5', exp: 52000, breakRate: 80, expPenalty: 30, itemPenalty: 5, rewards: ['z1:1'] },
-    { name: 'Luyện Khí - Hậu Kỳ - Tầng 6', exp: 54000, breakRate: 80, expPenalty: 30, itemPenalty: 5, rewards: ['z1:1'] },
-    { name: 'Luyện Khí - Hậu Kỳ - Tầng 7', exp: 56000, breakRate: 80, expPenalty: 35, itemPenalty: 6, rewards: ['z1:1'] },
-    { name: 'Luyện Khí - Hậu Kỳ - Tầng 8', exp: 58000, breakRate: 80, expPenalty: 35, itemPenalty: 6, rewards: ['z1:1'] },
-    { name: 'Luyện Khí - Hậu Kỳ - Tầng 9', exp: 60000, breakRate: 20, expPenalty: 40, itemPenalty: 10, rewards: ['z1:3'] },
+    { name: 'Luyện Khí - Hậu Kỳ - Tầng 1', exp: 42000, breakRate: 80, expPenalty: 20, itemPenalty: 3, rewards: ['lt1:250'] },
+    { name: 'Luyện Khí - Hậu Kỳ - Tầng 2', exp: 46000, breakRate: 80, expPenalty: 20, itemPenalty: 3, rewards: ['lt1:300'] },
+    { name: 'Luyện Khí - Hậu Kỳ - Tầng 3', exp: 48000, breakRate: 80, expPenalty: 25, itemPenalty: 4, rewards: ['lt1:350'] },
+    { name: 'Luyện Khí - Hậu Kỳ - Tầng 4', exp: 50000, breakRate: 80, expPenalty: 25, itemPenalty: 4, rewards: ['lt1:400'] },
+    { name: 'Luyện Khí - Hậu Kỳ - Tầng 5', exp: 52000, breakRate: 80, expPenalty: 30, itemPenalty: 5, rewards: ['lt1:450'] },
+    { name: 'Luyện Khí - Hậu Kỳ - Tầng 6', exp: 54000, breakRate: 80, expPenalty: 30, itemPenalty: 5, rewards: ['lt1:500'] },
+    { name: 'Luyện Khí - Hậu Kỳ - Tầng 7', exp: 56000, breakRate: 80, expPenalty: 35, itemPenalty: 6, rewards: ['lt1:550'] },
+    { name: 'Luyện Khí - Hậu Kỳ - Tầng 8', exp: 58000, breakRate: 80, expPenalty: 35, itemPenalty: 6, rewards: ['lt1:600'] },
+    { name: 'Luyện Khí - Hậu Kỳ - Tầng 9', exp: 60000, breakRate: 20, expPenalty: 40, itemPenalty: 10, rewards: ['lt1:1000'] },
     
     // Trúc Cơ - Sơ Kỳ
-    { name: 'Trúc Cơ - Sơ Kỳ - Tầng 1', exp: 70000, breakRate: 80, expPenalty: 25, itemPenalty: 4, rewards: ['z1:2'] },
-    { name: 'Trúc Cơ - Sơ Kỳ - Tầng 2', exp: 72000, breakRate: 80, expPenalty: 25, itemPenalty: 4, rewards: ['z1:2'] },
-    { name: 'Trúc Cơ - Sơ Kỳ - Tầng 3', exp: 74000, breakRate: 80, expPenalty: 30, itemPenalty: 5, rewards: ['z1:2'] },
-    { name: 'Trúc Cơ - Sơ Kỳ - Tầng 4', exp: 76000, breakRate: 80, expPenalty: 30, itemPenalty: 5, rewards: ['z1:2'] },
-    { name: 'Trúc Cơ - Sơ Kỳ - Tầng 5', exp: 78000, breakRate: 80, expPenalty: 35, itemPenalty: 6, rewards: ['z1:2'] },
-    { name: 'Trúc Cơ - Sơ Kỳ - Tầng 6', exp: 80000, breakRate: 80, expPenalty: 35, itemPenalty: 6, rewards: ['z1:2'] },
-    { name: 'Trúc Cơ - Sơ Kỳ - Tầng 7', exp: 82000, breakRate: 80, expPenalty: 40, itemPenalty: 7, rewards: ['z1:2'] },
-    { name: 'Trúc Cơ - Sơ Kỳ - Tầng 8', exp: 84000, breakRate: 80, expPenalty: 40, itemPenalty: 7, rewards: ['z1:2'] },
-    { name: 'Trúc Cơ - Sơ Kỳ - Tầng 9', exp: 86000, breakRate: 40, expPenalty: 45, itemPenalty: 10, rewards: ['z1:3'] },
+    { name: 'Trúc Cơ - Sơ Kỳ - Tầng 1', exp: 70000, breakRate: 80, expPenalty: 25, itemPenalty: 4, rewards: ['lt1:1200', 'lt2:1'] },
+    { name: 'Trúc Cơ - Sơ Kỳ - Tầng 2', exp: 72000, breakRate: 80, expPenalty: 25, itemPenalty: 4, rewards: ['lt1:1300', 'lt2:1'] },
+    { name: 'Trúc Cơ - Sơ Kỳ - Tầng 3', exp: 74000, breakRate: 80, expPenalty: 30, itemPenalty: 5, rewards: ['lt1:1400', 'lt2:1'] },
+    { name: 'Trúc Cơ - Sơ Kỳ - Tầng 4', exp: 76000, breakRate: 80, expPenalty: 30, itemPenalty: 5, rewards: ['lt1:1500', 'lt2:1'] },
+    { name: 'Trúc Cơ - Sơ Kỳ - Tầng 5', exp: 78000, breakRate: 80, expPenalty: 35, itemPenalty: 6, rewards: ['lt1:1600', 'lt2:1'] },
+    { name: 'Trúc Cơ - Sơ Kỳ - Tầng 6', exp: 80000, breakRate: 80, expPenalty: 35, itemPenalty: 6, rewards: ['lt1:1700', 'lt2:1'] },
+    { name: 'Trúc Cơ - Sơ Kỳ - Tầng 7', exp: 82000, breakRate: 80, expPenalty: 40, itemPenalty: 7, rewards: ['lt1:1800', 'lt2:1'] },
+    { name: 'Trúc Cơ - Sơ Kỳ - Tầng 8', exp: 84000, breakRate: 80, expPenalty: 40, itemPenalty: 7, rewards: ['lt1:1900', 'lt2:1'] },
+    { name: 'Trúc Cơ - Sơ Kỳ - Tầng 9', exp: 86000, breakRate: 40, expPenalty: 45, itemPenalty: 10, rewards: ['lt1:2000', 'lt2:3'] },
 
     // Tiếp tục với các level khác theo file dữ liệu...
     // Phi Thăng kiếp (Special breakthrough)
-    { name: 'Phi Thăng kiếp', exp: 330000, breakRate: 5, expPenalty: 50, itemPenalty: 20, rewards: ['z1:9', 'lt1:999'] },
+    { name: 'Phi Thăng kiếp', exp: 330000, breakRate: 5, expPenalty: 50, itemPenalty: 20, rewards: ['lt1:9999', 'lt2:999', 'lt3:99'] },
 
     // Luyện Hư realm
     { name: 'Luyện Hư - Sơ Kỳ - Tầng 1', exp: 340000, breakRate: 80, expPenalty: 30, itemPenalty: 8, rewards: ['lt2:1'] },
@@ -366,6 +482,18 @@ function getItemStorageInfo(itemId) {
         };
     }
     
+    // Check SHOP_ITEMS (linh đan, linh dược, sách)
+    if (SHOP_ITEMS[itemId]) {
+        const shopItem = SHOP_ITEMS[itemId];
+        const category = shopItem.category === 'book' ? 'book' : 'medicine';
+        return {
+            category: category,
+            actualId: itemId,
+            name: shopItem.name,
+            icon: shopItem.icon || shopItem.fallbackIcon
+        };
+    }
+    
     // Default fallback
     return {
         category: 'material',
@@ -453,6 +581,7 @@ module.exports = {
     FARM_MATERIALS,
     MEDICINES,
     SPIRIT_STONES,
+    SHOP_ITEMS,
     CRAFT_RECIPES,
     FUSION_RECIPES,
     CULTIVATION_LEVELS,
