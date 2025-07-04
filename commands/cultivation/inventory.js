@@ -221,7 +221,7 @@ module.exports = {
             } else if (filterType === 'medicines') {
                 responseText += `\n💡 *Giờ có thể farm đan phương và đan lò! Dùng \`!farm\` để thu thập.*`;
             } else if (filterType === 'stones') {
-                responseText += `\n💡 *Dùng \`!breakthrough\` để đột phá và \`!farm\` để thu thập tụ linh thạch fusion*`;
+                responseText += `\n💡 *Dùng \`!breakthrough\` để đột phá và \`!farm\` để thu thập tụ linh thạch craft*`;
             } else if (filterType === 'shop') {
                 responseText += `\n💡 *Dùng \`!shop\` để mua linh đan, linh dược và sách. Dùng \`!shop buy <id>\` để mua.*`;
             }

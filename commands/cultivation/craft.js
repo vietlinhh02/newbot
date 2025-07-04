@@ -1,16 +1,15 @@
-const { FARM_MATERIALS, MEDICINES, SPIRIT_STONES, SHOP_ITEMS, CRAFT_RECIPES, FUSION_RECIPES, getItemStorageInfo } = require('../../utils/cultivationData');
+const { FARM_MATERIALS, MEDICINES, SPIRIT_STONES, SHOP_ITEMS, CRAFT_RECIPES, getItemStorageInfo } = require('../../utils/cultivationData');
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType } = require('discord.js');
 
 module.exports = {
     name: 'craft',
     aliases: ['ghep', 'alchemy'],
-    description: 'Ghép nguyên liệu thành thuốc/đan dược hoặc dung hợp vật phẩm cấp cao',
-    usage: '!craft <item> [type]',
+    description: 'Chế tạo đan dược và linh thạch từ nguyên liệu',
+    usage: '!craft <item>',
     examples: [
-        '!craft z1 - Craft thuốc cấp 1',
         '!craft d1 - Craft đan dược hạ phẩm',
-        '!craft z2 fusion - Fusion thuốc cấp 2',
-        '!craft lt2 fusion - Fusion linh thạch',
+        '!craft d2 - Craft đan dược trung phẩm',
+        '!craft lt2 - Craft linh thạch trung phẩm',
         '!craft recipes - xem công thức'
     ],
     permissions: 'everyone',
@@ -27,12 +26,17 @@ module.exports = {
             }
 
             const targetItem = args[0].toLowerCase();
-            const craftType = args[1]?.toLowerCase() || 'craft'; // 'craft' hoặc 'fusion'
 
             // Validate item - check both MEDICINES and SPIRIT_STONES
             const itemData = MEDICINES[targetItem] || SPIRIT_STONES[targetItem];
             if (!itemData) {
                 return message.reply(`❌ Không tìm thấy item "${targetItem}"! Sử dụng \`!craft recipes\` để xem công thức.`);
+            }
+
+            // Check if item can be crafted
+            const recipe = CRAFT_RECIPES[targetItem];
+            if (!recipe) {
+                return message.reply(`❌ Không thể craft item "${targetItem}"! Sử dụng \`!craft recipes\` để xem công thức.`);
             }
 
             // Get user data
@@ -77,78 +81,39 @@ module.exports = {
                 }
             });
 
-            // Check craft type and recipe
-            let recipe;
-            let successRate;
+            // Get recipe and required items
+            const successRate = recipe.successRate;
             let requiredItems = [];
 
-            if (craftType === 'fusion') {
-                recipe = FUSION_RECIPES[targetItem];
-                if (!recipe) {
-                    return message.reply(`❌ Không thể fusion item "${targetItem}"!`);
-                }
-
-                successRate = recipe.successRate;
-                for (const [itemId, quantity] of Object.entries(recipe.required)) {
-                    let itemType, itemName, haveQty;
-                    
-                    // Check if this is a spirit stone
-                    if (SPIRIT_STONES[itemId]) {
-                        itemType = 'spirit';
-                        itemName = SPIRIT_STONES[itemId].name;
-                        haveQty = userItems[`spirit_${itemId}`] || 0;
-                    } else {
-                        itemType = 'medicine';
-                        itemName = MEDICINES[itemId]?.name || itemId;
-                        haveQty = userItems[`medicine_${itemId}`] || 0;
-                    }
-                    
+            // Add materials
+            if (recipe.materials) {
+                for (const [itemId, quantity] of Object.entries(recipe.materials)) {
+                    const storageInfo = getItemStorageInfo(itemId);
+                    const key = `${storageInfo.category}_${storageInfo.actualId}`;
                     requiredItems.push({
-                        type: itemType,
+                        type: storageInfo.category,
                         id: itemId,
+                        actualId: storageInfo.actualId,
                         needed: quantity,
-                        have: haveQty,
-                        name: itemName
+                        have: userItems[key] || 0,
+                        name: storageInfo.name
                     });
                 }
-            } else {
-                recipe = CRAFT_RECIPES[targetItem];
-                if (!recipe) {
-                    return message.reply(`❌ Không thể craft item "${targetItem}"!`);
-                }
+            }
 
-                successRate = recipe.successRate;
-
-                // Add materials
-                if (recipe.materials) {
-                    for (const [itemId, quantity] of Object.entries(recipe.materials)) {
-                        const storageInfo = getItemStorageInfo(itemId);
-                        const key = `${storageInfo.category}_${storageInfo.actualId}`;
-                        requiredItems.push({
-                            type: storageInfo.category,
-                            id: itemId,
-                            actualId: storageInfo.actualId,
-                            needed: quantity,
-                            have: userItems[key] || 0,
-                            name: storageInfo.name
-                        });
-                    }
-                }
-
-                // Add medicines
-                if (recipe.medicines) {
-                    for (const [itemId, quantity] of Object.entries(recipe.medicines)) {
-                        const storageInfo = getItemStorageInfo(itemId);
-                        const key = `${storageInfo.category}_${storageInfo.actualId}`;
-                        requiredItems.push({
-                            type: storageInfo.category,
-                            id: itemId,
-                            actualId: storageInfo.actualId,
-                            needed: quantity,
-                            have: userItems[key] || 0,
-                            name: storageInfo.name
-                        });
-                    }
+            // Add medicines
+            if (recipe.medicines) {
+                for (const [itemId, quantity] of Object.entries(recipe.medicines)) {
+                    const storageInfo = getItemStorageInfo(itemId);
+                    const key = `${storageInfo.category}_${storageInfo.actualId}`;
+                    requiredItems.push({
+                        type: storageInfo.category,
+                        id: itemId,
+                        actualId: storageInfo.actualId,
+                        needed: quantity,
+                        have: userItems[key] || 0,
+                        name: storageInfo.name
+                    });
                 }
             }
 
@@ -163,7 +128,7 @@ module.exports = {
 
                 const errorEmbed = new EmbedBuilder()
                     .setTitle('❌ Không đủ nguyên liệu!')
-                    .setDescription(`Không thể ${craftType === 'fusion' ? 'dung hợp' : 'chế tạo'} **${itemData.name}**`)
+                    .setDescription(`Không thể chế tạo **${itemData.name}**`)
                     .setColor(0xffa500)
                     .addFields({
                         name: '📦 Nguyên liệu thiếu',
@@ -184,21 +149,12 @@ module.exports = {
 
             // Remove materials regardless of success/failure
             for (const item of requiredItems) {
-                let actualType = item.type;
-                let actualId = item.actualId || item.id;
-                
-                // Handle spirit stones (for fusion compatibility)
-                if (item.type === 'spirit') {
-                    actualType = 'material';
-                    actualId = `spirit_${item.id}`;
-                }
-                
                 await client.prisma.userInventory.update({
                     where: {
                         userId_itemType_itemId: {
                             userId: userId,
-                            itemType: actualType,
-                            itemId: actualId
+                            itemType: item.type,
+                            itemId: item.actualId
                         }
                     },
                     data: {
@@ -248,21 +204,35 @@ module.exports = {
                     .setTitle('🧪 Chế tạo thành công!')
                     .setDescription(`${itemData.icon} **${itemData.name}** đã được tạo ra!`)
                     .setColor(0x00ff00)
-                    .addFields({
-                        name: '📊 Thông tin',
-                        value: `• **Loại:** ${craftType === 'fusion' ? 'Dung hợp' : 'Ghép liệu'}\n• **Tỉ lệ thành công:** \`${successRate}%\``,
-                        inline: false
-                    });
+                    .addFields([
+                        {
+                            name: '✅ Kết quả',
+                            value: `${itemData.icon} **${itemData.name}** x1`,
+                            inline: true
+                        },
+                        {
+                            name: '📊 Thông tin',
+                            value: `• **Loại:** Chế tạo\n• **Tỉ lệ thành công:** \`${successRate}%\``,
+                            inline: true
+                        }
+                    ]);
             } else {
                 resultEmbed
                     .setTitle('💥 Chế tạo thất bại!')
-                    .setDescription(`Không thể tạo ra **${itemData.name}**. Nguyên liệu đã bị tiêu hao.`)
-                    .setColor(0xff0000)
-                    .addFields({
-                        name: '📊 Thông tin',
-                        value: `• **Loại:** ${craftType === 'fusion' ? 'Dung hợp' : 'Ghép liệu'}\n• **Tỉ lệ thành công:** \`${successRate}%\`\n• **Lần sau có thể thành công hơn!**`,
-                        inline: false
-                    });
+                    .setDescription(`Không may mắn! Nguyên liệu đã bị tiêu hao.`)
+                    .setColor(0xff4444)
+                    .addFields([
+                        {
+                            name: '💔 Kết quả',
+                            value: `Không nhận được gì`,
+                            inline: true
+                        },
+                        {
+                            name: '📊 Thông tin',
+                            value: `• **Loại:** Chế tạo\n• **Tỉ lệ thành công:** \`${successRate}%\`\n• **Lần sau có thể thành công hơn!**`,
+                            inline: true
+                        }
+                    ]);
             }
 
             await message.reply({ embeds: [resultEmbed] });
@@ -279,17 +249,17 @@ module.exports = {
         
         // Page 1: Tổng quan
         const overviewEmbed = new EmbedBuilder()
-            .setTitle('🧪 Alchemy Recipes - Tu Tiên')
-            .setDescription('**Hệ thống chế tạo và dung hợp vật phẩm tu tiên**')
+            .setTitle('🧪 Craft Recipes - Tu Tiên')
+            .setDescription('**Hệ thống chế tạo vật phẩm tu tiên (chỉ CRAFT)**')
             .setColor(0x9932cc)
             .setTimestamp()
             .setFooter({ 
-                text: `Trang 1/5 • Yêu cầu bởi ${message.author.username}`, 
+                text: `Trang 1/3 • Yêu cầu bởi ${message.author.username}`, 
                 iconURL: message.author.displayAvatarURL() 
             })
             .addFields([
                 {
-                    name: '🔨 CRAFT (Ghép nguyên liệu)',
+                    name: '🔨 CRAFT (Chế tạo)',
                     value: `**${Object.keys(CRAFT_RECIPES).length} công thức craft:**\n` +
                            '• **Đan dược:** d1, d2, d3, d4 (từ nguyên liệu + đan phương + đan lò)\n' +
                            '• **Linh thạch:** lt2, lt3, lt4 (từ linh thạch thấp hơn + tụ linh thạch)\n' +
@@ -297,58 +267,47 @@ module.exports = {
                     inline: false
                 },
                 {
-                    name: '⚗️ FUSION (Dung hợp)',
-                    value: `**${Object.keys(FUSION_RECIPES).length} công thức fusion:**\n` +
-                           '• **Đan dược:** d2, d3, d4 (từ đan dược thấp hơn + đan lò)\n' +
-                           '• **Đan phương:** dp2, dp3, dp4 (từ đan phương thấp hơn + pdp)\n' +
-                           '• **Tỉ lệ thành công:** 50%',
-                    inline: false
-                },
-                {
                     name: '💡 Cách sử dụng',
-                    value: '• `!craft <item>` - Ghép nguyên liệu (50% thành công)\n' +
-                           '• `!craft <item> fusion` - Dung hợp vật phẩm (50% thành công)\n' +
+                    value: '• `!craft <item>` - Chế tạo vật phẩm (50% thành công)\n' +
                            '• `!craft recipes` - Xem tất cả công thức\n' +
-                           '• `!farm` - Thu thập nguyên liệu cơ bản\n' +
+                           '• `!farm` - Thu thập nguyên liệu cơ bản (1-7, lt1)\n' +
                            '• `!shop` - Mua đan phương, đan lò, tụ linh thạch',
                     inline: false
                 },
                 {
                     name: '📖 Navigation',
                     value: '• **Trang 1:** Tổng quan hệ thống\n' +
-                           '• **Trang 2:** CRAFT - Đan dược (d1-d4) và Linh thạch (lt2-lt4)\n' +
-                           '• **Trang 3:** FUSION - Đan dược (d2-d4)\n' +
-                           '• **Trang 4:** FUSION - Đan phương (dp2-dp4)\n' +
-                           '• **Trang 5:** Nguyên liệu & Hướng dẫn\n\n' +
+                           '• **Trang 2:** CRAFT - Đan dược (d1-d4)\n' +
+                           '• **Trang 3:** CRAFT - Linh thạch (lt2-lt4) & Hướng dẫn\n\n' +
                            '🎮 **Dùng nút bên dưới để chuyển trang!**',
                     inline: false
                 }
             ]);
         pages.push(overviewEmbed);
 
-        // Page 2: CRAFT - Đan dược và Linh thạch
+        // Page 2: CRAFT - Đan dược
         const craftPillsEmbed = new EmbedBuilder()
-            .setTitle('🔨 CRAFT - Đan dược & Linh thạch')
-            .setDescription('**Chế tạo đan dược từ nguyên liệu + đan phương + đan lò và linh thạch từ linh thạch thấp hơn + tụ linh thạch**')
+            .setTitle('🔨 CRAFT - Đan dược')
+            .setDescription('**Chế tạo đan dược từ nguyên liệu + đan phương + đan lò**')
             .setColor(0x0080ff)
             .setTimestamp()
             .setFooter({ 
-                text: `Trang 2/5 • Yêu cầu bởi ${message.author.username}`, 
+                text: `Trang 2/3 • Yêu cầu bởi ${message.author.username}`, 
                 iconURL: message.author.displayAvatarURL() 
             });
 
-        // Filter craft recipes for pills (d series) and spirit stones (lt series)
-        const craftRecipes = Object.entries(CRAFT_RECIPES).filter(([itemId]) => 
-            itemId.startsWith('d') || itemId.startsWith('lt')
+        // Filter craft recipes for pills (d series) only
+        const dCraftRecipes = Object.entries(CRAFT_RECIPES).filter(([itemId]) => 
+            itemId.startsWith('d')
         );
-        craftRecipes.forEach(([itemId, recipe]) => {
-            const itemData = MEDICINES[itemId] || SPIRIT_STONES[itemId];
+        dCraftRecipes.forEach(([itemId, recipe]) => {
+            const itemData = MEDICINES[itemId];
             
             if (itemData) {
                 let ingredients = '';
                 if (recipe.materials) {
                     const materials = Object.entries(recipe.materials).map(([id, qty]) => {
-                        const materialData = FARM_MATERIALS[id] || SPIRIT_STONES[id] || SHOP_ITEMS[id];
+                        const materialData = FARM_MATERIALS[id];
                         return `${materialData?.icon} \`${qty}\``;
                     }).join(' + ');
                     ingredients += materials;
@@ -356,179 +315,86 @@ module.exports = {
                 if (recipe.medicines && Object.keys(recipe.medicines).length > 0) {
                     if (ingredients) ingredients += ' + ';
                     const medicines = Object.entries(recipe.medicines).map(([id, qty]) => {
-                        const itemData = MEDICINES[id] || SHOP_ITEMS[id];
+                        const itemData = SHOP_ITEMS[id];
                         return `${itemData?.icon} \`${qty}\``;
                     }).join(' + ');
                     ingredients += medicines;
                 }
 
-                const description = itemId.startsWith('d') ? 'Đan dược cao cấp cần đan phương' : 'Linh thạch cần nhiều linh thạch thấp hơn';
                 craftPillsEmbed.addFields({
                     name: `${itemData.icon} ${itemData.name}`,
-                    value: `**Nguyên liệu:** ${ingredients}\n**Tỉ lệ thành công:** \`${recipe.successRate}%\`\n**Lệnh:** \`!craft ${itemId}\`\n**Mô tả:** ${description}`,
+                    value: `**Nguyên liệu:** ${ingredients}\n**Tỉ lệ thành công:** \`${recipe.successRate}%\`\n**Lệnh:** \`!craft ${itemId}\`\n**Mô tả:** Đan dược cao cấp từ nguyên liệu`,
                     inline: true
                 });
             }
         });
         
         craftPillsEmbed.addFields({
-            name: '✅ Lưu ý về chế tạo',
+            name: '✅ Lưu ý về chế tạo đan dược',
             value: '• **Đan phương & đan lò:** Mua từ `!shop` bằng linh thạch\n' +
                    '• **Nguyên liệu:** Thu thập từ `!farm` (1-7)\n' +
-                   '• **Tụ linh thạch:** Mua từ `!shop` để craft linh thạch cao\n' +
-                   '• **Tỉ lệ thành công:** 50% (cần chuẩn bị dự phòng)',
+                   '• **Tỉ lệ thành công:** 50% (cần chuẩn bị dự phòng)\n' +
+                   '• **Đan dược cao hơn:** Cần đan phương và nguyên liệu cao hơn',
             inline: false
         });
         pages.push(craftPillsEmbed);
 
-        // Page 3: FUSION - Đan dược  
-        const fusionMedPillsEmbed = new EmbedBuilder()
-            .setTitle('⚗️ FUSION - Đan dược')
-            .setDescription('**Dung hợp đan dược cấp thấp thành cấp cao hơn**')
+        // Page 3: CRAFT - Linh thạch & Hướng dẫn
+        const craftStonesEmbed = new EmbedBuilder()
+            .setTitle('🔨 CRAFT - Linh thạch & Hướng dẫn')
+            .setDescription('**Chế tạo linh thạch cao cấp và hướng dẫn sử dụng**')
             .setColor(0xff6600)
             .setTimestamp()
             .setFooter({ 
-                text: `Trang 3/5 • Yêu cầu bởi ${message.author.username}`, 
+                text: `Trang 3/3 • Yêu cầu bởi ${message.author.username}`, 
                 iconURL: message.author.displayAvatarURL() 
             });
 
-        // Filter fusion recipes for d series only (bỏ z series)
-        const dFusionRecipes = Object.entries(FUSION_RECIPES).filter(([itemId]) => 
-            itemId.startsWith('d')
+        // Filter craft recipes for spirit stones (lt series)
+        const ltCraftRecipes = Object.entries(CRAFT_RECIPES).filter(([itemId]) => 
+            itemId.startsWith('lt')
         );
-        
-        dFusionRecipes.forEach(([itemId, recipe]) => {
-            const itemData = MEDICINES[itemId];
+        ltCraftRecipes.forEach(([itemId, recipe]) => {
+            const itemData = SPIRIT_STONES[itemId];
             
             if (itemData) {
-                const ingredients = Object.entries(recipe.required).map(([id, qty]) => {
-                    const sourceData = MEDICINES[id] || SHOP_ITEMS[id] || SPIRIT_STONES[id];
-                    return `${sourceData?.icon} \`${qty}\``;
-                }).join(' + ');
-
-                fusionMedPillsEmbed.addFields({
-                    name: `${itemData.icon} ${itemData.name} 🔮`,
-                    value: `**Nguyên liệu:** ${ingredients}\n**Tỉ lệ thành công:** \`${recipe.successRate}%\`\n**Lệnh:** \`!craft ${itemId} fusion\`\n**Loại:** Đan dược`,
-                    inline: true
-                });
-            }
-        });
-        
-        fusionMedPillsEmbed.addFields({
-            name: '🔬 Nguyên lý Fusion Đan dược',
-            value: '• **Đan dược Fusion:** 9x đan dược + đan lò → đan dược cấp cao\n' +
-                   '• **Tỉ lệ thành công:** 50% (thấp hơn craft)\n' +
-                   '• **Lợi ích:** Tiết kiệm nguyên liệu khi có nhiều đan dược cấp thấp\n' +
-                   '• **Lưu ý:** Luôn cần thêm đan lò cho mọi fusion đan dược',
-            inline: false
-        });
-        pages.push(fusionMedPillsEmbed);
-
-        // Page 4: FUSION - Đan phương
-        const fusionAdvancedEmbed = new EmbedBuilder()
-            .setTitle('⚗️ FUSION - Đan phương')
-            .setDescription('**Dung hợp đan phương - vật phẩm cao cấp để craft đan dược**')
-            .setColor(0x8b00ff)
-            .setTimestamp()
-            .setFooter({ 
-                text: `Trang 4/5 • Yêu cầu bởi ${message.author.username}`, 
-                iconURL: message.author.displayAvatarURL() 
-            });
-
-        // Filter fusion recipes for dp series only
-        const dpFusionRecipes = Object.entries(FUSION_RECIPES).filter(([itemId]) => 
-            itemId.startsWith('dp')
-        );
-        
-        dpFusionRecipes.forEach(([itemId, recipe]) => {
-            const itemData = SHOP_ITEMS[itemId] || SPIRIT_STONES[itemId];
-            
-            if (itemData) {
-                const ingredients = Object.entries(recipe.required).map(([id, qty]) => {
-                    const sourceData = SHOP_ITEMS[id] || SPIRIT_STONES[id];
-                    return `${sourceData?.icon} \`${qty}\``;
-                }).join(' + ');
-
-                fusionAdvancedEmbed.addFields({
-                    name: `${itemData.icon} ${itemData.name} 📜`,
-                    value: `**Nguyên liệu:** ${ingredients}\n**Tỉ lệ thành công:** \`${recipe.successRate}%\`\n**Lệnh:** \`!craft ${itemId} fusion\`\n**Loại:** Đan phương`,
-                    inline: true
-                });
-            }
-        });
-        
-        fusionAdvancedEmbed.addFields({
-            name: '📜 Về Đan phương',
-            value: '• **Đan phương:** Cần thiết để craft đan dược\n' +
-                   '• **Fusion:** 9x đan phương thấp hơn + 1x phối đan phương\n' +
-                   '• **Tỉ lệ thành công:** 50% (rủi ro cao)\n' +
-                   '• **Mua từ shop:** Đan phương và phối đan phương bằng linh thạch',
-            inline: false
-        });
-        pages.push(fusionAdvancedEmbed);
-
-        // Page 5: Materials & Guide
-        const materialsEmbed = new EmbedBuilder()
-            .setTitle('📦 Nguyên liệu & Hướng dẫn')
-            .setDescription('**Thông tin về nguyên liệu và cách sử dụng hệ thống**')
-            .setColor(0x6600ff)
-            .setTimestamp()
-            .setFooter({ 
-                text: `Trang 5/5 • Yêu cầu bởi ${message.author.username}`, 
-                iconURL: message.author.displayAvatarURL() 
-            })
-            .addFields([
-                {
-                    name: '🌿 Nguyên liệu Farm',
-                    value: Object.entries(FARM_MATERIALS).map(([id, data]) => 
-                        `${data.icon} **${data.name}** - \`!farm\``
-                    ).join('\n'),
-                    inline: true
-                },
-                {
-                    name: '🧪 Đan phương & Đan lò',
-                    value: ['dp1', 'dp2', 'dp3', 'dp4', 'pdp', 'dl', 'tlt'].map(id => 
-                        `${SHOP_ITEMS[id]?.icon} **${SHOP_ITEMS[id]?.name}** - \`!shop buy ${id}\``
-                    ).join('\n'),
-                    inline: true
-                },
-                {
-                    name: '💎 Linh thạch',
-                    value: Object.entries(SPIRIT_STONES).map(([id, data]) => 
-                        `${data.icon} **${data.name}**`
-                    ).join('\n'),
-                    inline: true
-                },
-                {
-                    name: '📖 Hướng dẫn sử dụng',
-                    value: '• `!craft <item>` - Ghép bằng nguyên liệu\n' +
-                           '• `!craft <item> fusion` - Dung hợp vật phẩm\n' +
-                           '• `!inv` - Xem inventory hiện tại\n' +
-                           '• `!farm` - Thu thập nguyên liệu (1-7) + linh thạch (lt1)\n' +
-                           '• `!shop` - Mua đan phương, đan lò, tụ linh thạch\n' +
-                           '• `!breakthrough` - Nhận linh thạch từ đột phá',
-                    inline: true
-                },
-                {
-                    name: '💡 Tips & Chiến thuật',
-                    value: '• **Kiểm tra inventory:** `!inv materials`, `!inv medicines`, `!inv stones`\n' +
-                           '• **Tích lũy đan lò (dl):** Cần thiết cho mọi đan dược\n' +
-                           '• **Fusion thông minh:** Dùng khi có nhiều vật phẩm cấp thấp\n' +
-                           '• **Đột phá thường xuyên:** Để có linh thạch fusion',
-                    inline: true
-                },
-                {
-                    name: '⚠️ Lưu ý quan trọng',
-                    value: '🔥 **Nguyên liệu sẽ bị tiêu hao dù thành công hay thất bại!**\n' +
-                           '💰 **Tính toán kỹ trước khi craft/fusion**\n' +
-                           '🎯 **Tỉ lệ thành công:** Craft > Fusion\n' +
-                           '📈 **Hiệu quả:** Đan dược > Thuốc thường',
-                    inline: false
+                let ingredients = '';
+                if (recipe.materials) {
+                    const materials = Object.entries(recipe.materials).map(([id, qty]) => {
+                        const materialData = SPIRIT_STONES[id] || SHOP_ITEMS[id];
+                        return `${materialData?.icon} \`${qty}\``;
+                    }).join(' + ');
+                    ingredients += materials;
                 }
-            ]);
-        pages.push(materialsEmbed);
 
-        // Tạo buttons
+                craftStonesEmbed.addFields({
+                    name: `${itemData.icon} ${itemData.name}`,
+                    value: `**Nguyên liệu:** ${ingredients}\n**Tỉ lệ thành công:** \`${recipe.successRate}%\`\n**Lệnh:** \`!craft ${itemId}\`\n**Mô tả:** Linh thạch cần nhiều linh thạch thấp hơn`,
+                    inline: true
+                });
+            }
+        });
+        
+        craftStonesEmbed.addFields({
+            name: '💎 Về Linh thạch',
+            value: '• **Tụ linh thạch:** Mua từ `!shop` để craft linh thạch cao\n' +
+                   '• **Linh thạch lt1:** Thu thập từ `!farm` (rất ít)\n' +
+                   '• **Tỉ lệ thành công:** 50% (rủi ro cao)\n' +
+                   '• **Cần rất nhiều:** 9999x linh thạch thấp hơn để craft',
+            inline: false
+        },
+        {
+            name: '📚 Tổng kết hệ thống',
+            value: '🌾 **Farm** → Nguyên liệu (1-7) + lt1\n' +
+                   '🏪 **Shop** → Đan phương, đan lò, tụ linh thạch\n' +
+                   '🔨 **Craft** → Đan dược (d1-d4) + Linh thạch (lt2-lt4)\n' +
+                   '💊 **Sử dụng** → Tăng EXP và đột phá cảnh giới\n\n' +
+                   '💡 **Mẹo:** Luôn chuẩn bị thêm nguyên liệu vì tỉ lệ thành công chỉ 50%!',
+            inline: false
+        });
+        pages.push(craftStonesEmbed);
+
+        // Create navigation buttons
         const createButtons = (currentPage, totalPages) => {
             const buttons = [];
             
@@ -570,7 +436,7 @@ module.exports = {
             }
             
             // Quick navigation to specific sections
-            if (totalPages === 5 && currentPage === 0) {
+            if (totalPages === 3 && currentPage === 0) {
                 // Add quick access button on overview page
                 buttons.push(
                     new ButtonBuilder()
@@ -608,12 +474,10 @@ module.exports = {
                 // Show quick navigation info
                                         await interaction.followUp({
                             content: '🚀 **Chuyển nhanh đến trang bằng nút navigation:**\n\n' +
-                                     '📖 **Mục lục 5 trang:**\n' +
+                                     '📖 **Mục lục 3 trang:**\n' +
                                      '• **Trang 1:** 🏠 Tổng quan hệ thống\n' +
                                      '• **Trang 2:** 🔨 CRAFT Đan dược (d1-d4)\n' +
-                                     '• **Trang 3:** ⚗️ FUSION Đan dược\n' +
-                                     '• **Trang 4:** ⚗️ FUSION Đan phương & Linh thạch\n' +
-                                     '• **Trang 5:** 📦 Nguyên liệu & Hướng dẫn\n\n' +
+                                     '• **Trang 3:** 🔨 CRAFT Linh thạch (lt2-lt4) & Hướng dẫn\n\n' +
                                      '💡 **Dùng nút `◀ Trước` và `Sau ▶` để chuyển trang**',
                             ephemeral: true
                         });

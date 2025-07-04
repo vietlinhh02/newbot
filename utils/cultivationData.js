@@ -8,7 +8,6 @@ LOGIC MỚI:
         : craft linh thạch cao cấp (lt2-lt4) từ linh thạch thấp hơn + tụ linh thạch
 - !shop: mua đan phương (dp1-dp4), phối đan phương (pdp), đan lò (dl), tụ linh thạch (tlt)
        : mua linh đan, linh dược, sách
-- !fusion: fusion đan dược và đan phương để upgrade
 */
 
 // Dữ liệu farming từ FARM.txt - CHỈ CÓ NGUYÊN LIỆU CƠ BẢN VÀ LINH THẠCH CẤP 1
@@ -44,13 +43,11 @@ const SPIRIT_STONES = {
 
 // Đan phương, đan lò, tụ linh thạch, linh đan, linh dược và sách chỉ có thể mua từ shop
 const SHOP_ITEMS = {
-    // Đan phương và đan lò - cần thiết để craft đan dược
+    // Đan phương và đan lò - cần thiết để craft đan dược (tạm chưa có giá)
     dp1: { 
         name: 'hạ phẩm đan phương', 
         icon: VATPHAM_EMOJI_MAP.DAN_PHUONG_HA_PHAM, 
         fallbackIcon: '📜',
-        price: 10, 
-        currency: 'lt1',
         category: 'medicine',
         description: 'Đan phương cấp thấp, dùng để craft đan dược'
     },
@@ -58,8 +55,6 @@ const SHOP_ITEMS = {
         name: 'trung phẩm đan phương', 
         icon: VATPHAM_EMOJI_MAP.DAN_PHUONG_TRUNG_PHAM, 
         fallbackIcon: '📃',
-        price: 100, 
-        currency: 'lt1',
         category: 'medicine',
         description: 'Đan phương trung bình, dùng để craft đan dược'
     },
@@ -67,8 +62,6 @@ const SHOP_ITEMS = {
         name: 'thượng phẩm đan phương', 
         icon: VATPHAM_EMOJI_MAP.DAN_PHUONG_THUONG_PHAM, 
         fallbackIcon: '📋',
-        price: 1000, 
-        currency: 'lt2',
         category: 'medicine',
         description: 'Đan phương cao cấp, dùng để craft đan dược'
     },
@@ -76,8 +69,6 @@ const SHOP_ITEMS = {
         name: 'tiên phẩm đan phương', 
         icon: VATPHAM_EMOJI_MAP.DAN_PHUONG_TIEN_PHAM, 
         fallbackIcon: '📊',
-        price: 100, 
-        currency: 'lt3',
         category: 'medicine',
         description: 'Đan phương tiên phẩm, dùng để craft đan dược'
     },
@@ -85,30 +76,24 @@ const SHOP_ITEMS = {
         name: 'Phối đan phương', 
         icon: VATPHAM_EMOJI_MAP.PHIEN_DAN_PHUONG, 
         fallbackIcon: '📈',
-        price: 50, 
-        currency: 'lt1',
         category: 'medicine',
-        description: 'Phiên đan phương, dùng để fusion đan phương'
+        description: 'Phối đan phương, dùng để craft đan phương cao cấp'
     },
     dl: { 
         name: 'Đan lò', 
         icon: VATPHAM_EMOJI_MAP.DAN_LO, 
         fallbackIcon: '🏺',
-        price: 20, 
-        currency: 'lt1',
         category: 'medicine',
-        description: 'Đan lò, dùng để craft và fusion đan dược'
+        description: 'Đan lò, dùng để craft đan dược'
     },
     
-    // Tụ linh thạch - cần thiết để fusion linh thạch
+    // Tụ linh thạch - cần thiết để craft linh thạch (tạm chưa có giá)
     tlt: { 
         name: 'Tụ linh thạch', 
         icon: VATPHAM_EMOJI_MAP.TU_LINH_THACH, 
         fallbackIcon: '💫',
-        price: 500, 
-        currency: 'lt1',
         category: 'material',
-        description: 'Tụ linh thạch, dùng để fusion linh thạch cao cấp'
+        description: 'Tụ linh thạch, dùng để craft linh thạch cao cấp'
     },
     
     // Linh đan series (dùng linh thạch mua) - sử dụng đan dược emoji
@@ -266,19 +251,6 @@ const CRAFT_RECIPES = {
         successRate: 50,
         type: 'craft'
     }
-};
-
-// Công thức fusion - CHỈ ĐAN DƯỢC & ĐAN PHƯƠNG (dùng cho upgrade)
-const FUSION_RECIPES = {
-    // Đan dược (d series) - fusion từ đan dược cấp thấp hơn
-    d2: { required: { d1: 9, dl: 1 }, successRate: 50 },
-    d3: { required: { d2: 9, dl: 1 }, successRate: 50 },
-    d4: { required: { d3: 9, dl: 1 }, successRate: 50 },
-    
-    // Đan phương (dp series) - fusion từ đan phương cấp thấp hơn
-    dp2: { required: { dp1: 9, pdp: 1 }, successRate: 50 },
-    dp3: { required: { dp2: 9, pdp: 1 }, successRate: 50 },
-    dp4: { required: { dp3: 9, pdp: 1 }, successRate: 50 }
 };
 
 // Dữ liệu levels từ file "Role nhận , Level , exp , % đột phá , đan dược" - UPDATED FULL DATA
@@ -609,7 +581,6 @@ module.exports = {
     SPIRIT_STONES,
     SHOP_ITEMS,
     CRAFT_RECIPES,
-    FUSION_RECIPES,
     CULTIVATION_LEVELS,
     getRandomDrop,
     getLevelByName,
@@ -620,4 +591,4 @@ module.exports = {
     giveBreakthroughRewards,
     formatRewards,
     getItemStorageInfo
-}; 
+};   

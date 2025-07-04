@@ -54,6 +54,11 @@ module.exports = {
             return message.reply(`❌ Không tìm thấy item "${itemId}" trong shop! Dùng \`!shop\` để xem danh sách.`);
         }
 
+        // Check if item has price (for items without price yet)
+        if (!shopItem.price || !shopItem.currency) {
+            return message.reply(`💰 **${shopItem.icon} ${shopItem.name}** hiện tại chưa có giá! Vui lòng quay lại sau.`);
+        }
+
         // Get user inventory
         const inventory = await client.prisma.userInventory.findMany({
             where: { userId: userId }
@@ -216,20 +221,21 @@ module.exports = {
                 },
                 {
                     name: '🛍️ Danh mục sản phẩm',
-                    value: '• **Đan phương & Đan lò** 📜🏺 - Cần thiết để craft đan dược\n' +
-                           '• **Tụ linh thạch** 💫 - Cần thiết để craft linh thạch cao\n' +
+                    value: '• **Đan phương & Đan lò** 📜🏺 - Cần thiết để craft đan dược 🚧\n' +
+                           '• **Tụ linh thạch** 💫 - Cần thiết để craft linh thạch cao 🚧\n' +
                            '• **Linh đan** 🟢🔵🟣🟡 - Tăng EXP và đột phá\n' +
                            '• **Linh dược** 💚💙💜💛 - Hồi phục và tăng sức mạnh\n' +
-                           '• **Sách kỹ thuật** 📗📘📙 - Học võ công và bí kíp',
+                           '• **Sách kỹ thuật** 📗📘📙 - Học võ công và bí kíp\n\n' +
+                           '🚧 **Lưu ý:** Một số items đang phát triển, chưa có giá',
                     inline: false
                 },
                 {
                     name: '🎮 Cách sử dụng',
                     value: '• `!shop` - Xem tất cả sản phẩm\n' +
-                           '• `!shop buy <id>` - Mua sản phẩm\n' +
+                           '• `!shop buy <id>` - Mua sản phẩm (chỉ items có giá)\n' +
                            '\n**Ví dụ mua:**\n' +
-                           '• `!shop buy dp1` - Mua đan phương\n' +
                            '• `!shop buy ld1` - Mua linh đan\n' +
+                           '• `!shop buy ly1` - Mua linh dược\n' +
                            '• `!shop buy book1` - Mua sách\n' +
                            '\n💡 **Dùng nút bên dưới để chuyển trang!**',
                     inline: false
@@ -252,8 +258,20 @@ module.exports = {
         Object.entries(SHOP_ITEMS).filter(([id, item]) => 
             id.startsWith('dp') || id === 'pdp' || id === 'dl' || id === 'tlt'
         ).forEach(([id, item]) => {
+            // Handle items without price
+            if (!item.price || !item.currency) {
+                craftingEmbed.addFields({
+                    name: `${item.icon} ${item.name} 🚧`,
+                    value: `**Giá:** Chưa có giá (sắp ra mắt)\n` +
+                           `**Mô tả:** ${item.description}\n` +
+                           `**Trạng thái:** Đang phát triển`,
+                    inline: true
+                });
+                return;
+            }
+
             const currencyData = SPIRIT_STONES[item.currency];
-            const userHas = userCurrency[item.currency];
+            const userHas = userCurrency[item.currency] || 0;
             const canAfford = userHas >= item.price;
             
             craftingEmbed.addFields({
@@ -279,8 +297,20 @@ module.exports = {
             });
 
         Object.entries(SHOP_ITEMS).filter(([id, item]) => id.startsWith('ld')).forEach(([id, item]) => {
+            // Handle items without price
+            if (!item.price || !item.currency) {
+                pillsEmbed.addFields({
+                    name: `${item.icon} ${item.name} 🚧`,
+                    value: `**Giá:** Chưa có giá (sắp ra mắt)\n` +
+                           `**Mô tả:** ${item.description}\n` +
+                           `**Trạng thái:** Đang phát triển`,
+                    inline: true
+                });
+                return;
+            }
+
             const currencyData = SPIRIT_STONES[item.currency];
-            const userHas = userCurrency[item.currency];
+            const userHas = userCurrency[item.currency] || 0;
             const canAfford = userHas >= item.price;
             
             pillsEmbed.addFields({
@@ -309,8 +339,20 @@ module.exports = {
         Object.entries(SHOP_ITEMS).filter(([id, item]) => 
             id.startsWith('ly') || id.startsWith('book')
         ).forEach(([id, item]) => {
+            // Handle items without price
+            if (!item.price || !item.currency) {
+                medicineEmbed.addFields({
+                    name: `${item.icon} ${item.name} 🚧`,
+                    value: `**Giá:** Chưa có giá (sắp ra mắt)\n` +
+                           `**Mô tả:** ${item.description}\n` +
+                           `**Trạng thái:** Đang phát triển`,
+                    inline: true
+                });
+                return;
+            }
+
             const currencyData = SPIRIT_STONES[item.currency];
-            const userHas = userCurrency[item.currency];
+            const userHas = userCurrency[item.currency] || 0;
             const canAfford = userHas >= item.price;
             
             medicineEmbed.addFields({
