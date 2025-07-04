@@ -202,7 +202,7 @@ module.exports = {
             .setColor(0xffd700)
             .setTimestamp()
             .setFooter({ 
-                text: `Trang 1/5 • ${message.author.username}`, 
+                text: `Trang 1/4 • ${message.author.username}`, 
                 iconURL: message.author.displayAvatarURL() 
             })
             .addFields([
@@ -216,33 +216,65 @@ module.exports = {
                 },
                 {
                     name: '🛍️ Danh mục sản phẩm',
-                    value: '• **Linh đan** 🟢🔵🟣🟡 - Tăng EXP và đột phá\n' +
+                    value: '• **Đan phương & Đan lò** 📜🏺 - Cần thiết để craft đan dược\n' +
+                           '• **Tụ linh thạch** 💫 - Cần thiết để craft linh thạch cao\n' +
+                           '• **Linh đan** 🟢🔵🟣🟡 - Tăng EXP và đột phá\n' +
                            '• **Linh dược** 💚💙💜💛 - Hồi phục và tăng sức mạnh\n' +
-                           '• **Sách kỹ thuật** 📗📘📙📕📓 - Học võ công và bí kíp\n' +
-                           '• **Bảo điển** 📜📋 - Kinh sách thần thoại cực hiếm',
+                           '• **Sách kỹ thuật** 📗📘📙 - Học võ công và bí kíp',
                     inline: false
                 },
                 {
                     name: '🎮 Cách sử dụng',
                     value: '• `!shop` - Xem tất cả sản phẩm\n' +
-                           '• `!shop pills` - Chỉ xem linh đan\n' +
-                           '• `!shop medicine` - Chỉ xem linh dược\n' +
-                           '• `!shop books` - Chỉ xem sách\n' +
                            '• `!shop buy <id>` - Mua sản phẩm\n' +
+                           '\n**Ví dụ mua:**\n' +
+                           '• `!shop buy dp1` - Mua đan phương\n' +
+                           '• `!shop buy ld1` - Mua linh đan\n' +
+                           '• `!shop buy book1` - Mua sách\n' +
                            '\n💡 **Dùng nút bên dưới để chuyển trang!**',
                     inline: false
                 }
             ]);
         pages.push(overviewEmbed);
 
-        // Page 2: Linh đan
+        // Page 2: Đan phương, Đan lò, Tụ linh thạch
+        const craftingEmbed = new EmbedBuilder()
+            .setTitle('🔧 Nguyên Liệu Chế Tạo')
+            .setDescription('**Đan phương, đan lò và tụ linh thạch - cần thiết để craft**')
+            .setColor(0xff8800)
+            .setTimestamp()
+            .setFooter({ 
+                text: `Trang 2/4 • ${message.author.username}`, 
+                iconURL: message.author.displayAvatarURL() 
+            });
+
+        // Add đan phương, đan lò, tụ linh thạch
+        Object.entries(SHOP_ITEMS).filter(([id, item]) => 
+            id.startsWith('dp') || id === 'pdp' || id === 'dl' || id === 'tlt'
+        ).forEach(([id, item]) => {
+            const currencyData = SPIRIT_STONES[item.currency];
+            const userHas = userCurrency[item.currency];
+            const canAfford = userHas >= item.price;
+            
+            craftingEmbed.addFields({
+                name: `${item.icon} ${item.name} ${canAfford ? '✅' : '❌'}`,
+                value: `**Giá:** ${currencyData.icon} ${item.price.toLocaleString()} ${currencyData.name}\n` +
+                       `**Có:** ${currencyData.icon} ${userHas.toLocaleString()}\n` +
+                       `**Mô tả:** ${item.description}\n` +
+                       `**Lệnh:** \`!shop buy ${id}\``,
+                inline: true
+            });
+        });
+        pages.push(craftingEmbed);
+
+        // Page 3: Linh đan
         const pillsEmbed = new EmbedBuilder()
             .setTitle('🟢 Linh Đan - Tăng EXP & Đột Phá')
             .setDescription('**Linh đan giúp tăng EXP tu luyện và tỉ lệ đột phá**')
             .setColor(0x44ff44)
             .setTimestamp()
             .setFooter({ 
-                text: `Trang 2/5 • ${message.author.username}`, 
+                text: `Trang 3/4 • ${message.author.username}`, 
                 iconURL: message.author.displayAvatarURL() 
             });
 
@@ -262,18 +294,21 @@ module.exports = {
         });
         pages.push(pillsEmbed);
 
-        // Page 3: Linh dược
+        // Page 4: Linh dược và Sách
         const medicineEmbed = new EmbedBuilder()
-            .setTitle('💚 Linh Dược - Hồi Phục & Tăng Sức Mạnh')
-            .setDescription('**Linh dược hồi phục sức khỏe và tăng sức mạnh tu luyện**')
+            .setTitle('💚 Linh Dược & Sách Kỹ Thuật')
+            .setDescription('**Linh dược hồi phục sức khỏe và sách dạy võ công bí kíp**')
             .setColor(0x44ddff)
             .setTimestamp()
             .setFooter({ 
-                text: `Trang 3/5 • ${message.author.username}`, 
+                text: `Trang 4/4 • ${message.author.username}`, 
                 iconURL: message.author.displayAvatarURL() 
             });
 
-        Object.entries(SHOP_ITEMS).filter(([id, item]) => id.startsWith('ly')).forEach(([id, item]) => {
+        // Add linh dược và sách
+        Object.entries(SHOP_ITEMS).filter(([id, item]) => 
+            id.startsWith('ly') || id.startsWith('book')
+        ).forEach(([id, item]) => {
             const currencyData = SPIRIT_STONES[item.currency];
             const userHas = userCurrency[item.currency];
             const canAfford = userHas >= item.price;
@@ -288,69 +323,6 @@ module.exports = {
             });
         });
         pages.push(medicineEmbed);
-
-        // Page 4: Sách
-        const booksEmbed = new EmbedBuilder()
-            .setTitle('📚 Sách Kỹ Thuật - Võ Công & Bí Kíp')
-            .setDescription('**Sách dạy võ công, kỹ thuật và bí kíp tu tiên**')
-            .setColor(0xaa44ff)
-            .setTimestamp()
-            .setFooter({ 
-                text: `Trang 4/5 • ${message.author.username}`, 
-                iconURL: message.author.displayAvatarURL() 
-            });
-
-        Object.entries(SHOP_ITEMS).filter(([id, item]) => id.startsWith('book')).forEach(([id, item]) => {
-            const currencyData = SPIRIT_STONES[item.currency];
-            const userHas = userCurrency[item.currency];
-            const canAfford = userHas >= item.price;
-            
-            booksEmbed.addFields({
-                name: `${item.icon} ${item.name} ${canAfford ? '✅' : '❌'}`,
-                value: `**Giá:** ${currencyData.icon} ${item.price.toLocaleString()} ${currencyData.name}\n` +
-                       `**Có:** ${currencyData.icon} ${userHas.toLocaleString()}\n` +
-                       `**Mô tả:** ${item.description}\n` +
-                       `**Lệnh:** \`!shop buy ${id}\``,
-                inline: true
-            });
-        });
-        pages.push(booksEmbed);
-
-        // Page 5: Bảo điển
-        const scrollsEmbed = new EmbedBuilder()
-            .setTitle('📜 Bảo Điển - Kinh Sách Thần Thoại')
-            .setDescription('**Những bảo điển huyền thoại với sức mạnh khủng khiếp**')
-            .setColor(0xff6600)
-            .setTimestamp()
-            .setFooter({ 
-                text: `Trang 5/5 • ${message.author.username}`, 
-                iconURL: message.author.displayAvatarURL() 
-            });
-
-        Object.entries(SHOP_ITEMS).filter(([id, item]) => id.startsWith('scroll')).forEach(([id, item]) => {
-            const currencyData = SPIRIT_STONES[item.currency];
-            const userHas = userCurrency[item.currency];
-            const canAfford = userHas >= item.price;
-            
-            scrollsEmbed.addFields({
-                name: `${item.icon} ${item.name} ${canAfford ? '✅' : '❌'}`,
-                value: `**Giá:** ${currencyData.icon} ${item.price.toLocaleString()} ${currencyData.name}\n` +
-                       `**Có:** ${currencyData.icon} ${userHas.toLocaleString()}\n` +
-                       `**Mô tả:** ${item.description}\n` +
-                       `**Lệnh:** \`!shop buy ${id}\``,
-                inline: false
-            });
-        });
-
-        scrollsEmbed.addFields({
-            name: '⚠️ Lưu ý về Bảo Điển',
-            value: '• **Cực kỳ đắt đỏ** - Chỉ dành cho cao thủ\n' +
-                   '• **Sức mạnh khủng khiếp** - Có thể thay đổi vận mệnh\n' +
-                   '• **Hiếm có khó tìm** - Cơ hội duy nhất trong đời\n' +
-                   '• **Yêu cầu cao** - Cần rất nhiều linh thạch cấp cao',
-            inline: false
-        });
-        pages.push(scrollsEmbed);
 
         // Create navigation buttons
         const createButtons = (currentPage, totalPages) => {

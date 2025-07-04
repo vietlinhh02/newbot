@@ -1,4 +1,4 @@
-const { FARM_MATERIALS, MEDICINES, SPIRIT_STONES, CRAFT_RECIPES, FUSION_RECIPES, getItemStorageInfo } = require('../../utils/cultivationData');
+const { FARM_MATERIALS, MEDICINES, SPIRIT_STONES, SHOP_ITEMS, CRAFT_RECIPES, FUSION_RECIPES, getItemStorageInfo } = require('../../utils/cultivationData');
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType } = require('discord.js');
 
 module.exports = {
@@ -292,24 +292,33 @@ module.exports = {
                     name: '🔨 CRAFT (Ghép nguyên liệu)',
                     value: `**${Object.keys(CRAFT_RECIPES).length} công thức craft:**\n` +
                            '• **Đan dược:** d1, d2, d3, d4 (từ nguyên liệu + đan phương + đan lò)\n' +
+                           '• **Linh thạch:** lt2, lt3, lt4 (từ linh thạch thấp hơn + tụ linh thạch)\n' +
                            '• **Tỉ lệ thành công:** 50%',
                     inline: false
                 },
                 {
                     name: '⚗️ FUSION (Dung hợp)',
                     value: `**${Object.keys(FUSION_RECIPES).length} công thức fusion:**\n` +
-                           '• **Đan dược:** d2 ← 9x d1 + dl, d3 ← 9x d2 + dl...\n' +
-                           '• **Đan phương:** dp2 ← 9x dp1 + pdp, dp3 ← 9x dp2 + pdp...\n' +
-                           '• **Linh thạch:** lt2 ← 9999x lt1 + tlt...\n' +
+                           '• **Đan dược:** d2, d3, d4 (từ đan dược thấp hơn + đan lò)\n' +
+                           '• **Đan phương:** dp2, dp3, dp4 (từ đan phương thấp hơn + pdp)\n' +
                            '• **Tỉ lệ thành công:** 50%',
+                    inline: false
+                },
+                {
+                    name: '💡 Cách sử dụng',
+                    value: '• `!craft <item>` - Ghép nguyên liệu (50% thành công)\n' +
+                           '• `!craft <item> fusion` - Dung hợp vật phẩm (50% thành công)\n' +
+                           '• `!craft recipes` - Xem tất cả công thức\n' +
+                           '• `!farm` - Thu thập nguyên liệu cơ bản\n' +
+                           '• `!shop` - Mua đan phương, đan lò, tụ linh thạch',
                     inline: false
                 },
                 {
                     name: '📖 Navigation',
                     value: '• **Trang 1:** Tổng quan hệ thống\n' +
-                           '• **Trang 2:** CRAFT - Đan dược (d1-d4)\n' +
-                           '• **Trang 3:** FUSION - Đan dược\n' +
-                           '• **Trang 4:** FUSION - Đan phương & Linh thạch\n' +
+                           '• **Trang 2:** CRAFT - Đan dược (d1-d4) và Linh thạch (lt2-lt4)\n' +
+                           '• **Trang 3:** FUSION - Đan dược (d2-d4)\n' +
+                           '• **Trang 4:** FUSION - Đan phương (dp2-dp4)\n' +
                            '• **Trang 5:** Nguyên liệu & Hướng dẫn\n\n' +
                            '🎮 **Dùng nút bên dưới để chuyển trang!**',
                     inline: false
@@ -317,10 +326,10 @@ module.exports = {
             ]);
         pages.push(overviewEmbed);
 
-        // Page 2: CRAFT - Đan dược (d1-d4)
+        // Page 2: CRAFT - Đan dược và Linh thạch
         const craftPillsEmbed = new EmbedBuilder()
-            .setTitle('🔨 CRAFT - Đan dược (d1-d4)')
-            .setDescription('**Chế tạo đan dược từ nguyên liệu + đan phương + đan lò**')
+            .setTitle('🔨 CRAFT - Đan dược & Linh thạch')
+            .setDescription('**Chế tạo đan dược từ nguyên liệu + đan phương + đan lò và linh thạch từ linh thạch thấp hơn + tụ linh thạch**')
             .setColor(0x0080ff)
             .setTimestamp()
             .setFooter({ 
@@ -328,41 +337,46 @@ module.exports = {
                 iconURL: message.author.displayAvatarURL() 
             });
 
-        // Filter craft recipes for pills (d series)
-        const dSeriesRecipes = Object.entries(CRAFT_RECIPES).filter(([itemId]) => itemId.startsWith('d'));
-        dSeriesRecipes.forEach(([itemId, recipe]) => {
-            const itemData = MEDICINES[itemId];
+        // Filter craft recipes for pills (d series) and spirit stones (lt series)
+        const craftRecipes = Object.entries(CRAFT_RECIPES).filter(([itemId]) => 
+            itemId.startsWith('d') || itemId.startsWith('lt')
+        );
+        craftRecipes.forEach(([itemId, recipe]) => {
+            const itemData = MEDICINES[itemId] || SPIRIT_STONES[itemId];
             
             if (itemData) {
                 let ingredients = '';
                 if (recipe.materials) {
-                    const materials = Object.entries(recipe.materials).map(([id, qty]) => 
-                        `${FARM_MATERIALS[id]?.icon} \`${qty}\``
-                    ).join(' + ');
+                    const materials = Object.entries(recipe.materials).map(([id, qty]) => {
+                        const materialData = FARM_MATERIALS[id] || SPIRIT_STONES[id] || SHOP_ITEMS[id];
+                        return `${materialData?.icon} \`${qty}\``;
+                    }).join(' + ');
                     ingredients += materials;
                 }
-                if (recipe.medicines) {
+                if (recipe.medicines && Object.keys(recipe.medicines).length > 0) {
                     if (ingredients) ingredients += ' + ';
-                    const medicines = Object.entries(recipe.medicines).map(([id, qty]) => 
-                        `${MEDICINES[id]?.icon} \`${qty}\``
-                    ).join(' + ');
+                    const medicines = Object.entries(recipe.medicines).map(([id, qty]) => {
+                        const itemData = MEDICINES[id] || SHOP_ITEMS[id];
+                        return `${itemData?.icon} \`${qty}\``;
+                    }).join(' + ');
                     ingredients += medicines;
                 }
 
+                const description = itemId.startsWith('d') ? 'Đan dược cao cấp cần đan phương' : 'Linh thạch cần nhiều linh thạch thấp hơn';
                 craftPillsEmbed.addFields({
                     name: `${itemData.icon} ${itemData.name}`,
-                    value: `**Nguyên liệu:** ${ingredients}\n**Tỉ lệ thành công:** \`${recipe.successRate}%\`\n**Lệnh:** \`!craft ${itemId}\`\n**Mô tả:** Đan dược cao cấp cần đan phương`,
+                    value: `**Nguyên liệu:** ${ingredients}\n**Tỉ lệ thành công:** \`${recipe.successRate}%\`\n**Lệnh:** \`!craft ${itemId}\`\n**Mô tả:** ${description}`,
                     inline: true
                 });
             }
         });
         
         craftPillsEmbed.addFields({
-            name: '✅ Lưu ý về đan dược',
-            value: '• **Đan phương & đan lò:** Giờ có thể farm từ `!farm`!\n' +
-                   '• **Tỉ lệ thành công:** 50% (cần chuẩn bị dự phòng)\n' +
-                   '• **Công dụng:** Hiệu quả cao hơn thuốc thường\n' +
-                   '• **Lợi ích:** Có thể craft đan dược mạnh mẽ',
+            name: '✅ Lưu ý về chế tạo',
+            value: '• **Đan phương & đan lò:** Mua từ `!shop` bằng linh thạch\n' +
+                   '• **Nguyên liệu:** Thu thập từ `!farm` (1-7)\n' +
+                   '• **Tụ linh thạch:** Mua từ `!shop` để craft linh thạch cao\n' +
+                   '• **Tỉ lệ thành công:** 50% (cần chuẩn bị dự phòng)',
             inline: false
         });
         pages.push(craftPillsEmbed);
@@ -388,7 +402,7 @@ module.exports = {
             
             if (itemData) {
                 const ingredients = Object.entries(recipe.required).map(([id, qty]) => {
-                    const sourceData = MEDICINES[id] || SPIRIT_STONES[id];
+                    const sourceData = MEDICINES[id] || SHOP_ITEMS[id] || SPIRIT_STONES[id];
                     return `${sourceData?.icon} \`${qty}\``;
                 }).join(' + ');
 
@@ -410,10 +424,10 @@ module.exports = {
         });
         pages.push(fusionMedPillsEmbed);
 
-        // Page 4: FUSION - Đan phương & Linh thạch
+        // Page 4: FUSION - Đan phương
         const fusionAdvancedEmbed = new EmbedBuilder()
-            .setTitle('⚗️ FUSION - Đan phương & Linh thạch')
-            .setDescription('**Dung hợp đan phương và linh thạch - vật phẩm cao cấp nhất**')
+            .setTitle('⚗️ FUSION - Đan phương')
+            .setDescription('**Dung hợp đan phương - vật phẩm cao cấp để craft đan dược**')
             .setColor(0x8b00ff)
             .setTimestamp()
             .setFooter({ 
@@ -421,37 +435,34 @@ module.exports = {
                 iconURL: message.author.displayAvatarURL() 
             });
 
-        // Filter fusion recipes for dp and lt series
-        const dpAndLtFusionRecipes = Object.entries(FUSION_RECIPES).filter(([itemId]) => 
-            itemId.startsWith('dp') || itemId.startsWith('lt')
+        // Filter fusion recipes for dp series only
+        const dpFusionRecipes = Object.entries(FUSION_RECIPES).filter(([itemId]) => 
+            itemId.startsWith('dp')
         );
         
-        dpAndLtFusionRecipes.forEach(([itemId, recipe]) => {
-            const itemData = MEDICINES[itemId] || SPIRIT_STONES[itemId];
+        dpFusionRecipes.forEach(([itemId, recipe]) => {
+            const itemData = SHOP_ITEMS[itemId] || SPIRIT_STONES[itemId];
             
             if (itemData) {
                 const ingredients = Object.entries(recipe.required).map(([id, qty]) => {
-                    const sourceData = MEDICINES[id] || SPIRIT_STONES[id];
+                    const sourceData = SHOP_ITEMS[id] || SPIRIT_STONES[id];
                     return `${sourceData?.icon} \`${qty}\``;
                 }).join(' + ');
 
-                const categoryIcon = itemId.startsWith('dp') ? '📜' : '💎';
-                const categoryName = itemId.startsWith('dp') ? 'Đan phương' : 'Linh thạch';
-
                 fusionAdvancedEmbed.addFields({
-                    name: `${itemData.icon} ${itemData.name} ${categoryIcon}`,
-                    value: `**Nguyên liệu:** ${ingredients}\n**Tỉ lệ thành công:** \`${recipe.successRate}%\`\n**Lệnh:** \`!craft ${itemId} fusion\`\n**Loại:** ${categoryName}`,
+                    name: `${itemData.icon} ${itemData.name} 📜`,
+                    value: `**Nguyên liệu:** ${ingredients}\n**Tỉ lệ thành công:** \`${recipe.successRate}%\`\n**Lệnh:** \`!craft ${itemId} fusion\`\n**Loại:** Đan phương`,
                     inline: true
                 });
             }
         });
         
         fusionAdvancedEmbed.addFields({
-            name: '🏆 Vật phẩm cao cấp',
+            name: '📜 Về Đan phương',
             value: '• **Đan phương:** Cần thiết để craft đan dược\n' +
-                   '• **Linh thạch:** Nhận từ đột phá, dùng để fusion\n' +
+                   '• **Fusion:** 9x đan phương thấp hơn + 1x phối đan phương\n' +
                    '• **Tỉ lệ thành công:** 50% (rủi ro cao)\n' +
-                   '• **Lưu ý đặc biệt:** Linh thạch cần 9999x thay vì 9x!',
+                   '• **Mua từ shop:** Đan phương và phối đan phương bằng linh thạch',
             inline: false
         });
         pages.push(fusionAdvancedEmbed);
@@ -476,8 +487,8 @@ module.exports = {
                 },
                 {
                     name: '🧪 Đan phương & Đan lò',
-                    value: ['dp1', 'dp2', 'dp3', 'dp4', 'pdp', 'dl'].map(id => 
-                        `${MEDICINES[id]?.icon} **${MEDICINES[id]?.name}**`
+                    value: ['dp1', 'dp2', 'dp3', 'dp4', 'pdp', 'dl', 'tlt'].map(id => 
+                        `${SHOP_ITEMS[id]?.icon} **${SHOP_ITEMS[id]?.name}** - \`!shop buy ${id}\``
                     ).join('\n'),
                     inline: true
                 },
@@ -493,7 +504,8 @@ module.exports = {
                     value: '• `!craft <item>` - Ghép bằng nguyên liệu\n' +
                            '• `!craft <item> fusion` - Dung hợp vật phẩm\n' +
                            '• `!inv` - Xem inventory hiện tại\n' +
-                           '• `!farm` - Thu thập tất cả (nguyên liệu, đan phương, linh thạch)\n' +
+                           '• `!farm` - Thu thập nguyên liệu (1-7) + linh thạch (lt1)\n' +
+                           '• `!shop` - Mua đan phương, đan lò, tụ linh thạch\n' +
                            '• `!breakthrough` - Nhận linh thạch từ đột phá',
                     inline: true
                 },
