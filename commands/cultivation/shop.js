@@ -207,7 +207,7 @@ module.exports = {
             .setColor(0xffd700)
             .setTimestamp()
             .setFooter({ 
-                text: `Trang 1/4 • ${message.author.username}`, 
+                text: `Trang 1/2 • ${message.author.username}`, 
                 iconURL: message.author.displayAvatarURL() 
             })
             .addFields([
@@ -250,7 +250,7 @@ module.exports = {
             .setColor(0xff8800)
             .setTimestamp()
             .setFooter({ 
-                text: `Trang 2/4 • ${message.author.username}`, 
+                text: `Trang 2/2 • ${message.author.username}`, 
                 iconURL: message.author.displayAvatarURL() 
             });
 
@@ -285,86 +285,7 @@ module.exports = {
         });
         pages.push(craftingEmbed);
 
-        // Page 3: Linh đan
-        const pillsEmbed = new EmbedBuilder()
-            .setTitle('🟢 Linh Đan - Tăng EXP & Đột Phá')
-            .setDescription('**Linh đan giúp tăng EXP tu luyện và tỉ lệ đột phá**')
-            .setColor(0x44ff44)
-            .setTimestamp()
-            .setFooter({ 
-                text: `Trang 3/4 • ${message.author.username}`, 
-                iconURL: message.author.displayAvatarURL() 
-            });
 
-        Object.entries(SHOP_ITEMS).filter(([id, item]) => id.startsWith('ld')).forEach(([id, item]) => {
-            // Handle items without price
-            if (!item.price || !item.currency) {
-                pillsEmbed.addFields({
-                    name: `${item.icon} ${item.name} 🚧`,
-                    value: `**Giá:** Chưa có giá (sắp ra mắt)\n` +
-                           `**Mô tả:** ${item.description}\n` +
-                           `**Trạng thái:** Đang phát triển`,
-                    inline: true
-                });
-                return;
-            }
-
-            const currencyData = SPIRIT_STONES[item.currency];
-            const userHas = userCurrency[item.currency] || 0;
-            const canAfford = userHas >= item.price;
-            
-            pillsEmbed.addFields({
-                name: `${item.icon} ${item.name} ${canAfford ? '✅' : '❌'}`,
-                value: `**Giá:** ${currencyData.icon} ${item.price.toLocaleString()} ${currencyData.name}\n` +
-                       `**Có:** ${currencyData.icon} ${userHas.toLocaleString()}\n` +
-                       `**Mô tả:** ${item.description}\n` +
-                       `**Lệnh:** \`!shop buy ${id}\``,
-                inline: true
-            });
-        });
-        pages.push(pillsEmbed);
-
-        // Page 4: Linh dược và Sách
-        const medicineEmbed = new EmbedBuilder()
-            .setTitle('💚 Linh Dược & Sách Kỹ Thuật')
-            .setDescription('**Linh dược hồi phục sức khỏe và sách dạy võ công bí kíp**')
-            .setColor(0x44ddff)
-            .setTimestamp()
-            .setFooter({ 
-                text: `Trang 4/4 • ${message.author.username}`, 
-                iconURL: message.author.displayAvatarURL() 
-            });
-
-        // Add linh dược và sách
-        Object.entries(SHOP_ITEMS).filter(([id, item]) => 
-            id.startsWith('ly') || id.startsWith('book')
-        ).forEach(([id, item]) => {
-            // Handle items without price
-            if (!item.price || !item.currency) {
-                medicineEmbed.addFields({
-                    name: `${item.icon} ${item.name} 🚧`,
-                    value: `**Giá:** Chưa có giá (sắp ra mắt)\n` +
-                           `**Mô tả:** ${item.description}\n` +
-                           `**Trạng thái:** Đang phát triển`,
-                    inline: true
-                });
-                return;
-            }
-
-            const currencyData = SPIRIT_STONES[item.currency];
-            const userHas = userCurrency[item.currency] || 0;
-            const canAfford = userHas >= item.price;
-            
-            medicineEmbed.addFields({
-                name: `${item.icon} ${item.name} ${canAfford ? '✅' : '❌'}`,
-                value: `**Giá:** ${currencyData.icon} ${item.price.toLocaleString()} ${currencyData.name}\n` +
-                       `**Có:** ${currencyData.icon} ${userHas.toLocaleString()}\n` +
-                       `**Mô tả:** ${item.description}\n` +
-                       `**Lệnh:** \`!shop buy ${id}\``,
-                inline: true
-            });
-        });
-        pages.push(medicineEmbed);
 
         // Create navigation buttons
         const createButtons = (currentPage, totalPages) => {

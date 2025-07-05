@@ -187,7 +187,7 @@ module.exports = {
                 // Check for shop items
                 shopItems.forEach(item => {
                     const shopData = SHOP_ITEMS[item.itemId];
-                    if (shopData && item.quantity > 0) {
+                    if (shopData && shopData.icon && item.quantity > 0) {
                         shopDisplay.push(`${shopData.icon}${item.quantity}`);
                     }
                 });
