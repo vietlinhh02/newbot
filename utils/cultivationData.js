@@ -96,109 +96,80 @@ const SHOP_ITEMS = {
         description: 'Tụ linh thạch, dùng để craft linh thạch cao cấp'
     },
     
-    // Linh đan series (dùng linh thạch mua) - sử dụng đan dược emoji
-    ld1: { 
-        name: 'hạ phẩm linh đan', 
-        icon: VATPHAM_EMOJI_MAP.DAN_DUOC_HA_PHAM, 
-        fallbackIcon: '🟢',
-        price: 100, 
-        currency: 'lt1',
-        category: 'medicine',
-        description: 'Linh đan cấp thấp nhất, tăng EXP tu luyện'
-    },
-    ld2: { 
-        name: 'trung phẩm linh đan', 
-        icon: VATPHAM_EMOJI_MAP.DAN_DUOC_TRUNG_PHAM, 
-        fallbackIcon: '🔵',
-        price: 1000, 
-        currency: 'lt1',
-        category: 'medicine',
-        description: 'Linh đan trung bình, tăng nhiều EXP hơn'
-    },
-    ld3: { 
-        name: 'thượng phẩm linh đan', 
-        icon: VATPHAM_EMOJI_MAP.DAN_DUOC_THUONG_PHAM, 
-        fallbackIcon: '🟣',
-        price: 5000, 
-        currency: 'lt2',
-        category: 'medicine',
-        description: 'Linh đan cấp cao, tăng EXP và tỉ lệ đột phá'
-    },
-    ld4: { 
-        name: 'tiên phẩm linh đan', 
-        icon: VATPHAM_EMOJI_MAP.DAN_DUOC_TIEN_PHAM, 
-        fallbackIcon: '🟡',
-        price: 1000, 
-        currency: 'lt3',
-        category: 'medicine',
-        description: 'Linh đan cực phẩm, hiệu quả tuyệt đỉnh'
-    },
-    
-    // Linh dược series (dùng linh thạch mua) - sử dụng đan phương emoji
-    ly1: { 
-        name: 'hạ phẩm linh dược', 
-        icon: VATPHAM_EMOJI_MAP.DAN_PHUONG_HA_PHAM, 
-        fallbackIcon: '💚',
-        price: 500, 
-        currency: 'lt1',
-        category: 'medicine',
-        description: 'Linh dược hồi phục và tăng sức mạnh tu luyện'
-    },
-    ly2: { 
-        name: 'trung phẩm linh dược', 
-        icon: VATPHAM_EMOJI_MAP.DAN_PHUONG_TRUNG_PHAM, 
-        fallbackIcon: '💙',
-        price: 2000, 
-        currency: 'lt1',
-        category: 'medicine',
-        description: 'Linh dược mạnh mẽ, hiệu quả lâu dài'
-    },
-    ly3: { 
-        name: 'thượng phẩm linh dược', 
-        icon: VATPHAM_EMOJI_MAP.DAN_PHUONG_THUONG_PHAM, 
-        fallbackIcon: '💜',
-        price: 2000, 
-        currency: 'lt2',
-        category: 'medicine',
-        description: 'Linh dược cao cấp, có thể cứu sống trong thời khắc nguy hiểm'
-    },
-    ly4: { 
-        name: 'tiên phẩm linh dược', 
-        icon: VATPHAM_EMOJI_MAP.DAN_PHUONG_TIEN_PHAM, 
-        fallbackIcon: '💛',
-        price: 500, 
-        currency: 'lt3',
-        category: 'medicine',
-        description: 'Linh dược tiên phẩm, hồi sinh hoàn toàn'
-    },
-    
-    // Sách kỹ thuật (dùng linh thạch mua) - chỉ giữ 3 sách cơ bản
-    book1: { 
-        name: 'cơ bản tu tiên', 
+    // Vũ khí series (dùng EXP mua) - để test đột phá
+    vk1: { 
+        name: 'hạ phẩm vũ khí', 
         icon: VATPHAM_EMOJI_MAP.BACH_NGOC_SUONG, 
-        fallbackIcon: '📗',
-        price: 50, 
-        currency: 'lt1',
-        category: 'book',
-        description: 'Sách dạy kỹ thuật tu tiên cơ bản'
+        fallbackIcon: '⚔️',
+        price: 1000, 
+        currency: 'exp',
+        category: 'weapon',
+        description: 'Vũ khí cơ bản, tăng sức mạnh chiến đấu'
     },
-    book2: { 
-        name: 'trung cấp võ học', 
+    vk2: { 
+        name: 'trung phẩm vũ khí', 
         icon: VATPHAM_EMOJI_MAP.TU_LINH_THAO, 
-        fallbackIcon: '📘',
-        price: 300, 
-        currency: 'lt1',
-        category: 'book',
-        description: 'Sách võ học trung cấp, mở khóa kỹ năng mới'
+        fallbackIcon: '�️',
+        price: 1000, 
+        currency: 'exp',
+        category: 'weapon',
+        description: 'Vũ khí trung bình, sức mạnh tốt hơn'
     },
-    book3: { 
-        name: 'cao thủ chiến thuật', 
+    vk3: { 
+        name: 'thượng phẩm vũ khí', 
+        icon: VATPHAM_EMOJI_MAP.TU_HOA_THAO, 
+        fallbackIcon: '🏹',
+        price: 1000, 
+        currency: 'exp',
+        category: 'weapon',
+        description: 'Vũ khí cao cấp, sức mạnh lớn'
+    },
+    vk4: { 
+        name: 'tiên phẩm vũ khí', 
+        icon: VATPHAM_EMOJI_MAP.HONG_TU_HOA, 
+        fallbackIcon: '�',
+        price: 1000, 
+        currency: 'exp',
+        category: 'weapon',
+        description: 'Vũ khí tiên phẩm, sức mạnh tuyệt đỉnh'
+    },
+    
+    // Công pháp series (dùng EXP mua) - để test đột phá
+    cp1: { 
+        name: 'hạ phẩm công pháp', 
         icon: VATPHAM_EMOJI_MAP.NGU_SAC_HOA, 
-        fallbackIcon: '📙',
-        price: 1500, 
-        currency: 'lt2',
-        category: 'book',
-        description: 'Sách chiến thuật cao cấp, tăng khả năng đột phá'
+        fallbackIcon: '�',
+        price: 1000, 
+        currency: 'exp',
+        category: 'technique',
+        description: 'Công pháp cơ bản, tăng khả năng tu luyện'
+    },
+    cp2: { 
+        name: 'trung phẩm công pháp', 
+        icon: VATPHAM_EMOJI_MAP.NGU_SAC_THACH, 
+        fallbackIcon: '�',
+        price: 1000, 
+        currency: 'exp',
+        category: 'technique',
+        description: 'Công pháp trung bình, hiệu quả tốt hơn'
+    },
+    cp3: { 
+        name: 'thượng phẩm công pháp', 
+        icon: VATPHAM_EMOJI_MAP.HUYET_NGOC_HOA, 
+        fallbackIcon: '�',
+        price: 1000, 
+        currency: 'exp',
+        category: 'technique',
+        description: 'Công pháp cao cấp, sức mạnh lớn'
+    },
+    cp4: { 
+        name: 'tiên phẩm công pháp', 
+        icon: VATPHAM_EMOJI_MAP.LINH_THACH_HA_PHAM, 
+        fallbackIcon: '�',
+        price: 1000, 
+        currency: 'exp',
+        category: 'technique',
+        description: 'Công pháp tiên phẩm, hiệu quả tuyệt đỉnh'
     }
 };
 
