@@ -4,14 +4,12 @@ const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentTyp
 module.exports = {
     name: 'shop',
     aliases: ['thuongthuy', 'thuong_thuy', 'store', 'market'],
-    description: 'Thương thành tu tiên - Mua linh đan, linh dược và sách bằng linh thạch',
-    usage: '!shop [category] hoặc !shop buy <item>',
+    description: 'Thương thành tu tiên - Mua vũ khí, công pháp và nguyên liệu chế tạo',
+    usage: '!shop hoặc !shop buy <item>',
     examples: [
-        '!shop - Xem tất cả',
-        '!shop pills - Xem linh đan',
-        '!shop medicine - Xem linh dược', 
-        '!shop books - Xem sách',
-        '!shop buy ld1 - Mua linh đan'
+        '!shop - Xem tất cả sản phẩm',
+        '!shop buy vk1 - Mua vũ khí',
+        '!shop buy cp1 - Mua công pháp'
     ],
     permissions: 'everyone',
     guildOnly: true,
@@ -64,19 +62,36 @@ module.exports = {
             where: { userId: userId }
         });
 
-        // Get currency item info
-        const currencyInfo = getItemStorageInfo(shopItem.currency);
-        const currencyKey = `${currencyInfo.category}_${currencyInfo.actualId}`;
+        let userCurrency = 0;
+        let currencyName = '';
+        let currencyIcon = '';
         
-        // Find user's currency amount
-        const currencyItem = inventory.find(item => 
-            `${item.itemType}_${item.itemId}` === currencyKey
-        );
-        const userCurrency = currencyItem ? currencyItem.quantity : 0;
+        // Handle different currency types
+        if (shopItem.currency === 'exp') {
+            // Get user's EXP from cultivation data
+            const cultivationUser = await client.prisma.cultivationUser.findUnique({
+                where: { userId: userId }
+            });
+            userCurrency = cultivationUser ? cultivationUser.exp : 0;
+            currencyName = 'EXP';
+            currencyIcon = '⭐';
+        } else {
+            // Handle linh thạch currencies
+            const currencyInfo = getItemStorageInfo(shopItem.currency);
+            const currencyKey = `${currencyInfo.category}_${currencyInfo.actualId}`;
+            
+            const currencyItem = inventory.find(item => 
+                `${item.itemType}_${item.itemId}` === currencyKey
+            );
+            userCurrency = currencyItem ? currencyItem.quantity : 0;
+            
+            const currencyData = SPIRIT_STONES[shopItem.currency];
+            currencyName = currencyData.name;
+            currencyIcon = currencyData.icon;
+        }
 
         // Check if user has enough currency
         if (userCurrency < shopItem.price) {
-            const currencyData = SPIRIT_STONES[shopItem.currency];
             const errorEmbed = new EmbedBuilder()
                 .setTitle('💸 Không đủ tiền!')
                 .setDescription(`Không thể mua **${shopItem.icon} ${shopItem.name}**`)
@@ -84,17 +99,17 @@ module.exports = {
                 .addFields([
                     {
                         name: '💰 Chi phí',
-                        value: `${currencyData.icon} **${shopItem.price}** ${currencyData.name}`,
+                        value: `${currencyIcon} **${shopItem.price}** ${currencyName}`,
                         inline: true
                     },
                     {
                         name: '🏦 Bạn có',
-                        value: `${currencyData.icon} **${userCurrency}** ${currencyData.name}`,
+                        value: `${currencyIcon} **${userCurrency}** ${currencyName}`,
                         inline: true
                     },
                     {
                         name: '❌ Thiếu',
-                        value: `${currencyData.icon} **${shopItem.price - userCurrency}** ${currencyData.name}`,
+                        value: `${currencyIcon} **${shopItem.price - userCurrency}** ${currencyName}`,
                         inline: true
                     }
                 ])
@@ -110,18 +125,26 @@ module.exports = {
         // Process purchase
         try {
             // Remove currency
-            await client.prisma.userInventory.update({
-                where: {
-                    userId_itemType_itemId: {
-                        userId: userId,
-                        itemType: currencyInfo.category,
-                        itemId: currencyInfo.actualId
+            if (shopItem.currency === 'exp') {
+                await client.prisma.cultivationUser.update({
+                    where: { userId: userId },
+                    data: { exp: { decrement: shopItem.price } }
+                });
+            } else {
+                const currencyInfo = getItemStorageInfo(shopItem.currency);
+                await client.prisma.userInventory.update({
+                    where: {
+                        userId_itemType_itemId: {
+                            userId: userId,
+                            itemType: currencyInfo.category,
+                            itemId: currencyInfo.actualId
+                        }
+                    },
+                    data: {
+                        quantity: { decrement: shopItem.price }
                     }
-                },
-                data: {
-                    quantity: { decrement: shopItem.price }
-                }
-            });
+                });
+            }
 
             // Add purchased item
             const itemStorageInfo = getItemStorageInfo(itemId);
@@ -145,7 +168,6 @@ module.exports = {
             });
 
             // Success message
-            const currencyData = SPIRIT_STONES[shopItem.currency];
             const successEmbed = new EmbedBuilder()
                 .setTitle('🛒 Mua hàng thành công!')
                 .setDescription(`**${message.author.username}** đã mua **${shopItem.icon} ${shopItem.name}**`)
@@ -158,12 +180,12 @@ module.exports = {
                     },
                     {
                         name: '💰 Đã trả',
-                        value: `${currencyData.icon} **${shopItem.price}** ${currencyData.name}`,
+                        value: `${currencyIcon} **${shopItem.price}** ${currencyName}`,
                         inline: true
                     },
                     {
                         name: '🏦 Còn lại',
-                        value: `${currencyData.icon} **${userCurrency - shopItem.price}** ${currencyData.name}`,
+                        value: `${currencyIcon} **${userCurrency - shopItem.price}** ${currencyName}`,
                         inline: true
                     }
                 ])
@@ -189,6 +211,11 @@ module.exports = {
             where: { userId: userId }
         });
 
+        // Get user's cultivation data for EXP
+        const cultivationUser = await client.prisma.cultivationUser.findUnique({
+            where: { userId: userId }
+        });
+
         const userCurrency = {};
         ['lt1', 'lt2', 'lt3', 'lt4'].forEach(ltId => {
             const currencyInfo = getItemStorageInfo(ltId);
@@ -196,6 +223,9 @@ module.exports = {
             const item = inventory.find(inv => `${inv.itemType}_${inv.itemId}` === key);
             userCurrency[ltId] = item ? item.quantity : 0;
         });
+        
+        // Add EXP currency
+        userCurrency['exp'] = cultivationUser ? cultivationUser.exp : 0;
 
         // Create shop pages
         const pages = [];
@@ -203,54 +233,82 @@ module.exports = {
         // Page 1: Overview & Balance
         const overviewEmbed = new EmbedBuilder()
             .setTitle('🏪 Thương Thành Tu Tiên')
-            .setDescription('**Mua linh đan, linh dược và sách bằng linh thạch**')
+            .setDescription('**Mua vũ khí, công pháp và nguyên liệu chế tạo**')
             .setColor(0xffd700)
             .setTimestamp()
             .setFooter({ 
-                text: `Trang 1/2 • ${message.author.username}`, 
+                text: `Trang 1/3 • ${message.author.username}`, 
                 iconURL: message.author.displayAvatarURL() 
             })
             .addFields([
                 {
-                    name: '💰 Số dư linh thạch của bạn',
-                    value: Object.entries(userCurrency).map(([ltId, qty]) => {
-                        const ltData = SPIRIT_STONES[ltId];
-                        return `${ltData.icon} **${qty.toLocaleString()}** ${ltData.name}`;
-                    }).join('\n'),
+                    name: '💰 Số dư của bạn',
+                    value: `⭐ **${userCurrency.exp.toLocaleString()}** EXP\n` +
+                           Object.entries(userCurrency).filter(([id]) => id !== 'exp').map(([ltId, qty]) => {
+                               const ltData = SPIRIT_STONES[ltId];
+                               return `${ltData.icon} **${qty.toLocaleString()}** ${ltData.name}`;
+                           }).join('\n'),
                     inline: false
                 },
                 {
                     name: '🛍️ Danh mục sản phẩm',
-                    value: '• **Đan phương & Đan lò** 📜🏺 - Cần thiết để craft đan dược 🚧\n' +
-                           '• **Tụ linh thạch** 💫 - Cần thiết để craft linh thạch cao 🚧\n' +
-                           '• **Linh đan** 🟢🔵🟣🟡 - Tăng EXP và đột phá\n' +
-                           '• **Linh dược** 💚💙💜💛 - Hồi phục và tăng sức mạnh\n' +
-                           '• **Sách kỹ thuật** 📗📘📙 - Học võ công và bí kíp\n\n' +
-                           '🚧 **Lưu ý:** Một số items đang phát triển, chưa có giá',
+                    value: '• **Vũ khí** ⚔️�️�🔱 - Tăng sức mạnh chiến đấu (1000 EXP)\n' +
+                           '• **Công pháp** 📜📃📋� - Tăng khả năng tu luyện (1000 EXP)\n' +
+                           '• **Đan phương & Đan lò** �🏺 - Cần thiết để craft đan dược 🚧\n' +
+                           '• **Tụ linh thạch** � - Cần thiết để craft linh thạch cao 🚧\n\n' +
+                           '🚧 **Lưu ý:** Một số items craft đang phát triển, chưa có giá',
                     inline: false
                 },
                 {
                     name: '🎮 Cách sử dụng',
                     value: '• `!shop` - Xem tất cả sản phẩm\n' +
-                           '• `!shop buy <id>` - Mua sản phẩm (chỉ items có giá)\n' +
+                           '• `!shop buy <id>` - Mua sản phẩm\n' +
                            '\n**Ví dụ mua:**\n' +
-                           '• `!shop buy ld1` - Mua linh đan\n' +
-                           '• `!shop buy ly1` - Mua linh dược\n' +
-                           '• `!shop buy book1` - Mua sách\n' +
+                           '• `!shop buy vk1` - Mua vũ khí\n' +
+                           '• `!shop buy cp1` - Mua công pháp\n' +
                            '\n💡 **Dùng nút bên dưới để chuyển trang!**',
                     inline: false
                 }
             ]);
         pages.push(overviewEmbed);
 
-        // Page 2: Đan phương, Đan lò, Tụ linh thạch
+        // Page 2: Vũ khí và Công pháp
+        const combatEmbed = new EmbedBuilder()
+            .setTitle('⚔️ Vũ Khí & Công Pháp')
+            .setDescription('**Vũ khí và công pháp - mua bằng EXP để test đột phá**')
+            .setColor(0xff0000)
+            .setTimestamp()
+            .setFooter({ 
+                text: `Trang 2/3 • ${message.author.username}`, 
+                iconURL: message.author.displayAvatarURL() 
+            });
+
+        // Add vũ khí và công pháp
+        Object.entries(SHOP_ITEMS).filter(([id, item]) => 
+            id.startsWith('vk') || id.startsWith('cp')
+        ).forEach(([id, item]) => {
+            const userHas = userCurrency.exp || 0;
+            const canAfford = userHas >= item.price;
+            
+            combatEmbed.addFields({
+                name: `${item.icon} ${item.name} ${canAfford ? '✅' : '❌'}`,
+                value: `**Giá:** ⭐ ${item.price.toLocaleString()} EXP\n` +
+                       `**Có:** ⭐ ${userHas.toLocaleString()} EXP\n` +
+                       `**Mô tả:** ${item.description}\n` +
+                       `**Lệnh:** \`!shop buy ${id}\``,
+                inline: true
+            });
+        });
+        pages.push(combatEmbed);
+
+        // Page 3: Đan phương, Đan lò, Tụ linh thạch
         const craftingEmbed = new EmbedBuilder()
             .setTitle('🔧 Nguyên Liệu Chế Tạo')
             .setDescription('**Đan phương, đan lò và tụ linh thạch - cần thiết để craft**')
             .setColor(0xff8800)
             .setTimestamp()
             .setFooter({ 
-                text: `Trang 2/2 • ${message.author.username}`, 
+                text: `Trang 3/3 • ${message.author.username}`, 
                 iconURL: message.author.displayAvatarURL() 
             });
 
