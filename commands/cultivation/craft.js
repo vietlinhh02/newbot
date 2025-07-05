@@ -247,52 +247,14 @@ module.exports = {
         // Tạo các trang với thông tin chi tiết
         const pages = [];
         
-        // Page 1: Tổng quan
-        const overviewEmbed = new EmbedBuilder()
-            .setTitle('🧪 Craft Recipes - Tu Tiên')
-            .setDescription('**Hệ thống chế tạo vật phẩm tu tiên (chỉ CRAFT)**')
-            .setColor(0x9932cc)
-            .setTimestamp()
-            .setFooter({ 
-                text: `Trang 1/3 • Yêu cầu bởi ${message.author.username}`, 
-                iconURL: message.author.displayAvatarURL() 
-            })
-            .addFields([
-                {
-                    name: '🔨 CRAFT (Chế tạo)',
-                    value: `**${Object.keys(CRAFT_RECIPES).length} công thức craft:**\n` +
-                           '• **Đan dược:** d1, d2, d3, d4 (từ nguyên liệu + đan phương + đan lò)\n' +
-                           '• **Linh thạch:** lt2, lt3, lt4 (từ linh thạch thấp hơn + tụ linh thạch)\n' +
-                           '• **Tỉ lệ thành công:** 50%',
-                    inline: false
-                },
-                {
-                    name: '💡 Cách sử dụng',
-                    value: '• `!craft <item>` - Chế tạo vật phẩm (50% thành công)\n' +
-                           '• `!craft recipes` - Xem tất cả công thức\n' +
-                           '• `!farm` - Thu thập nguyên liệu cơ bản (1-7, lt1)\n' +
-                           '• `!shop` - Mua đan phương, đan lò, tụ linh thạch',
-                    inline: false
-                },
-                {
-                    name: '📖 Navigation',
-                    value: '• **Trang 1:** Tổng quan hệ thống\n' +
-                           '• **Trang 2:** CRAFT - Đan dược (d1-d4)\n' +
-                           '• **Trang 3:** CRAFT - Linh thạch (lt2-lt4) & Hướng dẫn\n\n' +
-                           '🎮 **Dùng nút bên dưới để chuyển trang!**',
-                    inline: false
-                }
-            ]);
-        pages.push(overviewEmbed);
-
-        // Page 2: CRAFT - Đan dược
+        // Page 1: CRAFT - Đan dược
         const craftPillsEmbed = new EmbedBuilder()
             .setTitle('🔨 CRAFT - Đan dược')
             .setDescription('**Chế tạo đan dược từ nguyên liệu + đan phương + đan lò**')
             .setColor(0x0080ff)
             .setTimestamp()
             .setFooter({ 
-                text: `Trang 2/3 • Yêu cầu bởi ${message.author.username}`, 
+                text: `Trang 1/2 • Yêu cầu bởi ${message.author.username}`, 
                 iconURL: message.author.displayAvatarURL() 
             });
 
@@ -339,14 +301,14 @@ module.exports = {
         });
         pages.push(craftPillsEmbed);
 
-        // Page 3: CRAFT - Linh thạch & Hướng dẫn
+        // Page 2: CRAFT - Linh thạch & Hướng dẫn
         const craftStonesEmbed = new EmbedBuilder()
             .setTitle('🔨 CRAFT - Linh thạch & Hướng dẫn')
             .setDescription('**Chế tạo linh thạch cao cấp và hướng dẫn sử dụng**')
             .setColor(0xff6600)
             .setTimestamp()
             .setFooter({ 
-                text: `Trang 3/3 • Yêu cầu bởi ${message.author.username}`, 
+                text: `Trang 2/2 • Yêu cầu bởi ${message.author.username}`, 
                 iconURL: message.author.displayAvatarURL() 
             });
 
@@ -425,26 +387,7 @@ module.exports = {
                     .setDisabled(currentPage === totalPages - 1)
             );
             
-            // Jump to overview (always show except on page 1)
-            if (currentPage !== 0) {
-                buttons.push(
-                    new ButtonBuilder()
-                        .setCustomId('craft_home')
-                        .setLabel('🏠 Tổng quan')
-                        .setStyle(ButtonStyle.Success)
-                );
-            }
-            
-            // Quick navigation to specific sections
-            if (totalPages === 3 && currentPage === 0) {
-                // Add quick access button on overview page
-                buttons.push(
-                    new ButtonBuilder()
-                        .setCustomId('craft_jump')
-                        .setLabel('🚀 Chuyển nhanh')
-                        .setStyle(ButtonStyle.Secondary)
-                );
-            }
+
             
             return new ActionRowBuilder().addComponents(buttons);
         };
@@ -468,20 +411,6 @@ module.exports = {
                 currentPage--;
             } else if (interaction.customId === 'craft_next' && currentPage < pages.length - 1) {
                 currentPage++;
-            } else if (interaction.customId === 'craft_home') {
-                currentPage = 0;
-            } else if (interaction.customId === 'craft_jump') {
-                // Show quick navigation info
-                                        await interaction.followUp({
-                            content: '🚀 **Chuyển nhanh đến trang bằng nút navigation:**\n\n' +
-                                     '📖 **Mục lục 3 trang:**\n' +
-                                     '• **Trang 1:** 🏠 Tổng quan hệ thống\n' +
-                                     '• **Trang 2:** 🔨 CRAFT Đan dược (d1-d4)\n' +
-                                     '• **Trang 3:** 🔨 CRAFT Linh thạch (lt2-lt4) & Hướng dẫn\n\n' +
-                                     '💡 **Dùng nút `◀ Trước` và `Sau ▶` để chuyển trang**',
-                            ephemeral: true
-                        });
-                return; // Don't update main message
             }
 
             await interaction.update({
