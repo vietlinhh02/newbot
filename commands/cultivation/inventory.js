@@ -94,8 +94,10 @@ module.exports = {
                     const material = materials.find(m => m.itemId === i.toString());
                     const materialData = FARM_MATERIALS[i.toString()];
                     const quantity = material ? material.quantity : 0;
-                    if (quantity > 0) {
+                    if (quantity > 0 && materialData && materialData.icon) {
                         materialDisplay.push(`${materialData.icon}${quantity}`);
+                    } else if (quantity > 0 && materialData && materialData.fallbackIcon) {
+                        materialDisplay.push(`${materialData.fallbackIcon}${quantity}`);
                     }
                     totalMaterials += quantity;
                 }
@@ -105,8 +107,10 @@ module.exports = {
                     const material = materials.find(m => m.itemId === itemId);
                     const materialData = FARM_MATERIALS[itemId];
                     const quantity = material ? material.quantity : 0;
-                    if (quantity > 0) {
+                    if (quantity > 0 && materialData && materialData.icon) {
                         materialDisplay.push(`${materialData.icon}${quantity}`);
+                    } else if (quantity > 0 && materialData && materialData.fallbackIcon) {
+                        materialDisplay.push(`${materialData.fallbackIcon}${quantity}`);
                     }
                     totalMaterials += quantity;
                 });
@@ -131,7 +135,7 @@ module.exports = {
                     const medicine = medicines.find(m => m.itemId === medicineId);
                     const medicineData = MEDICINES[medicineId];
                     const quantity = medicine ? medicine.quantity : 0;
-                    if (quantity > 0) {
+                    if (quantity > 0 && medicineData && medicineData.icon) {
                         medicineDisplay.push(`${medicineData.icon}${quantity}`);
                     }
                 });
@@ -139,10 +143,12 @@ module.exports = {
                 // Đan phương và đan lò (dp/dl series) - now farmable!
                 ['dp1', 'dp2', 'dp3', 'dp4', 'pdp', 'dl'].forEach(medicineId => {
                     const medicine = medicines.find(m => m.itemId === medicineId);
-                    const medicineData = MEDICINES[medicineId];
+                    const medicineData = SHOP_ITEMS[medicineId]; // These are in SHOP_ITEMS, not MEDICINES
                     const quantity = medicine ? medicine.quantity : 0;
-                    if (quantity > 0) {
+                    if (quantity > 0 && medicineData && medicineData.icon) {
                         medicineDisplay.push(`${medicineData.icon}${quantity}`);
+                    } else if (quantity > 0 && medicineData && medicineData.fallbackIcon) {
+                        medicineDisplay.push(`${medicineData.fallbackIcon}${quantity}`);
                     }
                 });
 
@@ -165,8 +171,11 @@ module.exports = {
                     const stone = spiritStones.find(s => s.itemId === `spirit_${stoneId}`);
                     const stoneData = SPIRIT_STONES[stoneId];
                     const quantity = stone ? stone.quantity : 0;
-                    if (quantity > 0) {
+                    if (quantity > 0 && stoneData && stoneData.icon) {
                         stoneDisplay.push(`${stoneData.icon}${quantity}`);
+                        totalStones += quantity;
+                    } else if (quantity > 0 && stoneData && stoneData.fallbackIcon) {
+                        stoneDisplay.push(`${stoneData.fallbackIcon}${quantity}`);
                         totalStones += quantity;
                     }
                 });
@@ -189,6 +198,8 @@ module.exports = {
                     const shopData = SHOP_ITEMS[item.itemId];
                     if (shopData && shopData.icon && item.quantity > 0) {
                         shopDisplay.push(`${shopData.icon}${item.quantity}`);
+                    } else if (shopData && shopData.fallbackIcon && item.quantity > 0) {
+                        shopDisplay.push(`${shopData.fallbackIcon}${item.quantity}`);
                     }
                 });
 
