@@ -1,4 +1,5 @@
 const { getLevelByName, getNextLevel, canBreakthrough, rollBreakthrough, applyBreakthroughPenalty, giveBreakthroughRewards, formatRewards } = require('../../utils/cultivationData');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType } = require('discord.js');
 
 module.exports = {
     name: 'breakthrough',
@@ -45,37 +46,120 @@ module.exports = {
                 return message.reply('🏆 **Bạn đã đạt đến đỉnh cao của tu luyện!**');
             }
 
-            // Show warning about penalties and rewards if applicable
-            if (currentLevelData.expPenalty > 0 || currentLevelData.itemPenalty > 0) {
-                const rewardsText = formatRewards(nextLevelData);
-                
-                const warningText = `⚠️ **CẢNH BÁO ĐỘT PHÁ** ⚠️\n` +
-                    `**${message.author.username}** muốn đột phá lên **${nextLevelData.name}**\n\n` +
-                    `🎯 **Tỉ lệ thành công:** **${currentLevelData.breakRate}%**\n` +
-                    `🎁 **Phần thưởng nếu thành công:** ${rewardsText}\n\n` +
-                    `💀 **Nếu thất bại sẽ mất:**\n` +
-                    `• **${currentLevelData.expPenalty}%** EXP hiện tại\n` +
-                    `• **${currentLevelData.itemPenalty}** vật phẩm ngẫu nhiên\n\n` +
-                    `Gõ \`!breakthrough confirm\` để xác nhận đột phá!`;
+            // Create confirmation embed based on risk level
+            const rewardsText = formatRewards(nextLevelData);
+            const hasRisk = currentLevelData.expPenalty > 0 || currentLevelData.itemPenalty > 0;
 
-                if (!args[0] || args[0] !== 'confirm') {
-                    return message.reply(warningText);
-                }
+            const confirmEmbed = new EmbedBuilder()
+                .setTitle(hasRisk ? '⚠️ Cảnh Báo Đột Phá' : '🎯 Đột Phá An Toàn')
+                .setDescription(`**${message.author.username}** muốn đột phá lên **${nextLevelData.name}**`)
+                .setColor(hasRisk ? 0xff4444 : 0x00ff88)
+                .addFields([
+                    {
+                        name: '📊 Thông tin đột phá',
+                        value: `• **Level hiện tại:** ${cultivationUser.currentLevel}\n• **Level mục tiêu:** ${nextLevelData.name}\n• **Tỉ lệ thành công:** **${currentLevelData.breakRate}%**\n• **EXP hiện tại:** ${cultivationUser.exp.toLocaleString()}`,
+                        inline: false
+                    },
+                    {
+                        name: '🎁 Phần thưởng nếu thành công',
+                        value: rewardsText,
+                        inline: false
+                    }
+                ])
+                .setTimestamp()
+                .setFooter({ 
+                    text: `Breakthrough • ${message.author.username}`, 
+                    iconURL: message.author.displayAvatarURL() 
+                });
+
+            if (hasRisk) {
+                confirmEmbed.addFields({
+                    name: '💀 Nguy cơ nếu thất bại',
+                    value: `• Mất **${currentLevelData.expPenalty}%** EXP hiện tại\n• Mất **${currentLevelData.itemPenalty}** vật phẩm ngẫu nhiên`,
+                    inline: false
+                });
             } else {
-                // Show rewards for safe breakthroughs too
-                const rewardsText = formatRewards(nextLevelData);
-                if (!args[0] || args[0] !== 'confirm') {
-                    const infoText = `🎯 **ĐỘT PHÁ AN TOÀN**\n` +
-                        `**${message.author.username}** muốn đột phá lên **${nextLevelData.name}**\n\n` +
-                        `✅ **Tỉ lệ thành công:** **${currentLevelData.breakRate}%**\n` +
-                        `🎁 **Phần thưởng:** ${rewardsText}\n` +
-                        `💚 **Không có rủi ro mất EXP hay vật phẩm**\n\n` +
-                        `Gõ \`!breakthrough confirm\` để xác nhận đột phá!`;
-                    
-                    return message.reply(infoText);
-                }
+                confirmEmbed.addFields({
+                    name: '💚 An toàn',
+                    value: 'Không có rủi ro mất EXP hay vật phẩm',
+                    inline: false
+                });
             }
 
+            const confirmButtons = new ActionRowBuilder()
+                .addComponents(
+                    new ButtonBuilder()
+                        .setCustomId('breakthrough_confirm')
+                        .setLabel('⚡ Xác nhận đột phá')
+                        .setStyle(hasRisk ? ButtonStyle.Danger : ButtonStyle.Success),
+                    new ButtonBuilder()
+                        .setCustomId('breakthrough_cancel')
+                        .setLabel('❌ Hủy bỏ')
+                        .setStyle(ButtonStyle.Secondary)
+                );
+
+            const reply = await message.reply({ 
+                embeds: [confirmEmbed], 
+                components: [confirmButtons] 
+            });
+
+            // Handle button interactions
+            const collector = reply.createMessageComponentCollector({
+                componentType: ComponentType.Button,
+                time: 60000, // 1 minute
+                filter: i => i.user.id === message.author.id
+            });
+
+            collector.on('collect', async interaction => {
+                if (interaction.customId === 'breakthrough_confirm') {
+                    await this.performBreakthrough(interaction, client, userId, currentLevelData, nextLevelData, cultivationUser);
+                } else if (interaction.customId === 'breakthrough_cancel') {
+                    const cancelEmbed = new EmbedBuilder()
+                        .setTitle('❌ Đã hủy đột phá')
+                        .setDescription('Quá trình đột phá đã bị hủy.')
+                        .setColor(0xff4444)
+                        .setTimestamp()
+                        .setFooter({ 
+                            text: `Breakthrough • ${message.author.username}`, 
+                            iconURL: message.author.displayAvatarURL() 
+                        });
+
+                    await interaction.update({ 
+                        embeds: [cancelEmbed], 
+                        components: [] 
+                    });
+                }
+            });
+
+            collector.on('end', () => {
+                // Disable buttons when expired
+                const disabledButtons = new ActionRowBuilder()
+                    .addComponents(
+                        new ButtonBuilder()
+                            .setCustomId('breakthrough_confirm')
+                            .setLabel('⚡ Xác nhận đột phá')
+                            .setStyle(hasRisk ? ButtonStyle.Danger : ButtonStyle.Success)
+                            .setDisabled(true),
+                        new ButtonBuilder()
+                            .setCustomId('breakthrough_cancel')
+                            .setLabel('❌ Hủy bỏ')
+                            .setStyle(ButtonStyle.Secondary)
+                            .setDisabled(true)
+                    );
+                
+                reply.edit({ components: [disabledButtons] }).catch(() => {});
+            });
+
+            return; // Exit early since we're handling the breakthrough in the collector
+
+        } catch (error) {
+            console.error('Error in breakthrough command:', error);
+            await message.reply(`❌ Lỗi đột phá: ${error.message}`);
+        }
+    },
+
+    async performBreakthrough(interaction, client, userId, currentLevelData, nextLevelData, cultivationUser) {
+        try {
             // Attempt breakthrough
             const success = rollBreakthrough(currentLevelData.breakRate);
 
@@ -102,66 +186,118 @@ module.exports = {
                     // Only change roles if they're different
                     if (currentRoleName !== newRoleName) {
                         // Remove old role
-                        const oldRole = message.guild.roles.cache.find(r => r.name === currentRoleName);
-                        if (oldRole && message.member.roles.cache.has(oldRole.id)) {
-                            await message.member.roles.remove(oldRole);
-                            console.log(`🗑️ Đã xóa role cũ "${oldRole.name}" của ${message.author.username}`);
+                        const oldRole = interaction.guild.roles.cache.find(r => r.name === currentRoleName);
+                        if (oldRole && interaction.member.roles.cache.has(oldRole.id)) {
+                            await interaction.member.roles.remove(oldRole);
+                            console.log(`🗑️ Đã xóa role cũ "${oldRole.name}" của ${interaction.user.username}`);
                         }
                         
                         // Add new role
-                        const newRole = message.guild.roles.cache.find(r => r.name === newRoleName);
+                        const newRole = interaction.guild.roles.cache.find(r => r.name === newRoleName);
                         if (newRole) {
                             // Check if bot can manage this role
-                            if (newRole.position >= message.guild.members.me.roles.highest.position) {
-                                console.log(`❌ Role "${newRole.name}" có thứ tự cao hơn bot (Bot: ${message.guild.members.me.roles.highest.position}, Role: ${newRole.position})`);
-                                await message.channel.send(`⚠️ Bot không thể gán role **${newRole.name}** vì role này có thứ tự cao hơn bot!`);
+                            if (newRole.position >= interaction.guild.members.me.roles.highest.position) {
+                                console.log(`❌ Role "${newRole.name}" có thứ tự cao hơn bot (Bot: ${interaction.guild.members.me.roles.highest.position}, Role: ${newRole.position})`);
+                                await interaction.followUp(`⚠️ Bot không thể gán role **${newRole.name}** vì role này có thứ tự cao hơn bot!`);
                             } else {
-                                await message.member.roles.add(newRole);
-                                console.log(`✅ Đã gán role mới "${newRole.name}" cho ${message.author.username}`);
+                                await interaction.member.roles.add(newRole);
+                                console.log(`✅ Đã gán role mới "${newRole.name}" cho ${interaction.user.username}`);
                             }
                         } else {
                             console.log(`❌ Không tìm thấy role với tên: "${newRoleName}" (từ level: "${nextLevelData.name}")`);
-                            await message.channel.send(`⚠️ Không tìm thấy role **${newRoleName}** trong server!`);
+                            await interaction.followUp(`⚠️ Không tìm thấy role **${newRoleName}** trong server!`);
                         }
                     } else {
                         console.log(`ℹ️ Role không thay đổi: "${newRoleName}"`);
                     }
                 } catch (error) {
                     console.log('❌ Lỗi khi quản lý role:', error.message);
-                    await message.channel.send(`⚠️ Không thể quản lý role: ${error.message}`);
+                    await interaction.followUp(`⚠️ Không thể quản lý role: ${error.message}`);
                 }
 
-                // Build success message with rewards
-                let successText = `🎉 **ĐỘT PHÁ THÀNH CÔNG!** **${message.author.username}** đã lên **${nextLevelData.name}** *(${currentLevelData.breakRate}% thành công)*`;
-                
+                // Build success embed
+                const successEmbed = new EmbedBuilder()
+                    .setTitle('🎉 Đột Phá Thành Công!')
+                    .setDescription(`**${interaction.user.username}** đã đột phá thành công!`)
+                    .setColor(0x00ff00)
+                    .addFields([
+                        {
+                            name: '⚡ Kết quả',
+                            value: `• **Level mới:** ${nextLevelData.name}\n• **Tỉ lệ thành công:** ${currentLevelData.breakRate}%`,
+                            inline: false
+                        }
+                    ])
+                    .setTimestamp()
+                    .setFooter({ 
+                        text: `Breakthrough • ${interaction.user.username}`, 
+                        iconURL: interaction.user.displayAvatarURL() 
+                    });
+
                 if (rewardsGiven.length > 0) {
                     const rewardsText = rewardsGiven.map(reward => `${reward.icon} ${reward.name} x${reward.quantity}`).join(', ');
-                    successText += `\n🎁 **Phần thưởng nhận được:** ${rewardsText}`;
+                    successEmbed.addFields({
+                        name: '🎁 Phần thưởng nhận được',
+                        value: rewardsText,
+                        inline: false
+                    });
                 }
 
-                await message.reply(successText);
+                await interaction.update({ 
+                    embeds: [successEmbed], 
+                    components: [] 
+                });
 
             } else {
                 // Failure - Apply penalties
                 const penalty = await applyBreakthroughPenalty(client, userId, currentLevelData);
 
-                let failureText = `💥 **ĐỘT PHÁ THẤT BẠI!** **${message.author.username}** vẫn ở **${cultivationUser.currentLevel}** *(${currentLevelData.breakRate}% thành công)*`;
+                const failureEmbed = new EmbedBuilder()
+                    .setTitle('💥 Đột Phá Thất Bại!')
+                    .setDescription(`**${interaction.user.username}** đã thất bại trong đột phá!`)
+                    .setColor(0xff4444)
+                    .addFields([
+                        {
+                            name: '💔 Kết quả',
+                            value: `• **Level:** Vẫn ở ${cultivationUser.currentLevel}\n• **Tỉ lệ thành công:** ${currentLevelData.breakRate}%`,
+                            inline: false
+                        }
+                    ])
+                    .setTimestamp()
+                    .setFooter({ 
+                        text: `Breakthrough • ${interaction.user.username}`, 
+                        iconURL: interaction.user.displayAvatarURL() 
+                    });
 
-                if (penalty.expLost > 0) {
-                    failureText += `\n💸 Mất **${penalty.expLost} EXP** (${currentLevelData.expPenalty}%)`;
+                if (penalty.expLost > 0 || penalty.itemsLost.length > 0) {
+                    let penaltyText = '';
+                    if (penalty.expLost > 0) {
+                        penaltyText += `💸 Mất **${penalty.expLost} EXP** (${currentLevelData.expPenalty}%)\n`;
+                    }
+                    if (penalty.itemsLost.length > 0) {
+                        const itemsText = penalty.itemsLost.map(item => `${item.name} x${item.quantity}`).join(', ');
+                        penaltyText += `🗑️ Mất vật phẩm: ${itemsText}`;
+                    }
+
+                    failureEmbed.addFields({
+                        name: '🪦 Thiệt hại',
+                        value: penaltyText,
+                        inline: false
+                    });
                 }
 
-                if (penalty.itemsLost.length > 0) {
-                    const itemsText = penalty.itemsLost.map(item => `${item.name} x${item.quantity}`).join(', ');
-                    failureText += `\n🗑️ Mất vật phẩm: ${itemsText}`;
-                }
-
-                await message.reply(failureText);
+                await interaction.update({ 
+                    embeds: [failureEmbed], 
+                    components: [] 
+                });
             }
 
         } catch (error) {
-            console.error('Error in breakthrough command:', error);
-            await message.reply(`❌ Lỗi đột phá: ${error.message}`);
+            console.error('Error in performBreakthrough:', error);
+            await interaction.update({ 
+                content: `❌ Lỗi đột phá: ${error.message}`,
+                embeds: [],
+                components: [] 
+            });
         }
     }
 }; 

@@ -143,6 +143,113 @@ module.exports = {
                 return message.reply({ embeds: [errorEmbed] });
             }
 
+            // Show craft confirmation
+            const materialsText = requiredItems.map(item => {
+                const storageInfo = getItemStorageInfo(item.id);
+                return `${storageInfo.icon} **${item.name}** x${item.needed}`;
+            }).join('\n');
+
+            const confirmEmbed = new EmbedBuilder()
+                .setTitle('🧪 Xác nhận chế tạo')
+                .setDescription(`Bạn có chắc chắn muốn chế tạo **${itemData.name}**?`)
+                .setColor(0x0080ff)
+                .addFields([
+                    {
+                        name: '📊 Thông tin chế tạo',
+                        value: `• **Vật phẩm:** ${itemData.icon} ${itemData.name}\n• **Tỉ lệ thành công:** ${successRate}%\n• **Mô tả:** ${itemData.description}`,
+                        inline: false
+                    },
+                    {
+                        name: '📦 Nguyên liệu sẽ tiêu tốn',
+                        value: materialsText,
+                        inline: false
+                    },
+                    {
+                        name: '⚠️ Lưu ý',
+                        value: '• Nguyên liệu sẽ bị tiêu tốn dù thành công hay thất bại\n• Chỉ nhận được vật phẩm nếu chế tạo thành công\n• Có thể thử lại nếu thất bại',
+                        inline: false
+                    }
+                ])
+                .setTimestamp()
+                .setFooter({ 
+                    text: `Craft • ${message.author.username}`, 
+                    iconURL: message.author.displayAvatarURL() 
+                });
+
+            const confirmButtons = new ActionRowBuilder()
+                .addComponents(
+                    new ButtonBuilder()
+                        .setCustomId('craft_confirm')
+                        .setLabel('🔨 Xác nhận chế tạo')
+                        .setStyle(ButtonStyle.Primary),
+                    new ButtonBuilder()
+                        .setCustomId('craft_cancel')
+                        .setLabel('❌ Hủy bỏ')
+                        .setStyle(ButtonStyle.Secondary)
+                );
+
+            const reply = await message.reply({ 
+                embeds: [confirmEmbed], 
+                components: [confirmButtons] 
+            });
+
+            // Handle button interactions
+            const collector = reply.createMessageComponentCollector({
+                componentType: ComponentType.Button,
+                time: 60000, // 1 minute
+                filter: i => i.user.id === message.author.id
+            });
+
+            collector.on('collect', async interaction => {
+                if (interaction.customId === 'craft_confirm') {
+                    await this.performCraft(interaction, client, userId, targetItem, itemData, recipe, requiredItems, successRate);
+                } else if (interaction.customId === 'craft_cancel') {
+                    const cancelEmbed = new EmbedBuilder()
+                        .setTitle('❌ Đã hủy chế tạo')
+                        .setDescription('Quá trình chế tạo đã bị hủy.')
+                        .setColor(0xff4444)
+                        .setTimestamp()
+                        .setFooter({ 
+                            text: `Craft • ${message.author.username}`, 
+                            iconURL: message.author.displayAvatarURL() 
+                        });
+
+                    await interaction.update({ 
+                        embeds: [cancelEmbed], 
+                        components: [] 
+                    });
+                }
+            });
+
+            collector.on('end', () => {
+                // Disable buttons when expired
+                const disabledButtons = new ActionRowBuilder()
+                    .addComponents(
+                        new ButtonBuilder()
+                            .setCustomId('craft_confirm')
+                            .setLabel('🔨 Xác nhận chế tạo')
+                            .setStyle(ButtonStyle.Primary)
+                            .setDisabled(true),
+                        new ButtonBuilder()
+                            .setCustomId('craft_cancel')
+                            .setLabel('❌ Hủy bỏ')
+                            .setStyle(ButtonStyle.Secondary)
+                            .setDisabled(true)
+                    );
+                
+                reply.edit({ components: [disabledButtons] }).catch(() => {});
+            });
+
+            return; // Exit early since we're handling the craft in the collector
+
+        } catch (error) {
+            console.error('Error in craft command:', error);
+            await message.reply(`❌ Lỗi craft: ${error.message}`);
+        }
+    },
+
+    async performCraft(interaction, client, userId, targetItem, itemData, recipe, requiredItems, successRate) {
+        try {
             // Perform crafting
             const success = Math.random() * 100 < successRate;
 
@@ -194,8 +301,8 @@ module.exports = {
             const resultEmbed = new EmbedBuilder()
                 .setTimestamp()
                 .setFooter({ 
-                    text: message.author.username, 
-                    iconURL: message.author.displayAvatarURL() 
+                    text: `Craft • ${interaction.user.username}`, 
+                    iconURL: interaction.user.displayAvatarURL() 
                 });
 
             if (success) {
@@ -234,11 +341,18 @@ module.exports = {
                     ]);
             }
 
-            await message.reply({ embeds: [resultEmbed] });
+            await interaction.update({ 
+                embeds: [resultEmbed], 
+                components: [] 
+            });
 
         } catch (error) {
-            console.error('Error in craft command:', error);
-            await message.reply(`❌ Lỗi craft: ${error.message}`);
+            console.error('Error in performCraft:', error);
+            await interaction.update({ 
+                content: `❌ Lỗi craft: ${error.message}`,
+                embeds: [],
+                components: [] 
+            });
         }
     },
 

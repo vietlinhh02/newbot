@@ -107,7 +107,108 @@ module.exports = {
             return message.reply({ embeds: [errorEmbed] });
         }
 
-        // Process purchase
+        // Show purchase confirmation
+        const currencyData = SPIRIT_STONES[shopItem.currency];
+        const confirmEmbed = new EmbedBuilder()
+            .setTitle('🛒 Xác nhận mua hàng')
+            .setDescription(`Bạn có chắc chắn muốn mua **${shopItem.icon} ${shopItem.name}**?`)
+            .setColor(0x00ff88)
+            .addFields([
+                {
+                    name: '🎁 Sản phẩm',
+                    value: `${shopItem.icon} **${shopItem.name}**\n*${shopItem.description}*`,
+                    inline: false
+                },
+                {
+                    name: '💰 Chi phí',
+                    value: `${currencyData.icon} **${shopItem.price.toLocaleString()}** ${currencyData.name}`,
+                    inline: true
+                },
+                {
+                    name: '🏦 Số dư hiện tại',
+                    value: `${currencyData.icon} **${userCurrency.toLocaleString()}** ${currencyData.name}`,
+                    inline: true
+                },
+                {
+                    name: '💳 Số dư sau mua',
+                    value: `${currencyData.icon} **${(userCurrency - shopItem.price).toLocaleString()}** ${currencyData.name}`,
+                    inline: true
+                }
+            ])
+            .setTimestamp()
+            .setFooter({ 
+                text: `Shop • ${message.author.username}`, 
+                iconURL: message.author.displayAvatarURL() 
+            });
+
+        const confirmButtons = new ActionRowBuilder()
+            .addComponents(
+                new ButtonBuilder()
+                    .setCustomId('shop_buy_confirm')
+                    .setLabel('💳 Xác nhận mua')
+                    .setStyle(ButtonStyle.Success),
+                new ButtonBuilder()
+                    .setCustomId('shop_buy_cancel')
+                    .setLabel('❌ Hủy bỏ')
+                    .setStyle(ButtonStyle.Secondary)
+            );
+
+        const reply = await message.reply({ 
+            embeds: [confirmEmbed], 
+            components: [confirmButtons] 
+        });
+
+        // Handle button interactions
+        const collector = reply.createMessageComponentCollector({
+            componentType: ComponentType.Button,
+            time: 60000, // 1 minute
+            filter: i => i.user.id === message.author.id
+        });
+
+        collector.on('collect', async interaction => {
+            if (interaction.customId === 'shop_buy_confirm') {
+                await this.processPurchase(interaction, client, userId, itemId, shopItem, currencyInfo, userCurrency);
+            } else if (interaction.customId === 'shop_buy_cancel') {
+                const cancelEmbed = new EmbedBuilder()
+                    .setTitle('❌ Đã hủy mua hàng')
+                    .setDescription('Giao dịch mua hàng đã bị hủy.')
+                    .setColor(0xff4444)
+                    .setTimestamp()
+                    .setFooter({ 
+                        text: `Shop • ${message.author.username}`, 
+                        iconURL: message.author.displayAvatarURL() 
+                    });
+
+                await interaction.update({ 
+                    embeds: [cancelEmbed], 
+                    components: [] 
+                });
+            }
+        });
+
+        collector.on('end', () => {
+            // Disable buttons when expired
+            const disabledButtons = new ActionRowBuilder()
+                .addComponents(
+                    new ButtonBuilder()
+                        .setCustomId('shop_buy_confirm')
+                        .setLabel('💳 Xác nhận mua')
+                        .setStyle(ButtonStyle.Success)
+                        .setDisabled(true),
+                    new ButtonBuilder()
+                        .setCustomId('shop_buy_cancel')
+                        .setLabel('❌ Hủy bỏ')
+                        .setStyle(ButtonStyle.Secondary)
+                        .setDisabled(true)
+                );
+            
+            reply.edit({ components: [disabledButtons] }).catch(() => {});
+        });
+
+        return; // Exit early since we're handling the purchase in the collector
+    },
+
+    async processPurchase(interaction, client, userId, itemId, shopItem, currencyInfo, userCurrency) {
         try {
             // Remove currency
             await client.prisma.userInventory.update({
@@ -148,7 +249,7 @@ module.exports = {
             const currencyData = SPIRIT_STONES[shopItem.currency];
             const successEmbed = new EmbedBuilder()
                 .setTitle('🛒 Mua hàng thành công!')
-                .setDescription(`**${message.author.username}** đã mua **${shopItem.icon} ${shopItem.name}**`)
+                .setDescription(`**${interaction.user.username}** đã mua **${shopItem.icon} ${shopItem.name}**`)
                 .setColor(0x00ff88)
                 .addFields([
                     {
@@ -158,26 +259,33 @@ module.exports = {
                     },
                     {
                         name: '💰 Đã trả',
-                        value: `${currencyData.icon} **${shopItem.price}** ${currencyData.name}`,
+                        value: `${currencyData.icon} **${shopItem.price.toLocaleString()}** ${currencyData.name}`,
                         inline: true
                     },
                     {
                         name: '🏦 Còn lại',
-                        value: `${currencyData.icon} **${userCurrency - shopItem.price}** ${currencyData.name}`,
+                        value: `${currencyData.icon} **${(userCurrency - shopItem.price).toLocaleString()}** ${currencyData.name}`,
                         inline: true
                     }
                 ])
                 .setTimestamp()
                 .setFooter({ 
-                    text: message.author.username, 
-                    iconURL: message.author.displayAvatarURL() 
+                    text: `Shop • ${interaction.user.username}`, 
+                    iconURL: interaction.user.displayAvatarURL() 
                 });
 
-            await message.reply({ embeds: [successEmbed] });
+            await interaction.update({ 
+                embeds: [successEmbed], 
+                components: [] 
+            });
 
         } catch (error) {
             console.error('Error processing purchase:', error);
-            await message.reply('❌ Lỗi xử lý giao dịch! Vui lòng thử lại.');
+            await interaction.update({ 
+                content: '❌ Lỗi xử lý giao dịch! Vui lòng thử lại.',
+                embeds: [],
+                components: [] 
+            });
         }
     },
 
@@ -225,7 +333,6 @@ module.exports = {
                            '• **Tụ linh thạch** 💫 - Cần thiết để craft linh thạch cao 🚧\n' +
                            '• **** Vũ khí **** - Khuếch đại sát thương chiến đấu ( Comming soon )\n' +
                            '• **Công giáp**  - Bảo vệ những đòn nguy hiểm\n' +
-                           '• **Sách kỹ thuật** 📗📘📙 - Học võ công và bí kíp\n\n' +
                            '🚧 **Lưu ý:** Một số items đang phát triển, chưa có giá',
                     inline: false
                 },
