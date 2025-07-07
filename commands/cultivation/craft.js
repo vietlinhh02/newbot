@@ -10,7 +10,6 @@ module.exports = {
         '!craft d1 - Craft đan dược hạ phẩm',
         '!craft d2 - Craft đan dược trung phẩm',
         '!craft lt2 - Craft linh thạch trung phẩm',
-        '!craft recipes - xem công thức'
     ],
     permissions: 'everyone',
     guildOnly: true,
@@ -21,7 +20,7 @@ module.exports = {
             const userId = message.author.id;
             const guildId = message.guild.id;
 
-            if (!args[0] || args[0] === 'recipes' || args[0] === 'recipe') {
+            if (!args[0] || args[0] === ' ' || args[0] === 'recipe') {
                 return this.showRecipes(message, client);
             }
 
@@ -30,13 +29,13 @@ module.exports = {
             // Validate item - check both MEDICINES and SPIRIT_STONES
             const itemData = MEDICINES[targetItem] || SPIRIT_STONES[targetItem];
             if (!itemData) {
-                return message.reply(`❌ Không tìm thấy item "${targetItem}"! Sử dụng \`!craft recipes\` để xem công thức.`);
+                return message.reply(`❌ Không tìm thấy item "${targetItem}"! Sử dụng \`!craft \` để xem công thức.`);
             }
 
             // Check if item can be crafted
             const recipe = CRAFT_RECIPES[targetItem];
             if (!recipe) {
-                return message.reply(`❌ Không thể craft item "${targetItem}"! Sử dụng \`!craft recipes\` để xem công thức.`);
+                return message.reply(`❌ Không thể craft item "${targetItem}"! Sử dụng \`!craft \` để xem công thức.`);
             }
 
             // Get user data
@@ -258,7 +257,7 @@ module.exports = {
                 iconURL: message.author.displayAvatarURL() 
             });
 
-        // Filter craft recipes for pills (d series) only
+        // Filter craft   for pills (d series) only
         const dCraftRecipes = Object.entries(CRAFT_RECIPES).filter(([itemId]) => 
             itemId.startsWith('d')
         );
@@ -312,7 +311,7 @@ module.exports = {
                 iconURL: message.author.displayAvatarURL() 
             });
 
-        // Filter craft recipes for spirit stones (lt series)
+        // Filter craft   for spirit stones (lt series)
         const ltCraftRecipes = Object.entries(CRAFT_RECIPES).filter(([itemId]) => 
             itemId.startsWith('lt')
         );

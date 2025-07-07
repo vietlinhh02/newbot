@@ -223,8 +223,8 @@ module.exports = {
                     name: '🛍️ Danh mục sản phẩm',
                     value: '• **Đan phương & Đan lò** 📜🏺 - Cần thiết để craft đan dược 🚧\n' +
                            '• **Tụ linh thạch** 💫 - Cần thiết để craft linh thạch cao 🚧\n' +
-                           '• **Linh đan** 🟢🔵🟣🟡 - Tăng EXP và đột phá\n' +
-                           '• **Linh dược** 💚💙💜💛 - Hồi phục và tăng sức mạnh\n' +
+                           '• **** Vũ khí **** - Khuếch đại sát thương chiến đấu ( Comming soon )\n' +
+                           '• **Công giáp**  - Bảo vệ những đòn nguy hiểm\n' +
                            '• **Sách kỹ thuật** 📗📘📙 - Học võ công và bí kíp\n\n' +
                            '🚧 **Lưu ý:** Một số items đang phát triển, chưa có giá',
                     inline: false
@@ -234,10 +234,8 @@ module.exports = {
                     value: '• `!shop` - Xem tất cả sản phẩm\n' +
                            '• `!shop buy <id>` - Mua sản phẩm (chỉ items có giá)\n' +
                            '\n**Ví dụ mua:**\n' +
-                           '• `!shop buy ld1` - Mua linh đan\n' +
-                           '• `!shop buy ly1` - Mua linh dược\n' +
-                           '• `!shop buy book1` - Mua sách\n' +
-                           '\n💡 **Dùng nút bên dưới để chuyển trang!**',
+                           '• `!shop buy book1` - Mua sách\n',
+
                     inline: false
                 }
             ]);
