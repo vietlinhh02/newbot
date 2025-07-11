@@ -82,7 +82,7 @@ async function updateVoiceTime(userId, timeSpent, client) {
         
         if (user && user.messageCount !== undefined) {
             const baseExpFromMessages = user.messageCount || 0; // 1 tin nhắn = 1 EXP
-            const baseExpFromVoice = Math.floor((user.voiceTime || 0) / 60) * 5; // 1 phút = 5 EXP
+            const baseExpFromVoice = Math.floor((user.voiceTime || 0) / 60); // 1 phút = 1 EXP
             const totalBaseExp = baseExpFromMessages + baseExpFromVoice;
             
             // Get member to calculate role bonus (if available)

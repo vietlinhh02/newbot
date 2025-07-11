@@ -196,11 +196,11 @@ module.exports = {
 
             // Add helpful tips
             responseText += `\n💡 **GỢI Ý:**\n`;
-            responseText += `• \`!farm\` - Thu thập nguyên liệu, đan phương, linh thạch (10+ tùy VIP)\n`;
-            responseText += `• \`!shop\` - Mua linh đan, linh dược, sách bằng linh thạch\n`;
-            responseText += `• \`!craft recipes\` - Xem công thức chế tạo\n`;
-            responseText += `• \`!breakthrough\` - Đột phá để nhận linh thạch\n`;
-            responseText += `• **1 tin nhắn** = 1 EXP | **1 phút voice** = 5 EXP`;
+            responseText += `• \`!farm\` - Thu thập nguyên liệu (1-9), linh thạch (1-99), EXP (1-60) + bonus VIP\n`;
+            responseText += `• \`!shop\` - Mua linh đan (đan phương/đan lò đang phát triển)\n`;
+            responseText += `• \`!craft\` - Chế tạo đan dược từ nguyên liệu + đan phương + đan lò (50% thành công)\n`;
+            responseText += `• \`!breakthrough\` - Đột phá để nhận linh thạch (random mất 1-10% EXP khi thất bại)\n`;
+            responseText += `• **1 tin nhắn** = 1 EXP | **1 phút voice** = 1 EXP + bonus VIP`;
 
             await message.reply(responseText);
 

@@ -371,14 +371,16 @@ async function applyBreakthroughPenalty(client, userId, levelData) {
 
     const results = { expLost: 0, itemsLost: [] };
 
-    // Apply EXP penalty
+    // Apply EXP penalty - random từ 1-10% thay vì theo levelData.expPenalty
     if (levelData.expPenalty > 0) {
         const user = await client.prisma.cultivationUser.findUnique({
             where: { userId: userId }
         });
 
         if (user) {
-            const expLoss = Math.floor(user.exp * (levelData.expPenalty / 100));
+            // Random mất từ 1-10% EXP
+            const randomPenaltyPercent = Math.floor(Math.random() * 10) + 1; // 1-10%
+            const expLoss = Math.floor(user.exp * (randomPenaltyPercent / 100));
             const newExp = Math.max(0, user.exp - expLoss);
             
             await client.prisma.cultivationUser.update({

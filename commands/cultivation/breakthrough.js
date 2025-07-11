@@ -75,7 +75,7 @@ module.exports = {
             if (hasRisk) {
                 confirmEmbed.addFields({
                     name: '💀 Nguy cơ nếu thất bại',
-                    value: `• Mất **${currentLevelData.expPenalty}%** EXP hiện tại\n• Mất **${currentLevelData.itemPenalty}** vật phẩm ngẫu nhiên`,
+                    value: `• Mất **1-10%** EXP hiện tại (random)\n• Mất **${currentLevelData.itemPenalty}** vật phẩm ngẫu nhiên`,
                     inline: false
                 });
             } else {
@@ -271,7 +271,9 @@ module.exports = {
                 if (penalty.expLost > 0 || penalty.itemsLost.length > 0) {
                     let penaltyText = '';
                     if (penalty.expLost > 0) {
-                        penaltyText += `💸 Mất **${penalty.expLost} EXP** (${currentLevelData.expPenalty}%)\n`;
+                        // Tính % thực tế đã mất để hiển thị
+                        const actualPercent = Math.round((penalty.expLost / (cultivationUser.exp + penalty.expLost)) * 100);
+                        penaltyText += `💸 Mất **${penalty.expLost} EXP** (${actualPercent}%)\n`;
                     }
                     if (penalty.itemsLost.length > 0) {
                         const itemsText = penalty.itemsLost.map(item => `${item.name} x${item.quantity}`).join(', ');

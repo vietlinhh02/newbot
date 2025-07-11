@@ -82,8 +82,8 @@ module.exports = {
                 console.log('Could not calculate role bonus for farm');
             }
 
-            // Calculate total materials to farm (base 10 + bonus, riêng với linh thạch)
-            const baseMaterials = 10;
+            // Calculate total materials to farm (base random 1-9 + bonus)
+            const baseMaterials = Math.floor(Math.random() * 9) + 1; // Random 1-9
             const bonusMaterials = Math.floor(baseMaterials * (roleBonus / 100));
             const totalMaterials = baseMaterials + bonusMaterials;
 
@@ -114,13 +114,31 @@ module.exports = {
                 dropCounts[drop.id]++;
             }
 
-            // Tách riêng farm linh thạch - random từ 1-999 + bonus
-            const baseSpiritStones = Math.floor(Math.random() * 999) + 1; // Random 1-999
+            // Tách riêng farm linh thạch - random từ 1-99 + bonus
+            const baseSpiritStones = Math.floor(Math.random() * 99) + 1; // Random 1-99
             const bonusSpiritStones = Math.floor(baseSpiritStones * (roleBonus / 100));
             const totalSpiritStones = baseSpiritStones + bonusSpiritStones;
             
             // Add linh thạch vào dropCounts
             dropCounts['lt1'] = totalSpiritStones;
+
+            // Farm EXP - random từ 1-60 + bonus
+            const baseExpGain = Math.floor(Math.random() * 60) + 1; // Random 1-60
+            const bonusExpGain = Math.floor(baseExpGain * (roleBonus / 100));
+            const totalExpGain = baseExpGain + bonusExpGain;
+
+            // Cập nhật EXP cho user
+            await client.prisma.cultivationUser.update({
+                where: {
+                    userId: userId
+                },
+                data: {
+                    exp: {
+                        increment: totalExpGain
+                    },
+                    lastFarmTime: new Date()
+                }
+            });
 
             // Update inventory for each unique item
             for (const [itemId, quantity] of Object.entries(dropCounts)) {
@@ -148,15 +166,7 @@ module.exports = {
                 });
             }
 
-            // Update farm time
-            await client.prisma.cultivationUser.update({
-                where: {
-                    userId: userId
-                },
-                data: {
-                    lastFarmTime: new Date()
-                }
-            });
+            // Update farm time - đã được update cùng với EXP ở trên
 
             // Create response message with grouped items (tách riêng linh thạch)
             const groupedDrops = {};
@@ -178,13 +188,15 @@ module.exports = {
             let replyText = `🌾 **${message.author.username}** đã farm và nhận được:\n`;
             replyText += `📦 **${totalMaterials} nguyên liệu:** ${dropsText}\n`;
             replyText += `💎 **${totalSpiritStones} linh thạch:** ${FARM_MATERIALS.lt1.icon} ${FARM_MATERIALS.lt1.name} x${totalSpiritStones}\n`;
+            replyText += `⭐ **${totalExpGain} EXP** được thêm vào tu luyện!\n`;
             
             if (roleBonus > 0) {
                 replyText += `✨ *Bonus nguyên liệu: ${baseMaterials} base + ${bonusMaterials} VIP (+${roleBonus}%)*\n`;
                 replyText += `✨ *Bonus linh thạch: ${baseSpiritStones} base + ${bonusSpiritStones} VIP (+${roleBonus}%)*\n`;
+                replyText += `✨ *Bonus EXP: ${baseExpGain} base + ${bonusExpGain} VIP (+${roleBonus}%)*\n`;
             }
             
-            replyText += `\n💡 *EXP: 1 tin nhắn = 1 EXP | 1 phút voice = 5 EXP + VIP bonus*`;
+            replyText += `\n💡 *EXP: 1 tin nhắn = 1 EXP | 1 phút voice = 1 EXP + VIP bonus*`;
 
             await message.reply(replyText);
 
