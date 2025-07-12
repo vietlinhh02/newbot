@@ -13,60 +13,60 @@ LOGIC MỚI:
 // Dữ liệu farming từ FARM.txt - CHỈ CÓ NGUYÊN LIỆU CƠ BẢN VÀ LINH THẠCH CẤP 1
 const FARM_MATERIALS = {
     // Nguyên liệu cơ bản (từ FARM.txt)
-    1: { name: 'bạch ngọc sương', dropRate: 30, icon: VATPHAM_EMOJI_MAP.BACH_NGOC_SUONG, fallbackIcon: '🔮' },
-    2: { name: 'tụ linh thảo', dropRate: 18, icon: VATPHAM_EMOJI_MAP.TU_LINH_THAO, fallbackIcon: '🌿' },
-    3: { name: 'tử hoa thảo', dropRate: 16, icon: VATPHAM_EMOJI_MAP.TU_HOA_THAO, fallbackIcon: '🟣' },
-    4: { name: 'hồng tú hoa', dropRate: 14, icon: VATPHAM_EMOJI_MAP.HONG_TU_HOA, fallbackIcon: '🌺' },
-    5: { name: 'ngũ sắc hoa', dropRate: 6, icon: VATPHAM_EMOJI_MAP.NGU_SAC_HOA, fallbackIcon: '🍃' },
-    6: { name: 'ngũ sắc thạch', dropRate: 3, icon: VATPHAM_EMOJI_MAP.NGU_SAC_THACH, fallbackIcon: '🌈' },
-    7: { name: 'huyết ngọc hoa', dropRate: 2, icon: VATPHAM_EMOJI_MAP.HUYET_NGOC_HOA, fallbackIcon: '🩸' },
+    1: { name: 'Bạch ngọc sương', dropRate: 30, icon: VATPHAM_EMOJI_MAP.BACH_NGOC_SUONG, fallbackIcon: '🔮' },
+    2: { name: 'Tụ linh thảo', dropRate: 18, icon: VATPHAM_EMOJI_MAP.TU_LINH_THAO, fallbackIcon: '🌿' },
+    3: { name: 'Tử hoa thảo', dropRate: 16, icon: VATPHAM_EMOJI_MAP.TU_HOA_THAO, fallbackIcon: '🟣' },
+    4: { name: 'Hồng tú hoa', dropRate: 14, icon: VATPHAM_EMOJI_MAP.HONG_TU_HOA, fallbackIcon: '🌺' },
+    5: { name: 'Ngũ sắc hoa', dropRate: 6, icon: VATPHAM_EMOJI_MAP.NGU_SAC_HOA, fallbackIcon: '🍃' },
+    6: { name: 'Ngũ sắc thạch', dropRate: 3, icon: VATPHAM_EMOJI_MAP.NGU_SAC_THACH, fallbackIcon: '🌈' },
+    7: { name: 'Huyết ngọc hoa', dropRate: 2, icon: VATPHAM_EMOJI_MAP.HUYET_NGOC_HOA, fallbackIcon: '🩸' },
     
     // Linh thạch cơ bản (tỉ lệ thấp, bổ sung cho breakthrough)
-    lt1: { name: 'hạ phẩm linh thạch', dropRate: 1, icon: VATPHAM_EMOJI_MAP.LINH_THACH_HA_PHAM, fallbackIcon: '💎' }
+    lt1: { name: 'Hạ phẩm linh thạch', dropRate: 1, icon: VATPHAM_EMOJI_MAP.LINH_THACH_HA_PHAM, fallbackIcon: '💎' }
 };
 
 const MEDICINES = {
     // Đan dược (d series) - CRAFT được từ nguyên liệu + đan phương + đan lò
-    d1: { name: 'hạ phẩm đan dược', icon: VATPHAM_EMOJI_MAP.DAN_DUOC_HA_PHAM, fallbackIcon: '💊', level: 1 },
-    d2: { name: 'trung phẩm đan dược', icon: VATPHAM_EMOJI_MAP.DAN_DUOC_TRUNG_PHAM, fallbackIcon: '💉', level: 2 },
-    d3: { name: 'thượng phẩm đan dược', icon: VATPHAM_EMOJI_MAP.DAN_DUOC_THUONG_PHAM, fallbackIcon: '🧪', level: 3 },
-    d4: { name: 'tiên phẩm đan dược', icon: VATPHAM_EMOJI_MAP.DAN_DUOC_TIEN_PHAM, fallbackIcon: '⚗️', level: 4 }
+d1: { name: 'Hạ phẩm đan dược', icon: VATPHAM_EMOJI_MAP.DAN_DUOC_HA_PHAM, fallbackIcon: '💊', level: 1 },
+d2: { name: 'Trung phẩm đan dược', icon: VATPHAM_EMOJI_MAP.DAN_DUOC_TRUNG_PHAM, fallbackIcon: '💉', level: 2 },
+d3: { name: 'Thượng phẩm đan dược', icon: VATPHAM_EMOJI_MAP.DAN_DUOC_THUONG_PHAM, fallbackIcon: '🧪', level: 3 },
+d4: { name: 'Tiên phẩm đan dược', icon: VATPHAM_EMOJI_MAP.DAN_DUOC_TIEN_PHAM, fallbackIcon: '⚗️', level: 4 }
 };
 
 // Linh thạch - CRAFT được từ linh thạch cấp thấp hơn + tụ linh thạch
 const SPIRIT_STONES = {
-    lt1: { name: 'hạ phẩm linh thạch', icon: VATPHAM_EMOJI_MAP.LINH_THACH_HA_PHAM, fallbackIcon: '💎' },
-    lt2: { name: 'trung phẩm linh thạch', icon: VATPHAM_EMOJI_MAP.LINH_THACH_TRUNG_PHAM, fallbackIcon: '💍' },
-    lt3: { name: 'thượng phẩm linh thạch', icon: VATPHAM_EMOJI_MAP.LINH_THACH_THUONG_PHAM, fallbackIcon: '💠' },
-    lt4: { name: 'tiên phẩm linh thạch', icon: VATPHAM_EMOJI_MAP.LINH_THACH_TIEN_PHAM, fallbackIcon: '🔸' }
+    lt1: { name: 'Hạ phẩm linh thạch', icon: VATPHAM_EMOJI_MAP.LINH_THACH_HA_PHAM, fallbackIcon: '💎' },
+    lt2: { name: 'Trung phẩm linh thạch', icon: VATPHAM_EMOJI_MAP.LINH_THACH_TRUNG_PHAM, fallbackIcon: '💍' },
+    lt3: { name: 'Thượng phẩm linh thạch', icon: VATPHAM_EMOJI_MAP.LINH_THACH_THUONG_PHAM, fallbackIcon: '💠' },
+    lt4: { name: 'Tiên phẩm linh thạch', icon: VATPHAM_EMOJI_MAP.LINH_THACH_TIEN_PHAM, fallbackIcon: '🔸' }
 };
 
 // Đan phương, đan lò, tụ linh thạch, linh đan, linh dược và sách chỉ có thể mua từ shop
 const SHOP_ITEMS = {
     // Đan phương và đan lò - cần thiết để craft đan dược (tạm chưa có giá)
     dp1: { 
-        name: 'hạ phẩm đan phương', 
+        name: 'Hạ phẩm đan phương', 
         icon: VATPHAM_EMOJI_MAP.DAN_PHUONG_HA_PHAM, 
         fallbackIcon: '📜',
         category: 'medicine',
         description: 'Đan phương cấp thấp, dùng để craft đan dược'
     },
     dp2: { 
-        name: 'trung phẩm đan phương', 
+        name: 'Trung phẩm đan phương', 
         icon: VATPHAM_EMOJI_MAP.DAN_PHUONG_TRUNG_PHAM, 
         fallbackIcon: '📃',
         category: 'medicine',
         description: 'Đan phương trung bình, dùng để craft đan dược'
     },
     dp3: { 
-        name: 'thượng phẩm đan phương', 
+        name: 'Thượng phẩm đan phương', 
         icon: VATPHAM_EMOJI_MAP.DAN_PHUONG_THUONG_PHAM, 
         fallbackIcon: '📋',
         category: 'medicine',
         description: 'Đan phương cao cấp, dùng để craft đan dược'
     },
     dp4: { 
-        name: 'tiên phẩm đan phương', 
+        name: 'Tiên phẩm đan phương', 
         icon: VATPHAM_EMOJI_MAP.DAN_PHUONG_TIEN_PHAM, 
         fallbackIcon: '📊',
         category: 'medicine',
@@ -98,7 +98,7 @@ const SHOP_ITEMS = {
     
     // Linh đan series (dùng linh thạch mua) - sử dụng đan dược emoji
     ld1: { 
-        name: 'hạ phẩm linh đan', 
+        name: 'Hạ phẩm linh đan', 
         icon: VATPHAM_EMOJI_MAP.DAN_DUOC_HA_PHAM, 
         fallbackIcon: '🟢',
         price: 100, 
@@ -107,7 +107,7 @@ const SHOP_ITEMS = {
         description: 'Linh đan cấp thấp nhất, tăng EXP tu luyện'
     },
     ld2: { 
-        name: 'trung phẩm linh đan', 
+        name: 'Trung phẩm linh đan', 
         icon: VATPHAM_EMOJI_MAP.DAN_DUOC_TRUNG_PHAM, 
         fallbackIcon: '🔵',
         price: 1000, 
@@ -116,7 +116,7 @@ const SHOP_ITEMS = {
         description: 'Linh đan trung bình, tăng nhiều EXP hơn'
     },
     ld3: { 
-        name: 'thượng phẩm linh đan', 
+        name: 'Thượng phẩm linh đan', 
         icon: VATPHAM_EMOJI_MAP.DAN_DUOC_THUONG_PHAM, 
         fallbackIcon: '🟣',
         price: 5000, 
@@ -125,7 +125,7 @@ const SHOP_ITEMS = {
         description: 'Linh đan cấp cao, tăng EXP và tỉ lệ đột phá'
     },
     ld4: { 
-        name: 'tiên phẩm linh đan', 
+        name: 'Tiên phẩm linh đan', 
         icon: VATPHAM_EMOJI_MAP.DAN_DUOC_TIEN_PHAM, 
         fallbackIcon: '🟡',
         price: 1000, 
@@ -136,7 +136,7 @@ const SHOP_ITEMS = {
     
     // Linh dược series (dùng linh thạch mua) - sử dụng đan phương emoji
     ly1: { 
-        name: 'hạ phẩm linh dược', 
+        name: 'Hạ phẩm linh dược', 
         icon: VATPHAM_EMOJI_MAP.DAN_PHUONG_HA_PHAM, 
         fallbackIcon: '💚',
         price: 500, 
@@ -145,7 +145,7 @@ const SHOP_ITEMS = {
         description: 'Linh dược hồi phục và tăng sức mạnh tu luyện'
     },
     ly2: { 
-        name: 'trung phẩm linh dược', 
+        name: 'Trung phẩm linh dược', 
         icon: VATPHAM_EMOJI_MAP.DAN_PHUONG_TRUNG_PHAM, 
         fallbackIcon: '💙',
         price: 2000, 
@@ -154,7 +154,7 @@ const SHOP_ITEMS = {
         description: 'Linh dược mạnh mẽ, hiệu quả lâu dài'
     },
     ly3: { 
-        name: 'thượng phẩm linh dược', 
+        name: 'Thượng phẩm linh dược', 
         icon: VATPHAM_EMOJI_MAP.DAN_PHUONG_THUONG_PHAM, 
         fallbackIcon: '💜',
         price: 2000, 
@@ -163,7 +163,7 @@ const SHOP_ITEMS = {
         description: 'Linh dược cao cấp, có thể cứu sống trong thời khắc nguy hiểm'
     },
     ly4: { 
-        name: 'tiên phẩm linh dược', 
+        name: 'Tiên phẩm linh dược', 
         icon: VATPHAM_EMOJI_MAP.DAN_PHUONG_TIEN_PHAM, 
         fallbackIcon: '💛',
         price: 500, 
@@ -174,7 +174,7 @@ const SHOP_ITEMS = {
     
     // Sách kỹ thuật (dùng linh thạch mua) - chỉ giữ 3 sách cơ bản
     book1: { 
-        name: 'cơ bản tu tiên', 
+        name: 'Cơ bản tu tiên', 
         icon: VATPHAM_EMOJI_MAP.BACH_NGOC_SUONG, 
         fallbackIcon: '📗',
         price: 50, 
@@ -183,7 +183,7 @@ const SHOP_ITEMS = {
         description: 'Sách dạy kỹ thuật tu tiên cơ bản'
     },
     book2: { 
-        name: 'trung cấp võ học', 
+        name: 'Trung cấp võ học', 
         icon: VATPHAM_EMOJI_MAP.TU_LINH_THAO, 
         fallbackIcon: '📘',
         price: 300, 
@@ -192,7 +192,7 @@ const SHOP_ITEMS = {
         description: 'Sách võ học trung cấp, mở khóa kỹ năng mới'
     },
     book3: { 
-        name: 'cao thủ chiến thuật', 
+        name: 'Cao thủ chiến thuật', 
         icon: VATPHAM_EMOJI_MAP.NGU_SAC_HOA, 
         fallbackIcon: '📙',
         price: 1500, 
