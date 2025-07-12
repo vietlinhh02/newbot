@@ -513,25 +513,55 @@ function getItemStorageInfo(itemId) {
         };
     }
     
-    // 5. Handle extended đan dược (d5+) from additems system
+    // 5. Handle extended đan dược (d5+) from additems system - use real icons
     if (itemIdStr.startsWith('d') && itemIdStr.length > 2) {
-        const level = itemIdStr.substring(1);
+        const level = parseInt(itemIdStr.substring(1));
+        let icon;
+        
+        // Map to existing đan dược icons based on level
+        if (level <= 4) {
+            // d1-d4 are handled above, but fallback just in case
+            const danDuocLevels = ['HA_PHAM', 'TRUNG_PHAM', 'THUONG_PHAM', 'TIEN_PHAM'];
+            const iconKey = `DAN_DUOC_${danDuocLevels[(level - 1) % 4]}`;
+            icon = VATPHAM_EMOJI_MAP[iconKey] || '💊';
+        } else {
+            // d5+ cycle through the 4 icon types
+            const danDuocLevels = ['HA_PHAM', 'TRUNG_PHAM', 'THUONG_PHAM', 'TIEN_PHAM'];
+            const iconKey = `DAN_DUOC_${danDuocLevels[(level - 1) % 4]}`;
+            icon = VATPHAM_EMOJI_MAP[iconKey] || '💊';
+        }
+        
         return {
             category: 'medicine',
             actualId: itemIdStr,
             name: `Đan Dược Cấp ${level}`,
-            icon: '💊'
+            icon: icon
         };
     }
     
-    // 6. Handle extended linh thạch (lt5+) from additems system
+    // 6. Handle extended linh thạch (lt5+) from additems system - use real icons
     if (itemIdStr.startsWith('lt') && itemIdStr.length > 3) {
-        const level = itemIdStr.substring(2);
+        const level = parseInt(itemIdStr.substring(2));
+        let icon;
+        
+        // Map to existing linh thạch icons based on level
+        if (level <= 4) {
+            // lt1-lt4 are handled above, but fallback just in case
+            const linhThachLevels = ['HA_PHAM', 'TRUNG_PHAM', 'THUONG_PHAM', 'TIEN_PHAM'];
+            const iconKey = `LINH_THACH_${linhThachLevels[(level - 1) % 4]}`;
+            icon = VATPHAM_EMOJI_MAP[iconKey] || '💎';
+        } else {
+            // lt5+ cycle through the 4 icon types
+            const linhThachLevels = ['HA_PHAM', 'TRUNG_PHAM', 'THUONG_PHAM', 'TIEN_PHAM'];
+            const iconKey = `LINH_THACH_${linhThachLevels[(level - 1) % 4]}`;
+            icon = VATPHAM_EMOJI_MAP[iconKey] || '💎';
+        }
+        
         return {
             category: 'material',
             actualId: itemIdStr,
             name: `Linh Thạch Cấp ${level}`,
-            icon: '💎'
+            icon: icon
         };
     }
     
