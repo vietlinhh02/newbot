@@ -41,9 +41,9 @@ const SPIRIT_STONES = {
     lt4: { name: 'Tiên phẩm linh thạch', icon: VATPHAM_EMOJI_MAP.LINH_THACH_TIEN_PHAM, fallbackIcon: '🔸' }
 };
 
-// Đan phương, đan lò, tụ linh thạch, linh đan, linh dược và sách chỉ có thể mua từ shop
+// Đan phương, đan lò, tụ linh thạch - chỉ có thể mua từ shop
 const SHOP_ITEMS = {
-    // Đan phương và đan lò - cần thiết để craft đan dược (tạm chưa có giá)
+    // Đan phương và đan lò - cần thiết để craft đan dược
     dp1: { 
         name: 'Hạ phẩm đan phương', 
         icon: VATPHAM_EMOJI_MAP.DAN_PHUONG_HA_PHAM, 
@@ -87,118 +87,13 @@ const SHOP_ITEMS = {
         description: 'Đan lò, dùng để craft đan dược'
     },
     
-    // Tụ linh thạch - cần thiết để craft linh thạch (tạm chưa có giá)
+    // Tụ linh thạch - cần thiết để craft linh thạch
     tlt: { 
         name: 'Tụ linh thạch', 
         icon: VATPHAM_EMOJI_MAP.TU_LINH_THACH, 
         fallbackIcon: '💫',
         category: 'material',
         description: 'Tụ linh thạch, dùng để craft linh thạch cao cấp'
-    },
-    
-    // Linh đan series (dùng linh thạch mua) - sử dụng đan dược emoji
-    ld1: { 
-        name: 'Hạ phẩm linh đan', 
-        icon: VATPHAM_EMOJI_MAP.DAN_DUOC_HA_PHAM, 
-        fallbackIcon: '🟢',
-        price: 100, 
-        currency: 'lt1',
-        category: 'medicine',
-        description: 'Linh đan cấp thấp nhất, tăng EXP tu luyện'
-    },
-    ld2: { 
-        name: 'Trung phẩm linh đan', 
-        icon: VATPHAM_EMOJI_MAP.DAN_DUOC_TRUNG_PHAM, 
-        fallbackIcon: '🔵',
-        price: 1000, 
-        currency: 'lt1',
-        category: 'medicine',
-        description: 'Linh đan trung bình, tăng nhiều EXP hơn'
-    },
-    ld3: { 
-        name: 'Thượng phẩm linh đan', 
-        icon: VATPHAM_EMOJI_MAP.DAN_DUOC_THUONG_PHAM, 
-        fallbackIcon: '🟣',
-        price: 5000, 
-        currency: 'lt2',
-        category: 'medicine',
-        description: 'Linh đan cấp cao, tăng EXP và tỉ lệ đột phá'
-    },
-    ld4: { 
-        name: 'Tiên phẩm linh đan', 
-        icon: VATPHAM_EMOJI_MAP.DAN_DUOC_TIEN_PHAM, 
-        fallbackIcon: '🟡',
-        price: 1000, 
-        currency: 'lt3',
-        category: 'medicine',
-        description: 'Linh đan cực phẩm, hiệu quả tuyệt đỉnh'
-    },
-    
-    // Linh dược series (dùng linh thạch mua) - sử dụng đan phương emoji
-    ly1: { 
-        name: 'Hạ phẩm linh dược', 
-        icon: VATPHAM_EMOJI_MAP.DAN_PHUONG_HA_PHAM, 
-        fallbackIcon: '💚',
-        price: 500, 
-        currency: 'lt1',
-        category: 'medicine',
-        description: 'Linh dược hồi phục và tăng sức mạnh tu luyện'
-    },
-    ly2: { 
-        name: 'Trung phẩm linh dược', 
-        icon: VATPHAM_EMOJI_MAP.DAN_PHUONG_TRUNG_PHAM, 
-        fallbackIcon: '💙',
-        price: 2000, 
-        currency: 'lt1',
-        category: 'medicine',
-        description: 'Linh dược mạnh mẽ, hiệu quả lâu dài'
-    },
-    ly3: { 
-        name: 'Thượng phẩm linh dược', 
-        icon: VATPHAM_EMOJI_MAP.DAN_PHUONG_THUONG_PHAM, 
-        fallbackIcon: '💜',
-        price: 2000, 
-        currency: 'lt2',
-        category: 'medicine',
-        description: 'Linh dược cao cấp, có thể cứu sống trong thời khắc nguy hiểm'
-    },
-    ly4: { 
-        name: 'Tiên phẩm linh dược', 
-        icon: VATPHAM_EMOJI_MAP.DAN_PHUONG_TIEN_PHAM, 
-        fallbackIcon: '💛',
-        price: 500, 
-        currency: 'lt3',
-        category: 'medicine',
-        description: 'Linh dược tiên phẩm, hồi sinh hoàn toàn'
-    },
-    
-    // Sách kỹ thuật (dùng linh thạch mua) - chỉ giữ 3 sách cơ bản
-    book1: { 
-        name: 'Cơ bản tu tiên', 
-        icon: VATPHAM_EMOJI_MAP.BACH_NGOC_SUONG, 
-        fallbackIcon: '📗',
-        price: 50, 
-        currency: 'lt1',
-        category: 'book',
-        description: 'Sách dạy kỹ thuật tu tiên cơ bản'
-    },
-    book2: { 
-        name: 'Trung cấp võ học', 
-        icon: VATPHAM_EMOJI_MAP.TU_LINH_THAO, 
-        fallbackIcon: '📘',
-        price: 300, 
-        currency: 'lt1',
-        category: 'book',
-        description: 'Sách võ học trung cấp, mở khóa kỹ năng mới'
-    },
-    book3: { 
-        name: 'Cao thủ chiến thuật', 
-        icon: VATPHAM_EMOJI_MAP.NGU_SAC_HOA, 
-        fallbackIcon: '📙',
-        price: 1500, 
-        currency: 'lt2',
-        category: 'book',
-        description: 'Sách chiến thuật cao cấp, tăng khả năng đột phá'
     }
 };
 
@@ -354,7 +249,7 @@ const CULTIVATION_LEVELS = [
     // Phi Thăng kiếp (Special breakthrough)
     { name: 'Phi Thăng kiếp', exp: 330000, breakRate: 5, expPenalty: 50, itemPenalty: 20, requirements: ['d1:9', 'lt1:999'], role: 'Phi Thăng kiếp' },
 
-    // Luyện Hư realm  
+    // Luyện Hư realm
     { name: 'Luyện Hư - Sơ Kỳ - Tầng 1', exp: 340000, breakRate: 80, expPenalty: 30, itemPenalty: 8, requirements: ['lt2:1'], role: 'Luyện Hư - Sơ Kỳ' },
     { name: 'Luyện Hư - Sơ Kỳ - Tầng 9', exp: 380000, breakRate: 40, expPenalty: 35, itemPenalty: 10, requirements: ['lt2:1'], role: 'Luyện Hư - Sơ Kỳ' },
     { name: 'Luyện Hư - Trung Kỳ - Tầng 1', exp: 390000, breakRate: 80, expPenalty: 35, itemPenalty: 8, requirements: ['d2:1'], role: 'Luyện Hư - Trung Kỳ' },
@@ -607,7 +502,7 @@ function getItemStorageInfo(itemId) {
         };
     }
     
-    // 4. Check SHOP_ITEMS (đan phương, đan lò, tụ linh thạch, linh đan, linh dược, sách)
+    // 4. Check SHOP_ITEMS (đan phương, đan lò, tụ linh thạch)
     if (SHOP_ITEMS[itemIdStr]) {
         const shopItem = SHOP_ITEMS[itemIdStr];
         return {
@@ -640,17 +535,7 @@ function getItemStorageInfo(itemId) {
         };
     }
     
-    // 7. Handle numbered materials (1-7) - fallback check
-    if (!isNaN(itemIdStr) && parseInt(itemIdStr) >= 1 && parseInt(itemIdStr) <= 7) {
-        return {
-            category: 'material',
-            actualId: itemIdStr,
-            name: FARM_MATERIALS[itemIdStr]?.name || `Nguyên liệu ${itemIdStr}`,
-            icon: FARM_MATERIALS[itemIdStr]?.icon || FARM_MATERIALS[itemIdStr]?.fallbackIcon || '🔮'
-        };
-    }
-    
-    // 8. Default fallback with better naming
+    // 7. Default fallback for invalid items
     return {
         category: 'material',
         actualId: itemIdStr,

@@ -4,14 +4,13 @@ const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentTyp
 module.exports = {
     name: 'shop',
     aliases: ['thuongthuy', 'thuong_thuy', 'store', 'market'],
-    description: 'Thương thành tu tiên - Mua linh đan, linh dược và sách bằng linh thạch',
-    usage: '!shop [category] hoặc !shop buy <item>',
+    description: 'Thương thành tu tiên - Mua nguyên liệu chế tạo bằng linh thạch',
+    usage: '!shop hoặc !shop buy <item>',
     examples: [
-        '!shop - Xem tất cả',
-        '!shop pills - Xem linh đan',
-        '!shop medicine - Xem linh dược', 
-        '!shop books - Xem sách',
-        '!shop buy ld1 - Mua linh đan'
+        '!shop - Xem tất cả nguyên liệu',
+        '!shop buy dp1 - Mua đan phương',
+        '!shop buy dl - Mua đan lò', 
+        '!shop buy tlt - Mua tụ linh thạch'
     ],
     permissions: 'everyone',
     guildOnly: true,
@@ -311,7 +310,7 @@ module.exports = {
         // Page 1: Overview & Balance
         const overviewEmbed = new EmbedBuilder()
             .setTitle('🏪 Thương Thành Tu Tiên')
-            .setDescription('**Mua linh đan, linh dược và sách bằng linh thạch**')
+            .setDescription('**Mua nguyên liệu chế tạo bằng linh thạch**')
             .setColor(0xffd700)
             .setTimestamp()
             .setFooter({ 
@@ -331,17 +330,18 @@ module.exports = {
                     name: '🛍️ Danh mục sản phẩm',
                     value: '• **Đan phương & Đan lò** 📜🏺 - Cần thiết để craft đan dược 🚧\n' +
                            '• **Tụ linh thạch** 💫 - Cần thiết để craft linh thạch cao 🚧\n' +
-                           '• **** Vũ khí **** - Khuếch đại sát thương chiến đấu ( Comming soon )\n' +
-                           '• **Công giáp**  - Bảo vệ những đòn nguy hiểm\n' +
+                           '• **Phối đan phương** 📈 - Craft đan phương cao cấp 🚧\n' +
                            '🚧 **Lưu ý:** Một số items đang phát triển, chưa có giá',
                     inline: false
                 },
                 {
                     name: '🎮 Cách sử dụng',
-                    value: '• `!shop` - Xem tất cả sản phẩm\n' +
-                           '• `!shop buy <id>` - Mua sản phẩm (chỉ items có giá)\n' +
+                    value: '• `!shop` - Xem tất cả nguyên liệu\n' +
+                           '• `!shop buy <id>` - Mua nguyên liệu (chỉ items có giá)\n' +
                            '\n**Ví dụ mua:**\n' +
-                           '• `!shop buy book1` - Mua sách\n',
+                           '• `!shop buy dp1` - Mua đan phương\n' +
+                           '• `!shop buy dl` - Mua đan lò\n' +
+                           '• `!shop buy tlt` - Mua tụ linh thạch',
 
                     inline: false
                 }
