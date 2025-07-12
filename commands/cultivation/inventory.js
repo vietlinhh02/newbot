@@ -199,8 +199,9 @@ module.exports = {
             responseText += `• \`!farm\` - Thu thập nguyên liệu (1-9), linh thạch (1-99), EXP (1-60) + bonus VIP\n`;
             responseText += `• \`!shop\` - Mua linh đan (đan phương/đan lò đang phát triển)\n`;
             responseText += `• \`!craft\` - Chế tạo đan dược từ nguyên liệu + đan phương + đan lò (50% thành công)\n`;
-            responseText += `• \`!breakthrough\` - Đột phá để nhận linh thạch (random mất 1-10% EXP khi thất bại)\n`;
-            responseText += `• **1 tin nhắn** = 1 EXP | **1 phút voice** = 1 EXP + bonus VIP`;
+            responseText += `• \`!breakthrough\` - Đột phá cần có đan dược/linh thạch trong túi (random mất 1-10% EXP khi thất bại)\n`;
+            responseText += `• **1 tin nhắn** = 1 EXP | **1 phút voice** = 1 EXP + bonus VIP\n`;
+            responseText += `• **CHÚ Ý:** Đột phá sẽ tiêu tốn vật phẩm yêu cầu dù thành công hay thất bại!`;
 
             await message.reply(responseText);
 
