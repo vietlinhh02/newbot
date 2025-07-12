@@ -501,26 +501,75 @@ async function applyBreakthroughPenalty(client, userId, levelData) {
         }
     }
 
-    // Apply item penalty
+    // Apply item penalty - Updated for new item system
     if (levelData.itemPenalty > 0) {
         const inventory = await client.prisma.userInventory.findMany({
             where: { userId }
         });
 
+        // Filter items that can be lost (quantity > 0)
         const availableItems = inventory.filter(item => item.quantity > 0);
-        const itemsToLose = Math.min(levelData.itemPenalty, availableItems.length);
+        
+        if (availableItems.length === 0) {
+            return results; // No items to lose
+        }
+
+        // Categorize items by priority (lower priority = more likely to be lost)
+        const itemsByPriority = {
+            materials: [], // Nguyên liệu (1-7, lt1+) - mất trước
+            medicines: [], // Đan dược (d1+) - mất giữa  
+            shopItems: []  // Shop items (đan phương, linh đan, etc.) - mất cuối
+        };
+
+        availableItems.forEach(item => {
+            const itemInfo = getItemStorageInfo(item.itemId);
+            const itemWithInfo = { ...item, info: itemInfo };
+            
+            // Categorize based on item type and origin
+            if (itemInfo.category === 'material') {
+                // Materials and spirit stones go first
+                itemsByPriority.materials.push(itemWithInfo);
+            } else if (itemInfo.category === 'medicine' && item.itemId.startsWith('d')) {
+                // Medicines (đan dược) go second
+                itemsByPriority.medicines.push(itemWithInfo);
+            } else {
+                // Shop items (đan phương, linh đan, sách, etc.) go last
+                itemsByPriority.shopItems.push(itemWithInfo);
+            }
+        });
+
+        // Create weighted selection pool (materials most likely to be lost)
+        const selectionPool = [
+            ...itemsByPriority.materials,
+            ...itemsByPriority.materials, // Add twice for higher chance
+            ...itemsByPriority.medicines,
+            ...itemsByPriority.shopItems
+        ];
+
+        const itemsToLose = Math.min(levelData.itemPenalty, selectionPool.length);
+        const processedItems = new Set(); // Track items already processed
 
         for (let i = 0; i < itemsToLose; i++) {
-            if (availableItems.length === 0) break;
+            if (selectionPool.length === 0) break;
 
-            const randomIndex = Math.floor(Math.random() * availableItems.length);
-            const selectedItem = availableItems[randomIndex];
+            // Select random item from pool
+            const randomIndex = Math.floor(Math.random() * selectionPool.length);
+            const selectedItem = selectionPool[randomIndex];
             
-            const lossQuantity = Math.min(
-                Math.floor(Math.random() * 3) + 1, // Lose 1-3 of each item
-                selectedItem.quantity
-            );
+            // Skip if already processed this item type
+            const itemKey = `${selectedItem.itemType}_${selectedItem.itemId}`;
+            if (processedItems.has(itemKey)) {
+                // Remove from pool and try again
+                selectionPool.splice(randomIndex, 1);
+                i--; // Retry this iteration
+                continue;
+            }
+            
+            // Calculate loss quantity (1-3 or all if less)
+            const maxLoss = Math.min(3, selectedItem.quantity);
+            const lossQuantity = Math.floor(Math.random() * maxLoss) + 1;
 
+            // Update database
             await client.prisma.userInventory.update({
                 where: {
                     userId_itemType_itemId: {
@@ -532,20 +581,23 @@ async function applyBreakthroughPenalty(client, userId, levelData) {
                 data: { quantity: { decrement: lossQuantity } }
             });
 
-            // Get item name for display
-            let itemName = 'Unknown Item';
-            if (selectedItem.itemType === 'material' && FARM_MATERIALS[selectedItem.itemId]) {
-                itemName = FARM_MATERIALS[selectedItem.itemId].name;
-            } else if (selectedItem.itemType === 'medicine' && MEDICINES[selectedItem.itemId]) {
-                itemName = MEDICINES[selectedItem.itemId].name;
-            }
+            // Add to results with icon
+            results.itemsLost.push({ 
+                name: selectedItem.info.name,
+                icon: selectedItem.info.icon,
+                quantity: lossQuantity 
+            });
 
-            results.itemsLost.push({ name: itemName, quantity: lossQuantity });
-
-            // Remove from available list if quantity reaches 0
-            selectedItem.quantity -= lossQuantity;
-            if (selectedItem.quantity <= 0) {
-                availableItems.splice(randomIndex, 1);
+            // Mark as processed and remove from pool
+            processedItems.add(itemKey);
+            selectionPool.splice(randomIndex, 1);
+            
+            // Remove all instances of this item from pool
+            for (let j = selectionPool.length - 1; j >= 0; j--) {
+                if (selectionPool[j].itemId === selectedItem.itemId && 
+                    selectionPool[j].itemType === selectedItem.itemType) {
+                    selectionPool.splice(j, 1);
+                }
             }
         }
     }
@@ -553,64 +605,89 @@ async function applyBreakthroughPenalty(client, userId, levelData) {
     return results;
 }
 
-// Helper function to determine item storage category
+// Helper function to determine item storage category - Updated for current system
 function getItemStorageInfo(itemId) {
-    // Check if it's a number (basic materials 1-7)
-    if (!isNaN(itemId)) {
+    // Convert itemId to string for consistent checking
+    const itemIdStr = String(itemId);
+    
+    // 1. Check FARM_MATERIALS first (nguyên liệu cơ bản 1-7, lt1)
+    if (FARM_MATERIALS[itemIdStr]) {
         return {
             category: 'material',
-            actualId: itemId,
-            name: FARM_MATERIALS[itemId]?.name || `Material ${itemId}`,
-            icon: FARM_MATERIALS[itemId]?.icon || '🔮'
+            actualId: itemIdStr,
+            name: FARM_MATERIALS[itemIdStr].name,
+            icon: FARM_MATERIALS[itemIdStr].icon || FARM_MATERIALS[itemIdStr].fallbackIcon || '🔮'
         };
     }
     
-    // Check FARM_MATERIALS first (chỉ còn 1-7, lt1)
-    if (FARM_MATERIALS[itemId]) {
-        return {
-            category: 'material',
-            actualId: itemId,
-            name: FARM_MATERIALS[itemId].name,
-            icon: FARM_MATERIALS[itemId].icon
-        };
-    }
-    
-    // Check MEDICINES (d1-d4)
-    if (MEDICINES[itemId]) {
+    // 2. Check MEDICINES (đan dược d1-d4)
+    if (MEDICINES[itemIdStr]) {
         return {
             category: 'medicine',
-            actualId: itemId,
-            name: MEDICINES[itemId].name,
-            icon: MEDICINES[itemId].icon
+            actualId: itemIdStr,
+            name: MEDICINES[itemIdStr].name,
+            icon: MEDICINES[itemIdStr].icon || MEDICINES[itemIdStr].fallbackIcon || '💊'
         };
     }
     
-    // Check SPIRIT_STONES (lt2, lt3, lt4)
-    if (SPIRIT_STONES[itemId]) {
+    // 3. Check SPIRIT_STONES (linh thạch lt1-lt4)
+    if (SPIRIT_STONES[itemIdStr]) {
         return {
             category: 'material',
-            actualId: `spirit_${itemId}`,
-            name: SPIRIT_STONES[itemId].name,
-            icon: SPIRIT_STONES[itemId].icon
+            actualId: itemIdStr,
+            name: SPIRIT_STONES[itemIdStr].name,
+            icon: SPIRIT_STONES[itemIdStr].icon || SPIRIT_STONES[itemIdStr].fallbackIcon || '💎'
         };
     }
     
-    // Check SHOP_ITEMS (dp1-dp4, pdp, dl, tlt, linh đan, linh dược, sách)
-    if (SHOP_ITEMS[itemId]) {
-        const shopItem = SHOP_ITEMS[itemId];
+    // 4. Check SHOP_ITEMS (đan phương, đan lò, tụ linh thạch, linh đan, linh dược, sách)
+    if (SHOP_ITEMS[itemIdStr]) {
+        const shopItem = SHOP_ITEMS[itemIdStr];
         return {
-            category: shopItem.category,
-            actualId: itemId,
+            category: shopItem.category || 'material',
+            actualId: itemIdStr,
             name: shopItem.name,
-            icon: shopItem.icon || shopItem.fallbackIcon
+            icon: shopItem.icon || shopItem.fallbackIcon || '❓'
         };
     }
     
-    // Default fallback
+    // 5. Handle extended đan dược (d5+) from additems system
+    if (itemIdStr.startsWith('d') && itemIdStr.length > 2) {
+        const level = itemIdStr.substring(1);
+        return {
+            category: 'medicine',
+            actualId: itemIdStr,
+            name: `Đan Dược Cấp ${level}`,
+            icon: '💊'
+        };
+    }
+    
+    // 6. Handle extended linh thạch (lt5+) from additems system
+    if (itemIdStr.startsWith('lt') && itemIdStr.length > 3) {
+        const level = itemIdStr.substring(2);
+        return {
+            category: 'material',
+            actualId: itemIdStr,
+            name: `Linh Thạch Cấp ${level}`,
+            icon: '💎'
+        };
+    }
+    
+    // 7. Handle numbered materials (1-7) - fallback check
+    if (!isNaN(itemIdStr) && parseInt(itemIdStr) >= 1 && parseInt(itemIdStr) <= 7) {
+        return {
+            category: 'material',
+            actualId: itemIdStr,
+            name: FARM_MATERIALS[itemIdStr]?.name || `Nguyên liệu ${itemIdStr}`,
+            icon: FARM_MATERIALS[itemIdStr]?.icon || FARM_MATERIALS[itemIdStr]?.fallbackIcon || '🔮'
+        };
+    }
+    
+    // 8. Default fallback with better naming
     return {
         category: 'material',
-        actualId: itemId,
-        name: itemId,
+        actualId: itemIdStr,
+        name: `Vật phẩm không xác định (${itemIdStr})`,
         icon: '❓'
     };
 }

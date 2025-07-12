@@ -311,7 +311,9 @@ module.exports = {
                         penaltyText += `💸 Mất **${penalty.expLost} EXP** (${actualPercent}%)\n`;
                     }
                     if (penalty.itemsLost.length > 0) {
-                        const itemsText = penalty.itemsLost.map(item => `${item.name} x${item.quantity}`).join(', ');
+                        const itemsText = penalty.itemsLost.map(item => 
+                            `${item.icon || '❓'} ${item.name} x${item.quantity}`
+                        ).join(', ');
                         penaltyText += `🗑️ Mất vật phẩm: ${itemsText}`;
                     }
 
