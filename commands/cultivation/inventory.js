@@ -108,18 +108,35 @@ module.exports = {
                 }
             });
             
-            // Extended đan dược (d5+)
+            // Extended đan dược (d5+) - gom theo chất lượng
             const extendedMedicines = medicines.filter(m => 
                 m.itemId.startsWith('d') && m.itemId.length > 2
             );
+            
+            // Gom theo chất lượng
+            const medicineGroups = {
+                'HA_PHAM': 0,
+                'TRUNG_PHAM': 0,
+                'THUONG_PHAM': 0,
+                'TIEN_PHAM': 0
+            };
+            
             extendedMedicines.forEach(medicine => {
                 if (medicine.quantity > 0) {
                     const level = parseInt(medicine.itemId.substring(1));
                     const danDuocLevels = ['HA_PHAM', 'TRUNG_PHAM', 'THUONG_PHAM', 'TIEN_PHAM'];
-                    const iconKey = `DAN_DUOC_${danDuocLevels[(level - 1) % 4]}`;
-                    const { VATPHAM_EMOJI_MAP } = require('../../utils/vatphamEmojis');
+                    const qualityType = danDuocLevels[(level - 1) % 4];
+                    medicineGroups[qualityType] += medicine.quantity;
+                }
+            });
+            
+            // Hiển thị theo nhóm chất lượng
+            const { VATPHAM_EMOJI_MAP } = require('../../utils/vatphamEmojis');
+            Object.entries(medicineGroups).forEach(([quality, total]) => {
+                if (total > 0) {
+                    const iconKey = `DAN_DUOC_${quality}`;
                     const icon = VATPHAM_EMOJI_MAP[iconKey] || '💊';
-                    medicineDisplay.push(`${icon}${medicine.quantity}`);
+                    medicineDisplay.push(`${icon}${total}`);
                 }
             });
 
@@ -134,18 +151,34 @@ module.exports = {
                 }
             });
             
-            // Extended stones (lt5+)
+            // Extended stones (lt5+) - gom theo chất lượng
             const extendedStones = spiritStones.filter(s => 
                 s.itemId.startsWith('lt') && s.itemId.length > 3
             );
+            
+            // Gom theo chất lượng
+            const stoneGroups = {
+                'HA_PHAM': 0,
+                'TRUNG_PHAM': 0,
+                'THUONG_PHAM': 0,
+                'TIEN_PHAM': 0
+            };
+            
             extendedStones.forEach(stone => {
                 if (stone.quantity > 0) {
                     const level = stone.itemId.substring(2);
                     const linhThachLevels = ['HA_PHAM', 'TRUNG_PHAM', 'THUONG_PHAM', 'TIEN_PHAM'];
-                    const iconKey = `LINH_THACH_${linhThachLevels[(parseInt(level) - 1) % 4]}`;
-                    const { VATPHAM_EMOJI_MAP } = require('../../utils/vatphamEmojis');
+                    const qualityType = linhThachLevels[(parseInt(level) - 1) % 4];
+                    stoneGroups[qualityType] += stone.quantity;
+                }
+            });
+            
+            // Hiển thị theo nhóm chất lượng
+            Object.entries(stoneGroups).forEach(([quality, total]) => {
+                if (total > 0) {
+                    const iconKey = `LINH_THACH_${quality}`;
                     const icon = VATPHAM_EMOJI_MAP[iconKey] || '💎';
-                    stoneDisplay.push(`${icon}${stone.quantity}`);
+                    stoneDisplay.push(`${icon}${total}`);
                 }
             });
 
