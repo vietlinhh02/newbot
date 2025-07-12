@@ -501,75 +501,47 @@ async function applyBreakthroughPenalty(client, userId, levelData) {
         }
     }
 
-    // Apply item penalty - Updated for new item system
+    // Apply item penalty - chỉ mất những vật phẩm có trong inventory và có tồn tại trong hệ thống
     if (levelData.itemPenalty > 0) {
         const inventory = await client.prisma.userInventory.findMany({
             where: { userId }
         });
 
-        // Filter items that can be lost (quantity > 0)
-        const availableItems = inventory.filter(item => item.quantity > 0);
+        // Lọc những vật phẩm có trong inventory (quantity > 0) và có tồn tại trong hệ thống
+        const availableItems = inventory.filter(item => {
+            if (item.quantity <= 0) return false;
+            
+            // Kiểm tra vật phẩm có tồn tại trong hệ thống không
+            const itemInfo = getItemStorageInfo(item.itemId);
+            return itemInfo && !itemInfo.name.includes('không xác định');
+        });
         
         if (availableItems.length === 0) {
-            return results; // No items to lose
+            return results; // Không có vật phẩm nào để mất
         }
 
-        // Categorize items by priority (lower priority = more likely to be lost)
-        const itemsByPriority = {
-            materials: [], // Nguyên liệu (1-7, lt1+) - mất trước
-            medicines: [], // Đan dược (d1+) - mất giữa  
-            shopItems: []  // Shop items (đan phương, linh đan, etc.) - mất cuối
-        };
-
-        availableItems.forEach(item => {
-            const itemInfo = getItemStorageInfo(item.itemId);
-            const itemWithInfo = { ...item, info: itemInfo };
-            
-            // Categorize based on item type and origin
-            if (itemInfo.category === 'material') {
-                // Materials and spirit stones go first
-                itemsByPriority.materials.push(itemWithInfo);
-            } else if (itemInfo.category === 'medicine' && item.itemId.startsWith('d')) {
-                // Medicines (đan dược) go second
-                itemsByPriority.medicines.push(itemWithInfo);
-            } else {
-                // Shop items (đan phương, linh đan, sách, etc.) go last
-                itemsByPriority.shopItems.push(itemWithInfo);
-            }
-        });
-
-        // Create weighted selection pool (materials most likely to be lost)
-        const selectionPool = [
-            ...itemsByPriority.materials,
-            ...itemsByPriority.materials, // Add twice for higher chance
-            ...itemsByPriority.medicines,
-            ...itemsByPriority.shopItems
-        ];
-
-        const itemsToLose = Math.min(levelData.itemPenalty, selectionPool.length);
-        const processedItems = new Set(); // Track items already processed
+        // Tính số lượng vật phẩm sẽ mất (tối đa là số vật phẩm có sẵn)
+        const itemsToLose = Math.min(levelData.itemPenalty, availableItems.length);
+        const lostItems = new Set(); // Theo dõi những vật phẩm đã mất
 
         for (let i = 0; i < itemsToLose; i++) {
-            if (selectionPool.length === 0) break;
+            // Lọc những vật phẩm chưa bị mất
+            const remainingItems = availableItems.filter(item => {
+                const itemKey = `${item.itemType}_${item.itemId}`;
+                return !lostItems.has(itemKey);
+            });
 
-            // Select random item from pool
-            const randomIndex = Math.floor(Math.random() * selectionPool.length);
-            const selectedItem = selectionPool[randomIndex];
+            if (remainingItems.length === 0) break;
+
+            // Chọn ngẫu nhiên một vật phẩm
+            const randomIndex = Math.floor(Math.random() * remainingItems.length);
+            const selectedItem = remainingItems[randomIndex];
             
-            // Skip if already processed this item type
-            const itemKey = `${selectedItem.itemType}_${selectedItem.itemId}`;
-            if (processedItems.has(itemKey)) {
-                // Remove from pool and try again
-                selectionPool.splice(randomIndex, 1);
-                i--; // Retry this iteration
-                continue;
-            }
-            
-            // Calculate loss quantity (1-3 or all if less)
+            // Tính số lượng mất (1-3 hoặc tất cả nếu có ít hơn)
             const maxLoss = Math.min(3, selectedItem.quantity);
             const lossQuantity = Math.floor(Math.random() * maxLoss) + 1;
 
-            // Update database
+            // Cập nhật database
             await client.prisma.userInventory.update({
                 where: {
                     userId_itemType_itemId: {
@@ -581,24 +553,19 @@ async function applyBreakthroughPenalty(client, userId, levelData) {
                 data: { quantity: { decrement: lossQuantity } }
             });
 
-            // Add to results with icon
+            // Lấy thông tin vật phẩm
+            const itemInfo = getItemStorageInfo(selectedItem.itemId);
+            
+            // Thêm vào kết quả
             results.itemsLost.push({ 
-                name: selectedItem.info.name,
-                icon: selectedItem.info.icon,
+                name: itemInfo.name,
+                icon: itemInfo.icon,
                 quantity: lossQuantity 
             });
 
-            // Mark as processed and remove from pool
-            processedItems.add(itemKey);
-            selectionPool.splice(randomIndex, 1);
-            
-            // Remove all instances of this item from pool
-            for (let j = selectionPool.length - 1; j >= 0; j--) {
-                if (selectionPool[j].itemId === selectedItem.itemId && 
-                    selectionPool[j].itemType === selectedItem.itemType) {
-                    selectionPool.splice(j, 1);
-                }
-            }
+            // Đánh dấu đã xử lý
+            const itemKey = `${selectedItem.itemType}_${selectedItem.itemId}`;
+            lostItems.add(itemKey);
         }
     }
 
