@@ -396,22 +396,26 @@ async function applyBreakthroughPenalty(client, userId, levelData) {
         }
     }
 
-    // Apply item penalty - chỉ mất những vật phẩm có trong inventory và có tồn tại trong hệ thống
+    // Apply item penalty - CHỈ mất những vật phẩm THỰC SỰ có trong inventory
     if (levelData.itemPenalty > 0) {
         const inventory = await client.prisma.userInventory.findMany({
-            where: { userId }
+            where: { 
+                userId,
+                quantity: { gt: 0 } // Chỉ lấy những item có quantity > 0
+            }
         });
 
-        // Lọc những vật phẩm có trong inventory (quantity > 0) và có tồn tại trong hệ thống
+        // Lọc thêm những vật phẩm có tồn tại trong hệ thống
         const availableItems = inventory.filter(item => {
-            if (item.quantity <= 0) return false;
-            
-            // Kiểm tra vật phẩm có tồn tại trong hệ thống không
             const itemInfo = getItemStorageInfo(item.itemId);
             return itemInfo && !itemInfo.name.includes('không xác định');
         });
         
+        console.log(`💀 [PENALTY] User ${userId} có ${availableItems.length} vật phẩm có thể mất:`, 
+            availableItems.map(item => `${item.itemId}:${item.quantity}`));
+        
         if (availableItems.length === 0) {
+            console.log(`💀 [PENALTY] User ${userId} không có vật phẩm nào để mất`);
             return results; // Không có vật phẩm nào để mất
         }
 
@@ -420,13 +424,16 @@ async function applyBreakthroughPenalty(client, userId, levelData) {
         const lostItems = new Set(); // Theo dõi những vật phẩm đã mất
 
         for (let i = 0; i < itemsToLose; i++) {
-            // Lọc những vật phẩm chưa bị mất
+            // Lọc những vật phẩm chưa bị mất và vẫn còn quantity > 0
             const remainingItems = availableItems.filter(item => {
                 const itemKey = `${item.itemType}_${item.itemId}`;
-                return !lostItems.has(itemKey);
+                return !lostItems.has(itemKey) && item.quantity > 0;
             });
 
-            if (remainingItems.length === 0) break;
+            if (remainingItems.length === 0) {
+                console.log(`💀 [PENALTY] Không còn vật phẩm nào để mất cho user ${userId}`);
+                break;
+            }
 
             // Chọn ngẫu nhiên một vật phẩm
             const randomIndex = Math.floor(Math.random() * remainingItems.length);
@@ -436,7 +443,9 @@ async function applyBreakthroughPenalty(client, userId, levelData) {
             const maxLoss = Math.min(3, selectedItem.quantity);
             const lossQuantity = Math.floor(Math.random() * maxLoss) + 1;
 
-            // Cập nhật database
+            console.log(`💀 [PENALTY] User ${userId} mất ${selectedItem.itemId} x${lossQuantity} (có: ${selectedItem.quantity})`);
+
+            // Cập nhật database và item trong memory
             await client.prisma.userInventory.update({
                 where: {
                     userId_itemType_itemId: {
@@ -447,6 +456,9 @@ async function applyBreakthroughPenalty(client, userId, levelData) {
                 },
                 data: { quantity: { decrement: lossQuantity } }
             });
+
+            // Cập nhật quantity trong memory để tránh mất quá nhiều
+            selectedItem.quantity -= lossQuantity;
 
             // Lấy thông tin vật phẩm
             const itemInfo = getItemStorageInfo(selectedItem.itemId);
