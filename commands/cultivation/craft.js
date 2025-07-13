@@ -321,7 +321,7 @@ module.exports = {
                 }).join(', ');
 
                 successEmbed.addFields({
-                    name: '� Nguyên liệu đã tiêu tốn',
+                    name: '💊 Nguyên liệu đã tiêu tốn',
                     value: consumedText,
                     inline: false
                 });
@@ -382,6 +382,63 @@ module.exports = {
         try {
             const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType } = require('discord.js');
 
+            // Helper function to format items with icons
+            const formatItemWithIcon = (itemName, quantity) => {
+                // Try to find the item in different data sources
+                let icon = '';
+                
+                // Check farm materials
+                if (FARM_MATERIALS[itemName] || FARM_MATERIALS[itemName.toLowerCase()]) {
+                    const item = FARM_MATERIALS[itemName] || FARM_MATERIALS[itemName.toLowerCase()];
+                    icon = item.icon || item.fallbackIcon || '🌿';
+                }
+                // Check medicines
+                else if (MEDICINES[itemName] || MEDICINES[itemName.toLowerCase()]) {
+                    const item = MEDICINES[itemName] || MEDICINES[itemName.toLowerCase()];
+                    icon = item.icon || item.fallbackIcon || '💊';
+                }
+                // Check spirit stones
+                else if (SPIRIT_STONES[itemName] || SPIRIT_STONES[itemName.toLowerCase()]) {
+                    const item = SPIRIT_STONES[itemName] || SPIRIT_STONES[itemName.toLowerCase()];
+                    icon = item.icon || item.fallbackIcon || '💎';
+                }
+                // Check shop items
+                else if (SHOP_ITEMS[itemName] || SHOP_ITEMS[itemName.toLowerCase()]) {
+                    const item = SHOP_ITEMS[itemName] || SHOP_ITEMS[itemName.toLowerCase()];
+                    icon = item.icon || item.fallbackIcon || '📜';
+                }
+                // Try to match by name (for Vietnamese names)
+                else {
+                    const nameMap = {
+                        'Bạch ngọc sương': FARM_MATERIALS['1'],
+                        'Tụ linh thảo': FARM_MATERIALS['2'],
+                        'Tử hoa thảo': FARM_MATERIALS['3'],
+                        'Hồng tú hoa': FARM_MATERIALS['4'],
+                        'Ngũ sắc hoa': FARM_MATERIALS['5'],
+                        'Ngũ sắc thạch': FARM_MATERIALS['6'],
+                        'Huyết ngọc hoa': FARM_MATERIALS['7'],
+                        'Hạ phẩm linh thạch': SPIRIT_STONES['lt1'],
+                        'Trung phẩm linh thạch': SPIRIT_STONES['lt2'],
+                        'Thượng phẩm linh thạch': SPIRIT_STONES['lt3'],
+                        'Tiên phẩm linh thạch': SPIRIT_STONES['lt4'],
+                        'Hạ phẩm đan phương': SHOP_ITEMS['dp1'],
+                        'Trung phẩm đan phương': SHOP_ITEMS['dp2'],
+                        'Thượng phẩm đan phương': SHOP_ITEMS['dp3'],
+                        'Tiên phẩm đan phương': SHOP_ITEMS['dp4'],
+                        'Đan lò': SHOP_ITEMS['dl'],
+                        'Tụ linh thạch': SHOP_ITEMS['tlt']
+                    };
+                    
+                    if (nameMap[itemName]) {
+                        icon = nameMap[itemName].icon || nameMap[itemName].fallbackIcon || '🔮';
+                    } else {
+                        icon = '🔮'; // Default icon
+                    }
+                }
+                
+                return `${icon}${itemName} x${quantity}`;
+            };
+
             // Create recipe pages
             const pages = [];
             
@@ -399,26 +456,26 @@ module.exports = {
             const medicineRecipes = [
                 {
                     name: `${MEDICINES['d1'].icon || MEDICINES['d1'].fallbackIcon || '💊'} Hạ phẩm đan dược (d1)`,
-                    materials: 'Bạch ngọc sương x9, Tụ linh thảo x9, Tử hoa thảo x9, Hồng tú hoa x9',
-                    requirements: 'Hạ phẩm đan phương x1, Đan lò x1',
+                    materials: `${formatItemWithIcon('Bạch ngọc sương', 9)}, ${formatItemWithIcon('Tụ linh thảo', 9)}, ${formatItemWithIcon('Tử hoa thảo', 9)}, ${formatItemWithIcon('Hồng tú hoa', 9)}`,
+                    requirements: `${formatItemWithIcon('Hạ phẩm đan phương', 1)}, ${formatItemWithIcon('Đan lò', 1)}`,
                     successRate: '50%'
                 },
                 {
                     name: `${MEDICINES['d2'].icon || MEDICINES['d2'].fallbackIcon || '💉'} Trung phẩm đan dược (d2)`,
-                    materials: 'Bạch ngọc sương x9, Tử hoa thảo x9, Hồng tú hoa x9, Ngũ sắc hoa x9',
-                    requirements: 'Trung phẩm đan phương x1, Đan lò x1',
+                    materials: `${formatItemWithIcon('Bạch ngọc sương', 9)}, ${formatItemWithIcon('Tử hoa thảo', 9)}, ${formatItemWithIcon('Hồng tú hoa', 9)}, ${formatItemWithIcon('Ngũ sắc hoa', 9)}`,
+                    requirements: `${formatItemWithIcon('Trung phẩm đan phương', 1)}, ${formatItemWithIcon('Đan lò', 1)}`,
                     successRate: '50%'
                 },
                 {
                     name: `${MEDICINES['d3'].icon || MEDICINES['d3'].fallbackIcon || '🧪'} Thượng phẩm đan dược (d3)`,
-                    materials: 'Bạch ngọc sương x9, Hồng tú hoa x9, Ngũ sắc hoa x9, Ngũ sắc thạch x9',
-                    requirements: 'Thượng phẩm đan phương x1, Đan lò x1',
+                    materials: `${formatItemWithIcon('Bạch ngọc sương', 9)}, ${formatItemWithIcon('Hồng tú hoa', 9)}, ${formatItemWithIcon('Ngũ sắc hoa', 9)}, ${formatItemWithIcon('Ngũ sắc thạch', 9)}`,
+                    requirements: `${formatItemWithIcon('Thượng phẩm đan phương', 1)}, ${formatItemWithIcon('Đan lò', 1)}`,
                     successRate: '50%'
                 },
                 {
                     name: `${MEDICINES['d4'].icon || MEDICINES['d4'].fallbackIcon || '⚗️'} Tiên phẩm đan dược (d4)`,
-                    materials: 'Bạch ngọc sương x9, Ngũ sắc hoa x5, Ngũ sắc thạch x5, Huyết ngọc hoa x5',
-                    requirements: 'Tiên phẩm đan phương x1, Đan lò x1',
+                    materials: `${formatItemWithIcon('Bạch ngọc sương', 9)}, ${formatItemWithIcon('Ngũ sắc hoa', 5)}, ${formatItemWithIcon('Ngũ sắc thạch', 5)}, ${formatItemWithIcon('Huyết ngọc hoa', 5)}`,
+                    requirements: `${formatItemWithIcon('Tiên phẩm đan phương', 1)}, ${formatItemWithIcon('Đan lò', 1)}`,
                     successRate: '50%'
                 }
             ];
@@ -453,20 +510,20 @@ module.exports = {
             const stoneRecipes = [
                 {
                     name: `${SPIRIT_STONES['lt2'].icon || SPIRIT_STONES['lt2'].fallbackIcon || '💍'} Trung phẩm linh thạch (lt2)`,
-                    materials: 'Hạ phẩm linh thạch x9999',
-                    requirements: 'Tụ linh thạch x1',
+                    materials: `${formatItemWithIcon('Hạ phẩm linh thạch', 9999)}`,
+                    requirements: `${formatItemWithIcon('Tụ linh thạch', 1)}`,
                     successRate: '50%'
                 },
                 {
                     name: `${SPIRIT_STONES['lt3'].icon || SPIRIT_STONES['lt3'].fallbackIcon || '💠'} Thượng phẩm linh thạch (lt3)`,
-                    materials: 'Trung phẩm linh thạch x9999',
-                    requirements: 'Tụ linh thạch x1',
+                    materials: `${formatItemWithIcon('Trung phẩm linh thạch', 9999)}`,
+                    requirements: `${formatItemWithIcon('Tụ linh thạch', 1)}`,
                     successRate: '50%'
                 },
                 {
                     name: `${SPIRIT_STONES['lt4'].icon || SPIRIT_STONES['lt4'].fallbackIcon || '🔸'} Tiên phẩm linh thạch (lt4)`,
-                    materials: 'Thượng phẩm linh thạch x9999',
-                    requirements: 'Tụ linh thạch x1',
+                    materials: `${formatItemWithIcon('Thượng phẩm linh thạch', 9999)}`,
+                    requirements: `${formatItemWithIcon('Tụ linh thạch', 1)}`,
                     successRate: '50%'
                 }
             ];

@@ -262,6 +262,9 @@ module.exports = {
         try {
             const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType } = require('discord.js');
 
+            // Get linh thach icon
+            const linhThachIcon = SPIRIT_STONES['lt1'].icon || SPIRIT_STONES['lt1'].fallbackIcon || '💎';
+
             // Create shop pages
             const pages = [];
             
@@ -280,37 +283,37 @@ module.exports = {
                 {
                     id: 'dp1',
                     name: `${SHOP_ITEMS['dp1'].icon || SHOP_ITEMS['dp1'].fallbackIcon || '📜'} Hạ phẩm đan phương (dp1)`,
-                    price: '100 linh thạch',
+                    price: `100 ${linhThachIcon}`,
                     description: 'Đan phương cấp thấp, dùng để chế tạo đan dược'
                 },
                 {
                     id: 'dp2',
                     name: `${SHOP_ITEMS['dp2'].icon || SHOP_ITEMS['dp2'].fallbackIcon || '📃'} Trung phẩm đan phương (dp2)`,
-                    price: '500 linh thạch',
+                    price: `500 ${linhThachIcon}`,
                     description: 'Đan phương trung bình, dùng để chế tạo đan dược'
                 },
                 {
                     id: 'dp3',
                     name: `${SHOP_ITEMS['dp3'].icon || SHOP_ITEMS['dp3'].fallbackIcon || '📋'} Thượng phẩm đan phương (dp3)`,
-                    price: '1000 linh thạch',
+                    price: `1000 ${linhThachIcon}`,
                     description: 'Đan phương cao cấp, dùng để chế tạo đan dược'
                 },
                 {
                     id: 'dp4',
                     name: `${SHOP_ITEMS['dp4'].icon || SHOP_ITEMS['dp4'].fallbackIcon || '📊'} Tiên phẩm đan phương (dp4)`,
-                    price: '2000 linh thạch',
+                    price: `2000 ${linhThachIcon}`,
                     description: 'Đan phương tiên phẩm, dùng để chế tạo đan dược'
                 },
                 {
                     id: 'pdp',
                     name: `${SHOP_ITEMS['pdp'].icon || SHOP_ITEMS['pdp'].fallbackIcon || '📈'} Phối đan phương (pdp)`,
-                    price: '5000 linh thạch',
+                    price: `5000 ${linhThachIcon}`,
                     description: 'Phối đan phương, dùng để chế tạo đan phương cao cấp'
                 },
                 {
                     id: 'dl',
                     name: `${SHOP_ITEMS['dl'].icon || SHOP_ITEMS['dl'].fallbackIcon || '🏺'} Đan lò (dl)`,
-                    price: '1000 linh thạch',
+                    price: `1000 ${linhThachIcon}`,
                     description: 'Đan lò, dùng để chế tạo đan dược'
                 }
             ];
@@ -345,7 +348,7 @@ module.exports = {
                 {
                     id: 'tlt',
                     name: `${SHOP_ITEMS['tlt'].icon || SHOP_ITEMS['tlt'].fallbackIcon || '💫'} Tụ linh thạch (tlt)`,
-                    price: '10000 linh thạch',
+                    price: `10000 ${linhThachIcon}`,
                     description: 'Tụ linh thạch, dùng để chế tạo linh thạch cao cấp'
                 }
             ];
