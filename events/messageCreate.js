@@ -138,7 +138,7 @@ async function processActivityExp(message, client) {
                                     const breakthroughMessage = `🌟 **${message.author.username}** đã đủ exp để đột phá!\n` +
                     `⬆️ **${updatedUser.currentLevel}** → **${nextLevelData.name}**\n` +
                     `📊 **EXP:** ${updatedUser.exp}\n` +
-                    `💫 Dùng \`!breakthrough\` để thử đột phá!`;
+                    `💫 Dùng \`!dotpha\` để thử đột phá!`;
                     
                     await message.reply(breakthroughMessage);
                 }

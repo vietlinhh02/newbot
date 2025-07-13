@@ -69,7 +69,7 @@ module.exports = {
                     },
                     {
                         name: '💡 Hướng dẫn',
-                        value: 'Sử dụng `!breakthrough` để thử đột phá lên level cao hơn!',
+                        value: 'Sử dụng `!dotpha` để thử đột phá lên tu vi cao hơn!',
                         inline: false
                     }
                 ])

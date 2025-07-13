@@ -223,7 +223,7 @@ module.exports = {
                     },
                     {
                         name: '💡 Gợi ý',
-                        value: '`!farm` - Thu thập nguyên liệu\n`!shop` - Mua nguyên liệu chế tạo\n`!craft` - Chế tạo đan dược & linh thạch\n`!breakthrough` - Đột phá realm',
+                        value: '`!farm` - Thu thập nguyên liệu\n`!shop` - Mua nguyên liệu chế tạo\n`!craft` - Chế tạo đan dược & linh thạch\n`!dotpha` - Đột phá realm',
                         inline: false
                     }
                 ]);

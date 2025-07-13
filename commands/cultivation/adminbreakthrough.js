@@ -202,7 +202,7 @@ module.exports = {
                             },
                             {
                                 name: '💡 Hướng dẫn tiếp theo',
-                                value: '• Sử dụng `!level` để xem thông tin level\n• Sử dụng `!testexp` để thêm EXP test\n• Sử dụng `!breakthrough` để test đột phá bình thường',
+                                value: '• Sử dụng `!tuvi` để xem thông tin tu vi\n• Sử dụng `!testexp` để thêm EXP test\n• Sử dụng `!dotpha` để test đột phá bình thường',
                                 inline: false
                             }
                         ])
