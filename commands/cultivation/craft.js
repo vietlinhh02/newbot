@@ -480,18 +480,20 @@ module.exports = {
                 }
             ];
 
-            let medicineText = '';
-            medicineRecipes.forEach(recipe => {
-                medicineText += `**${recipe.name}**\n`;
-                medicineText += `📦 Nguyên liệu: ${recipe.materials}\n`;
-                medicineText += `🔧 Yêu cầu: ${recipe.requirements}\n`;
-                medicineText += `🎲 Tỉ lệ thành công: ${recipe.successRate}\n\n`;
-            });
-
-            medicineEmbed.addFields({
-                name: '💊 Đan Dược',
-                value: medicineText,
-                inline: false
+            // Split recipes into individual fields with even shorter text
+            medicineRecipes.forEach((recipe, index) => {
+                // Create shorter versions of materials and requirements
+                const shortMaterials = recipe.materials.split(', ').map(item => {
+                    return item.replace(' x', '×').replace('Bạch ngọc sương', 'BNS').replace('Tụ linh thảo', 'TLT').replace('Tử hoa thảo', 'THT').replace('Hồng tú hoa', 'HTH').replace('Ngũ sắc hoa', 'NSH').replace('Ngũ sắc thạch', 'NST').replace('Huyết ngọc hoa', 'HNH');
+                }).join(', ');
+                
+                const shortRequirements = recipe.requirements.replace('Hạ phẩm đan phương', 'HP ĐP').replace('Trung phẩm đan phương', 'TP ĐP').replace('Thượng phẩm đan phương', 'THP ĐP').replace('Tiên phẩm đan phương', 'TIP ĐP').replace('Đan lò', 'ĐL').replace(' x', '×');
+                
+                medicineEmbed.addFields({
+                    name: `${recipe.name}`,
+                    value: `📦 ${shortMaterials}\n🔧 ${shortRequirements}\n🎲 ${recipe.successRate}`,
+                    inline: false
+                });
             });
 
             pages.push(medicineEmbed);
@@ -528,18 +530,17 @@ module.exports = {
                 }
             ];
 
-            let stoneText = '';
-            stoneRecipes.forEach(recipe => {
-                stoneText += `**${recipe.name}**\n`;
-                stoneText += `📦 Nguyên liệu: ${recipe.materials}\n`;
-                stoneText += `🔧 Yêu cầu: ${recipe.requirements}\n`;
-                stoneText += `🎲 Tỉ lệ thành công: ${recipe.successRate}\n\n`;
-            });
-
-            stoneEmbed.addFields({
-                name: '💎 Linh Thạch',
-                value: stoneText,
-                inline: false
+            // Split stone recipes into individual fields with shorter text
+            stoneRecipes.forEach((recipe, index) => {
+                // Create shorter versions
+                const shortMaterials = recipe.materials.replace('Hạ phẩm linh thạch', 'HP LT').replace('Trung phẩm linh thạch', 'TP LT').replace('Thượng phẩm linh thạch', 'THP LT').replace(' x', '×');
+                const shortRequirements = recipe.requirements.replace('Tụ linh thạch', 'TLT').replace(' x', '×');
+                
+                stoneEmbed.addFields({
+                    name: `${recipe.name}`,
+                    value: `📦 ${shortMaterials}\n🔧 ${shortRequirements}\n🎲 ${recipe.successRate}`,
+                    inline: false
+                });
             });
 
             pages.push(stoneEmbed);

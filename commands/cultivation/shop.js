@@ -318,18 +318,25 @@ module.exports = {
                 }
             ];
 
-            let medicineText = '';
-            medicineItems.forEach(item => {
-                medicineText += `**${item.name}**\n`;
-                medicineText += `💰 Giá: ${item.price}\n`;
-                medicineText += `📝 Mô tả: ${item.description}\n\n`;
-            });
-
-            medicineEmbed.addFields({
-                name: '🧪 Đan Phương & Đan Lò',
-                value: medicineText,
-                inline: false
-            });
+            // Split into multiple fields to avoid Discord's 1024 character limit
+            const itemsPerField = 3;
+            for (let i = 0; i < medicineItems.length; i += itemsPerField) {
+                const currentItems = medicineItems.slice(i, i + itemsPerField);
+                let fieldText = '';
+                
+                currentItems.forEach(item => {
+                    fieldText += `**${item.name}**\n`;
+                    fieldText += `💰 ${item.price} • ${item.description}\n\n`;
+                });
+                
+                const fieldName = i === 0 ? '🧪 Đan Phương' : i === 3 ? '🏺 Đan Lò & Khác' : '📦 Vật Phẩm';
+                
+                medicineEmbed.addFields({
+                    name: fieldName,
+                    value: fieldText.trim(),
+                    inline: false
+                });
+            }
 
             pages.push(medicineEmbed);
 
@@ -353,17 +360,13 @@ module.exports = {
                 }
             ];
 
-            let materialText = '';
+            // Use shorter format for material items
             materialItems.forEach(item => {
-                materialText += `**${item.name}**\n`;
-                materialText += `💰 Giá: ${item.price}\n`;
-                materialText += `📝 Mô tả: ${item.description}\n\n`;
-            });
-
-            materialEmbed.addFields({
-                name: '💎 Tụ Linh Thạch',
-                value: materialText,
-                inline: false
+                materialEmbed.addFields({
+                    name: `💎 ${item.name}`,
+                    value: `💰 ${item.price}\n📝 ${item.description}`,
+                    inline: false
+                });
             });
 
             pages.push(materialEmbed);
