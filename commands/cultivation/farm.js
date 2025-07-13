@@ -1,12 +1,12 @@
 const { getRandomDrop, getLevelByName, getNextLevel, canBreakthrough, rollBreakthrough, FARM_MATERIALS, getItemStorageInfo } = require('../../utils/cultivationData');
 
 module.exports = {
-    name: 'farm',
-    aliases: ['f', 'thu_thap'],
+    name: 'thugom',
+    aliases: ['f', 'thu_thap', 'farm', 'thugom'],
     description: 'Thu thập nguyên liệu để chế tạo đan dược (1 giờ 1 lần, 10+ nguyên liệu tùy VIP)',
-    usage: '!farm',
+    usage: '!thugom',
     examples: [
-        '!farm - Thu thập nguyên liệu',
+        '!thugom - Thu thập nguyên liệu',
         '!f - Thu thập nguyên liệu'
     ],
     permissions: 'everyone',
@@ -51,7 +51,7 @@ module.exports = {
                     if (minutes > 0) timeText += `${minutes}p`;
                     if (!timeText) timeText = '< 1p';
                     
-                    return message.reply(`⏰ **${message.author.username}** cần nghỉ ngơi \`${timeText}\` nữa mới có thể farm tiếp!`);
+                    return message.reply(`⏰ **${message.author.username}** cần nghỉ ngơi \`${timeText}\` nữa mới có thể thu gom tiếp!`);
                 }
             }
 
@@ -185,7 +185,7 @@ module.exports = {
                 .map(item => `${item.icon} ${item.name} x${item.count}`)
                 .join(', ');
 
-            let replyText = `🌾 **${message.author.username}** đã farm và nhận được:\n`;
+            let replyText = `🌾 **${message.author.username}** đã thu gom và nhận được:\n`;
             replyText += `📦 **${totalMaterials} nguyên liệu:** ${dropsText}\n`;
             replyText += `💎 **${totalSpiritStones} linh thạch:** ${FARM_MATERIALS.lt1.icon} ${FARM_MATERIALS.lt1.name} x${totalSpiritStones}\n`;
             replyText += `⭐ **${totalExpGain} EXP** được thêm vào tu luyện!\n`;
@@ -201,8 +201,8 @@ module.exports = {
             await message.reply(replyText);
 
         } catch (error) {
-            console.error('Error in farm command:', error);
-            await message.reply(`❌ Lỗi farm: ${error.message}`);
+            console.error('Error in thugom command:', error);
+            await message.reply(`❌ Lỗi thu gom: ${error.message}`);
         }
     }
 }; 

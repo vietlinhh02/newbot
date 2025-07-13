@@ -1,15 +1,15 @@
-const { MEDICINES, FARM_MATERIALS, SPIRIT_STONES, SHOP_ITEMS } = require('../../utils/cultivationData');
+const { FARM_MATERIALS, MEDICINES, SPIRIT_STONES, SHOP_ITEMS, getItemStorageInfo } = require('../../utils/cultivationData');
 const { EmbedBuilder } = require('discord.js');
 
 module.exports = {
-    name: 'inventory',
-    aliases: ['inv', 'kho', 'bag', 'zoo', 'materials', 'farm_items', 'nguyen_lieu', 'z'],
-    description: 'Xem kho đồ tu luyện (nguyên liệu + thuốc + linh thạch + shop items) của bạn',
-    usage: '!inventory [user] [type]',
+    name: 'tudo',
+    aliases: ['inv', 'bag', 'kho', 'inventory', 'tudo'],
+    description: 'Xem túi đồ và vật phẩm tu luyện',
+    usage: '!tudo [user]',
     examples: [
-        '!inventory - Xem tất cả',
-        '!inv @user - Xem của user khác', 
-        '!zoo - Alias cũ vẫn hoạt động'
+        '!tudo',
+        '!tudo @user',
+        '!inv @user'
     ],
     permissions: 'everyone',
     guildOnly: true,
@@ -17,24 +17,21 @@ module.exports = {
 
     async execute(message, args, client) {
         try {
-            // Parse arguments
+            const guildId = message.guild.id;
+
+            // Check target user
             let targetUser = message.author;
-            
-            // Check arguments
-            for (const arg of args) {
-                if (arg.startsWith('<@') || /^\d+$/.test(arg.replace(/[<@!>]/g, ''))) {
-                    // This is a user mention or ID
-                    const userMention = message.mentions.users.first();
-                    const userId = arg.replace(/[<@!>]/g, '');
-                    
-                    if (userMention) {
-                        targetUser = userMention;
-                    } else {
-                        try {
-                            targetUser = await client.users.fetch(userId);
-                        } catch (error) {
-                            return message.reply('❌ Không tìm thấy user này!');
-                        }
+            if (args[0]) {
+                const userMention = message.mentions.users.first();
+                const userIdArg = args[0].replace(/[<@!>]/g, '');
+                
+                if (userMention) {
+                    targetUser = userMention;
+                } else {
+                    try {
+                        targetUser = await client.users.fetch(userIdArg);
+                    } catch (error) {
+                        return message.reply('❌ Không tìm thấy user này!');
                     }
                 }
             }
@@ -207,12 +204,12 @@ module.exports = {
                         inline: false
                     },
                     {
-                        name: '🧪 Đan dược (Craft)',
+                        name: '🧪 Đan dược (Chế tạo)',
                         value: medicineDisplay.length > 0 ? medicineDisplay.join(' ') : '🚫 Chưa có đan dược',
                         inline: false
                     },
                     {
-                        name: '💎 Linh thạch (Craft)',
+                        name: '💎 Linh thạch (Chế tạo)',
                         value: stoneDisplay.length > 0 ? stoneDisplay.join(' ') : '🚫 Chưa có linh thạch',
                         inline: false
                     },
@@ -223,7 +220,7 @@ module.exports = {
                     },
                     {
                         name: '💡 Gợi ý',
-                        value: '`!farm` - Thu thập nguyên liệu\n`!shop` - Mua nguyên liệu chế tạo\n`!craft` - Chế tạo đan dược & linh thạch\n`!dotpha` - Đột phá realm',
+                        value: '`!thugom` - Thu thập nguyên liệu\n`!shop` - Mua nguyên liệu chế tạo\n`!chetao` - Chế tạo đan dược & linh thạch\n`!dotpha` - Đột phá realm',
                         inline: false
                     }
                 ]);
@@ -231,8 +228,8 @@ module.exports = {
             await message.reply({ embeds: [inventoryEmbed] });
 
         } catch (error) {
-            console.error('Error in inventory command:', error);
-            await message.reply(`❌ Lỗi inventory: ${error.message}`);
+            console.error('Error in tudo command:', error);
+            await message.reply(`❌ Lỗi túi đồ: ${error.message}`);
         }
     }
 }; 

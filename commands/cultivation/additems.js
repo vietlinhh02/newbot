@@ -101,11 +101,11 @@ module.exports = {
                         value: `• **${itemName}** x${quantity.toLocaleString()}`,
                         inline: false
                     },
-                    {
-                        name: '💡 Hướng dẫn tiếp theo',
-                        value: '• Sử dụng `!inventory` để xem kho đồ\n• Sử dụng `!dotpha` để test đột phá\n• Sử dụng `!additems all` để thêm tất cả vật phẩm test',
-                        inline: false
-                    }
+                                            {
+                            name: '💡 Hướng dẫn tiếp theo',
+                            value: '• Sử dụng `!tudo` để xem túi đồ\n• Sử dụng `!dotpha` để test đột phá\n• Sử dụng `!additems all` để thêm tất cả vật phẩm test',
+                            inline: false
+                        }
                 ])
                 .setTimestamp()
                 .setFooter({ 
@@ -256,7 +256,7 @@ module.exports = {
                         },
                         {
                             name: '💡 Hướng dẫn tiếp theo',
-                            value: '• Sử dụng `!inventory` để xem kho đồ\n• Sử dụng `!dotpha` để test đột phá\n• Sử dụng `!adminbreakthrough` để đột phá nhanh\n• Sử dụng `!tuvi` để kiểm tra tu vi hiện tại',
+                            value: '• Sử dụng `!tudo` để xem túi đồ\n• Sử dụng `!dotpha` để test đột phá\n• Sử dụng `!adminbreakthrough` để đột phá nhanh\n• Sử dụng `!tuvi` để kiểm tra tu vi hiện tại',
                             inline: false
                         }
                     ])

@@ -3,7 +3,7 @@ const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentTyp
 
 module.exports = {
     name: 'dotpha',
-    aliases: ['breakthrough', 'bt'],
+    aliases: ['breakthrough', 'bt', 'dotphatuvi', 'dotpha'],
     description: 'Thử đột phá lên tu vi cao hơn (cần đan dược/linh thạch trong túi)',
     usage: '!dotpha',
     examples: [

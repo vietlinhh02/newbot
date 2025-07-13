@@ -2,7 +2,7 @@ const { getLevelByName, getNextLevel, canBreakthrough, rollBreakthrough } = requ
 
 module.exports = {
     name: 'tuvi',
-    aliases: ['rank', 'tu_luyen', 'cultivation', 'level'],
+    aliases: ['rank', 'tu_luyen', 'cultivation', 'level', 'tuviluyen', 'tuvi'],
     description: 'Xem thông tin tu luyện và thử đột phá',
     usage: '!tuvi [user] hoặc !tuvi breakthrough',
     examples: [
@@ -104,19 +104,19 @@ module.exports = {
                 const progress = Math.min(Math.floor((cultivationUser.exp / expNeeded) * 100), 100);
                 const expRemaining = Math.max(expNeeded - cultivationUser.exp, 0);
                 
-                tuViText += `📊 **Progress:** ${cultivationUser.exp}/${expNeeded} **(${progress}%)**\n`;
+                tuViText += `📊 **Tiến độ:** ${cultivationUser.exp}/${expNeeded} **(${progress}%)**\n`;
                 tuViText += `⬆️ **Tu Vi tiếp theo:** ${nextTuViData.name}\n`;
                 tuViText += `🎲 **Tỉ lệ đột phá:** ${currentTuViData.breakRate}%\n`;
                 
                 // Penalty warning
                 if (currentTuViData.expPenalty > 0 || currentTuViData.itemPenalty > 0) {
-                    tuViText += `⚠️ **Penalty nếu thất bại:** ${currentTuViData.expPenalty}% EXP\n`;
+                    tuViText += `⚠️ **Phạt nếu thất bại:** ${currentTuViData.expPenalty}% EXP\n`;
                 }
                 
                 // Breakthrough status
                 const canBreak = canBreakthrough(cultivationUser.currentLevel, cultivationUser.exp);
                 if (canBreak) {
-                    tuViText += `\n🌟 **READY TO BREAKTHROUGH!**\n`;
+                    tuViText += `\n🌟 **SẴN SÀNG ĐỘT PHÁ!**\n`;
                     tuViText += `💥 Dùng \`!dotpha\` để thử đột phá!`;
                 } else {
                     tuViText += `\n💡 **Cách nhận EXP:**\n`;
