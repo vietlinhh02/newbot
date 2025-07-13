@@ -2,7 +2,7 @@ const { FARM_MATERIALS, MEDICINES, SPIRIT_STONES, SHOP_ITEMS, getItemStorageInfo
 const { EmbedBuilder } = require('discord.js');
 
 module.exports = {
-    name: 'tudo',
+    name: 'khodo',
     aliases: ['inv', 'bag', 'kho', 'inventory', 'tudo'],
     description: 'Xem túi đồ và vật phẩm tu luyện',
     usage: '!tudo [user]',
