@@ -398,25 +398,25 @@ module.exports = {
 
             const medicineRecipes = [
                 {
-                    name: '💊 Hạ phẩm đan dược (d1)',
+                    name: `${MEDICINES['d1'].icon || MEDICINES['d1'].fallbackIcon || '💊'} Hạ phẩm đan dược (d1)`,
                     materials: 'Bạch ngọc sương x9, Tụ linh thảo x9, Tử hoa thảo x9, Hồng tú hoa x9',
                     requirements: 'Hạ phẩm đan phương x1, Đan lò x1',
                     successRate: '50%'
                 },
                 {
-                    name: '💉 Trung phẩm đan dược (d2)',
+                    name: `${MEDICINES['d2'].icon || MEDICINES['d2'].fallbackIcon || '💉'} Trung phẩm đan dược (d2)`,
                     materials: 'Bạch ngọc sương x9, Tử hoa thảo x9, Hồng tú hoa x9, Ngũ sắc hoa x9',
                     requirements: 'Trung phẩm đan phương x1, Đan lò x1',
                     successRate: '50%'
                 },
                 {
-                    name: '🧪 Thượng phẩm đan dược (d3)',
+                    name: `${MEDICINES['d3'].icon || MEDICINES['d3'].fallbackIcon || '🧪'} Thượng phẩm đan dược (d3)`,
                     materials: 'Bạch ngọc sương x9, Hồng tú hoa x9, Ngũ sắc hoa x9, Ngũ sắc thạch x9',
                     requirements: 'Thượng phẩm đan phương x1, Đan lò x1',
                     successRate: '50%'
                 },
                 {
-                    name: '⚗️ Tiên phẩm đan dược (d4)',
+                    name: `${MEDICINES['d4'].icon || MEDICINES['d4'].fallbackIcon || '⚗️'} Tiên phẩm đan dược (d4)`,
                     materials: 'Bạch ngọc sương x9, Ngũ sắc hoa x5, Ngũ sắc thạch x5, Huyết ngọc hoa x5',
                     requirements: 'Tiên phẩm đan phương x1, Đan lò x1',
                     successRate: '50%'
@@ -441,7 +441,7 @@ module.exports = {
 
             // Page 2: Linh thạch recipes
             const stoneEmbed = new EmbedBuilder()
-                .setTitle('� Công Thức Chế Tạo - Linh Thạch')
+                .setTitle('💎 Công Thức Chế Tạo - Linh Thạch')
                 .setDescription('**Danh sách công thức chế tạo linh thạch:**')
                 .setColor(0x00ff88)
                 .setTimestamp()
@@ -452,19 +452,19 @@ module.exports = {
 
             const stoneRecipes = [
                 {
-                    name: '💍 Trung phẩm linh thạch (lt2)',
+                    name: `${SPIRIT_STONES['lt2'].icon || SPIRIT_STONES['lt2'].fallbackIcon || '💍'} Trung phẩm linh thạch (lt2)`,
                     materials: 'Hạ phẩm linh thạch x9999',
                     requirements: 'Tụ linh thạch x1',
                     successRate: '50%'
                 },
                 {
-                    name: '💠 Thượng phẩm linh thạch (lt3)',
+                    name: `${SPIRIT_STONES['lt3'].icon || SPIRIT_STONES['lt3'].fallbackIcon || '💠'} Thượng phẩm linh thạch (lt3)`,
                     materials: 'Trung phẩm linh thạch x9999',
                     requirements: 'Tụ linh thạch x1',
                     successRate: '50%'
                 },
                 {
-                    name: '� Tiên phẩm linh thạch (lt4)',
+                    name: `${SPIRIT_STONES['lt4'].icon || SPIRIT_STONES['lt4'].fallbackIcon || '🔸'} Tiên phẩm linh thạch (lt4)`,
                     materials: 'Thượng phẩm linh thạch x9999',
                     requirements: 'Tụ linh thạch x1',
                     successRate: '50%'
