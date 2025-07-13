@@ -369,7 +369,7 @@ function rollBreakthrough(breakRate) {
 }
 
 async function applyBreakthroughPenalty(client, userId, levelData) {
-    if (!levelData.expPenalty && !levelData.itemPenalty) {
+    if (!levelData.expPenalty) {
         return { expLost: 0, itemsLost: [] };
     }
 
@@ -396,86 +396,7 @@ async function applyBreakthroughPenalty(client, userId, levelData) {
         }
     }
 
-    // Apply item penalty - CHỈ mất những vật phẩm THỰC SỰ có trong inventory
-    if (levelData.itemPenalty > 0) {
-        const inventory = await client.prisma.userInventory.findMany({
-            where: { 
-                userId,
-                quantity: { gt: 0 } // Chỉ lấy những item có quantity > 0
-            }
-        });
-
-        // Lọc thêm những vật phẩm có tồn tại trong hệ thống
-        const availableItems = inventory.filter(item => {
-            const itemInfo = getItemStorageInfo(item.itemId);
-            return itemInfo && !itemInfo.name.includes('không xác định');
-        });
-        
-        console.log(`💀 [PENALTY] User ${userId} có ${availableItems.length} vật phẩm có thể mất:`, 
-            availableItems.map(item => `${item.itemId}:${item.quantity}`));
-        
-        if (availableItems.length === 0) {
-            console.log(`💀 [PENALTY] User ${userId} không có vật phẩm nào để mất`);
-            return results; // Không có vật phẩm nào để mất
-        }
-
-        // Tính số lượng vật phẩm sẽ mất (tối đa là số vật phẩm có sẵn)
-        const itemsToLose = Math.min(levelData.itemPenalty, availableItems.length);
-        const lostItems = new Set(); // Theo dõi những vật phẩm đã mất
-
-        for (let i = 0; i < itemsToLose; i++) {
-            // Lọc những vật phẩm chưa bị mất và vẫn còn quantity > 0
-            const remainingItems = availableItems.filter(item => {
-                const itemKey = `${item.itemType}_${item.itemId}`;
-                return !lostItems.has(itemKey) && item.quantity > 0;
-            });
-
-            if (remainingItems.length === 0) {
-                console.log(`💀 [PENALTY] Không còn vật phẩm nào để mất cho user ${userId}`);
-                break;
-            }
-
-            // Chọn ngẫu nhiên một vật phẩm
-            const randomIndex = Math.floor(Math.random() * remainingItems.length);
-            const selectedItem = remainingItems[randomIndex];
-            
-            // Tính số lượng mất (1-3 hoặc tất cả nếu có ít hơn)
-            const maxLoss = Math.min(3, selectedItem.quantity);
-            const lossQuantity = Math.floor(Math.random() * maxLoss) + 1;
-
-            console.log(`💀 [PENALTY] User ${userId} mất ${selectedItem.itemId} x${lossQuantity} (có: ${selectedItem.quantity})`);
-
-            // Cập nhật database và item trong memory
-            await client.prisma.userInventory.update({
-                where: {
-                    userId_itemType_itemId: {
-                        userId,
-                        itemType: selectedItem.itemType,
-                        itemId: selectedItem.itemId
-                    }
-                },
-                data: { quantity: { decrement: lossQuantity } }
-            });
-
-            // Cập nhật quantity trong memory để tránh mất quá nhiều
-            selectedItem.quantity -= lossQuantity;
-
-            // Lấy thông tin vật phẩm
-            const itemInfo = getItemStorageInfo(selectedItem.itemId);
-            
-            // Thêm vào kết quả
-            results.itemsLost.push({ 
-                name: itemInfo.name,
-                icon: itemInfo.icon,
-                quantity: lossQuantity 
-            });
-
-            // Đánh dấu đã xử lý
-            const itemKey = `${selectedItem.itemType}_${selectedItem.itemId}`;
-            lostItems.add(itemKey);
-        }
-    }
-
+    // Không mất vật phẩm nữa - chỉ mất EXP
     return results;
 }
 

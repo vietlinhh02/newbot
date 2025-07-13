@@ -1,14 +1,14 @@
 const { getLevelByName, getNextLevel, canBreakthrough, rollBreakthrough } = require('../../utils/cultivationData');
 
 module.exports = {
-    name: 'level',
-    aliases: ['rank', 'tu_luyen', 'cultivation'],
+    name: 'tuvi',
+    aliases: ['rank', 'tu_luyen', 'cultivation', 'level', 'tuviluyen', 'tuvi'],
     description: 'Xem thông tin tu luyện và thử đột phá',
-    usage: '!level [user] hoặc !level breakthrough',
+    usage: '!tuvi [user] hoặc !tuvi breakthrough',
     examples: [
-        '!level',
-        '!level @user',
-        '!level breakthrough',
+        '!tuvi',
+        '!tuvi @user',
+        '!tuvi breakthrough',
         '!rank breakthrough'
     ],
     permissions: 'everyone',
@@ -77,12 +77,12 @@ module.exports = {
                 console.log('Could not fetch member for role bonus calculation');
             }
 
-            // Get level data
-            const currentLevelData = getLevelByName(cultivationUser.currentLevel);
-            const nextLevelData = getNextLevel(cultivationUser.currentLevel);
+            // Get tu vi data
+            const currentTuViData = getLevelByName(cultivationUser.currentLevel);
+            const nextTuViData = getNextLevel(cultivationUser.currentLevel);
 
             // Build simple text response
-            let levelText = `🧘 **${targetUser.username}** | **${cultivationUser.currentLevel}**\n`;
+            let tuViText = `🧘 **${targetUser.username}** | **${cultivationUser.currentLevel}**\n`;
 
             // EXP info với công thức mới (1 tin nhắn = 1 EXP, 1 phút = 5 EXP)
             if (cultivationUser.messageCount !== undefined) {
@@ -90,62 +90,62 @@ module.exports = {
                 const voiceTime = cultivationUser.voiceTime || 0;
                 const voiceMinutes = Math.floor(voiceTime / 60);
                 
-                levelText += `⚡ **EXP:** ${cultivationUser.exp} *(${messageCount} tin nhắn + ${voiceMinutes} phút voice`;
+                tuViText += `⚡ **EXP:** ${cultivationUser.exp} *(${messageCount} tin nhắn + ${voiceMinutes} phút voice`;
                 if (roleBonus > 0) {
-                    levelText += ` + bonus ${roleBonus}%`;
+                    tuViText += ` + bonus ${roleBonus}%`;
                 }
-                levelText += `)*\n`;
+                tuViText += `)*\n`;
             } else {
-                levelText += `⚡ **EXP:** ${cultivationUser.exp} *(đang nâng cấp hệ thống...)*\n`;
+                tuViText += `⚡ **EXP:** ${cultivationUser.exp} *(đang nâng cấp hệ thống...)*\n`;
             }
 
-            if (currentLevelData && nextLevelData) {
-                const expNeeded = currentLevelData.exp;
+            if (currentTuViData && nextTuViData) {
+                const expNeeded = currentTuViData.exp;
                 const progress = Math.min(Math.floor((cultivationUser.exp / expNeeded) * 100), 100);
                 const expRemaining = Math.max(expNeeded - cultivationUser.exp, 0);
                 
-                levelText += `📊 **Progress:** ${cultivationUser.exp}/${expNeeded} **(${progress}%)**\n`;
-                levelText += `⬆️ **Level tiếp theo:** ${nextLevelData.name}\n`;
-                levelText += `🎲 **Tỉ lệ đột phá:** ${currentLevelData.breakRate}%\n`;
+                tuViText += `📊 **Tiến độ:** ${cultivationUser.exp}/${expNeeded} **(${progress}%)**\n`;
+                tuViText += `⬆️ **Tu Vi tiếp theo:** ${nextTuViData.name}\n`;
+                tuViText += `🎲 **Tỉ lệ đột phá:** ${currentTuViData.breakRate}%\n`;
                 
                 // Penalty warning
-                if (currentLevelData.expPenalty > 0 || currentLevelData.itemPenalty > 0) {
-                    levelText += `⚠️ **Penalty nếu thất bại:** ${currentLevelData.expPenalty}% EXP + ${currentLevelData.itemPenalty} vật phẩm\n`;
+                if (currentTuViData.expPenalty > 0 || currentTuViData.itemPenalty > 0) {
+                    tuViText += `⚠️ **Phạt nếu thất bại:** ${currentTuViData.expPenalty}% EXP\n`;
                 }
                 
                 // Breakthrough status
                 const canBreak = canBreakthrough(cultivationUser.currentLevel, cultivationUser.exp);
                 if (canBreak) {
-                    levelText += `\n🌟 **READY TO BREAKTHROUGH!**\n`;
-                    levelText += `💥 Dùng \`!breakthrough\` để thử đột phá!`;
+                    tuViText += `\n🌟 **SẴN SÀNG ĐỘT PHÁ!**\n`;
+                    tuViText += `💥 Dùng \`!dotpha\` để thử đột phá!`;
                 } else {
-                    levelText += `\n💡 **Cách nhận EXP:**\n`;
+                    tuViText += `\n💡 **Cách nhận EXP:**\n`;
                     if (cultivationUser.messageCount !== undefined) {
-                        levelText += `• **1 tin nhắn** = 1 EXP\n`;
-                        levelText += `• **1 phút voice** = 5 EXP\n`;
-                        levelText += `• **Bonus từ VIP roles** (có thể cộng dồn)\n`;
+                        tuViText += `• **1 tin nhắn** = 1 EXP\n`;
+                        tuViText += `• **1 phút voice** = 5 EXP\n`;
+                        tuViText += `• **Bonus từ VIP roles** (có thể cộng dồn)\n`;
                         
                         if (expRemaining <= 50) {
-                            levelText += `⏰ Cần thêm **${expRemaining} EXP** để đột phá!`;
+                            tuViText += `⏰ Cần thêm **${expRemaining} EXP** để đột phá!`;
                         }
                     } else {
-                        levelText += `• Chat và voice để nhận EXP\n`;
-                        levelText += `• Hệ thống đang được nâng cấp`;
+                        tuViText += `• Chat và voice để nhận EXP\n`;
+                        tuViText += `• Hệ thống đang được nâng cấp`;
                     }
                 }
 
-            } else if (!nextLevelData) {
-                levelText += `\n🏆 **ĐÃ ĐẠT LEVEL TỐI ĐA!**\n`;
-                levelText += `🎉 Chúc mừng bạn đã hoàn thành hành trình tu luyện!`;
+            } else if (!nextTuViData) {
+                tuViText += `\n🏆 **ĐÃ ĐẠT TU VI TỐI ĐA!**\n`;
+                tuViText += `🎉 Chúc mừng bạn đã hoàn thành hành trình tu luyện!`;
             } else {
-                levelText += `\n❓ **Lỗi dữ liệu level** - Vui lòng báo admin!`;
+                tuViText += `\n❓ **Lỗi dữ liệu tu vi** - Vui lòng báo admin!`;
             }
 
-            await message.reply(levelText);
+            await message.reply(tuViText);
 
         } catch (error) {
-            console.error('Error in level command:', error);
-            await message.reply(`❌ Lỗi level: ${error.message}`);
+            console.error('Error in tuvi command:', error);
+            await message.reply(`❌ Lỗi tu vi: ${error.message}`);
         }
     }
 }; 

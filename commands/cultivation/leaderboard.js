@@ -69,7 +69,7 @@ module.exports = {
             // Create leaderboard text
             let leaderboardText = `====== **🏆 BẢNG XẾP HẠNG TU LUYỆN TOÀN CẦU** ======\n`;
             leaderboardText += `**Phạm vi:** Cross-Server Global\n`;
-            leaderboardText += `**Xếp theo:** ${sortBy === 'level' ? 'Level' : 'EXP'}\n\n`;
+            leaderboardText += `**Xếp theo:** ${sortBy === 'level' ? 'Tu Vi' : 'EXP'}\n\n`;
 
             // Top 10 users
             const topUsers = leaderboardData.slice(0, 10);
@@ -107,7 +107,7 @@ module.exports = {
 
             leaderboardText += `\n\n**📊 THỐNG KÊ SERVER:**\n`;
             leaderboardText += `Tổng tu sĩ: **${totalUsers}** | Trung bình EXP: **${avgExp}**\n`;
-            leaderboardText += `Level cao nhất: **${topLevel}** | Tổng EXP: **${totalExp.toLocaleString()}**\n`;
+            leaderboardText += `Tu Vi cao nhất: **${topLevel}** | Tổng EXP: **${totalExp.toLocaleString()}**\n`;
             leaderboardText += `\n💡 *Dùng \`!lb exp\` hoặc \`!lb level\` để đổi cách sắp xếp*`;
 
             await message.reply(leaderboardText);

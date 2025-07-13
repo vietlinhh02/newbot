@@ -2,14 +2,14 @@ const { FARM_MATERIALS, MEDICINES, SPIRIT_STONES, SHOP_ITEMS, CRAFT_RECIPES, get
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType } = require('discord.js');
 
 module.exports = {
-    name: 'craft',
-    aliases: ['ghep', 'alchemy'],
+    name: 'chetao',
+    aliases: ['ghep', 'alchemy', 'craft', 'chetao'],
     description: 'Chế tạo đan dược và linh thạch từ nguyên liệu',
-    usage: '!craft <item>',
+    usage: '!chetao <item>',
     examples: [
-        '!craft d1 - Craft đan dược hạ phẩm',
-        '!craft d2 - Craft đan dược trung phẩm',
-        '!craft lt2 - Craft linh thạch trung phẩm',
+        '!chetao d1 - Chế tạo đan dược hạ phẩm',
+        '!chetao d2 - Chế tạo đan dược trung phẩm',
+        '!chetao lt2 - Chế tạo linh thạch trung phẩm',
     ],
     permissions: 'everyone',
     guildOnly: true,
@@ -29,13 +29,13 @@ module.exports = {
             // Validate item - check both MEDICINES and SPIRIT_STONES
             const itemData = MEDICINES[targetItem] || SPIRIT_STONES[targetItem];
             if (!itemData) {
-                return message.reply(`❌ Không tìm thấy item "${targetItem}"! Sử dụng \`!craft \` để xem công thức.`);
+                return message.reply(`❌ Không tìm thấy item "${targetItem}"! Sử dụng \`!chetao \` để xem công thức.`);
             }
 
             // Check if item can be crafted
             const recipe = CRAFT_RECIPES[targetItem];
             if (!recipe) {
-                return message.reply(`❌ Không thể craft item "${targetItem}"! Sử dụng \`!craft \` để xem công thức.`);
+                return message.reply(`❌ Không thể chế tạo item "${targetItem}"! Sử dụng \`!chetao \` để xem công thức.`);
             }
 
             // Get user data
@@ -172,7 +172,7 @@ module.exports = {
                 ])
                 .setTimestamp()
                 .setFooter({ 
-                    text: `Craft • ${message.author.username}`, 
+                    text: `Chế Tạo • ${message.author.username}`, 
                     iconURL: message.author.displayAvatarURL() 
                 });
 
@@ -210,7 +210,7 @@ module.exports = {
                         .setColor(0xff4444)
                         .setTimestamp()
                         .setFooter({ 
-                            text: `Craft • ${message.author.username}`, 
+                            text: `Chế Tạo • ${message.author.username}`, 
                             iconURL: message.author.displayAvatarURL() 
                         });
 
@@ -243,17 +243,14 @@ module.exports = {
             return; // Exit early since we're handling the craft in the collector
 
         } catch (error) {
-            console.error('Error in craft command:', error);
-            await message.reply(`❌ Lỗi craft: ${error.message}`);
+            console.error('Error in chetao command:', error);
+            await message.reply(`❌ Lỗi chế tạo: ${error.message}`);
         }
     },
 
     async performCraft(interaction, client, userId, targetItem, itemData, recipe, requiredItems, successRate) {
         try {
-            // Perform crafting
-            const success = Math.random() * 100 < successRate;
-
-            // Remove materials regardless of success/failure
+            // Consume materials first (regardless of success/failure)
             for (const item of requiredItems) {
                 await client.prisma.userInventory.update({
                     where: {
@@ -271,16 +268,19 @@ module.exports = {
                 });
             }
 
-            // If successful, add the crafted item
+            // Attempt craft
+            const success = Math.random() * 100 < successRate;
+
             if (success) {
-                const resultStorageInfo = getItemStorageInfo(targetItem);
+                // Success - Add crafted item to inventory
+                const storageInfo = getItemStorageInfo(targetItem);
                 
                 await client.prisma.userInventory.upsert({
                     where: {
                         userId_itemType_itemId: {
                             userId: userId,
-                            itemType: resultStorageInfo.category,
-                            itemId: resultStorageInfo.actualId
+                            itemType: storageInfo.category,
+                            itemId: storageInfo.actualId
                         }
                     },
                     update: {
@@ -290,66 +290,88 @@ module.exports = {
                     },
                     create: {
                         userId: userId,
-                        itemType: resultStorageInfo.category,
-                        itemId: resultStorageInfo.actualId,
+                        itemType: storageInfo.category,
+                        itemId: storageInfo.actualId,
                         quantity: 1
                     }
                 });
-            }
 
-            // Show result với embed
-            const resultEmbed = new EmbedBuilder()
-                .setTimestamp()
-                .setFooter({ 
-                    text: `Craft • ${interaction.user.username}`, 
-                    iconURL: interaction.user.displayAvatarURL() 
-                });
-
-            if (success) {
-                resultEmbed
-                    .setTitle('🧪 Chế tạo thành công!')
-                    .setDescription(`${itemData.icon} **${itemData.name}** đã được tạo ra!`)
+                // Build success embed
+                const successEmbed = new EmbedBuilder()
+                    .setTitle('🎉 Chế Tạo Thành Công!')
+                    .setDescription(`**${interaction.user.username}** đã chế tạo thành công!`)
                     .setColor(0x00ff00)
                     .addFields([
                         {
-                            name: '✅ Kết quả',
-                            value: `${itemData.icon} **${itemData.name}** x1`,
-                            inline: true
-                        },
-                        {
-                            name: '📊 Thông tin',
-                            value: `• **Loại:** Chế tạo\n• **Tỉ lệ thành công:** \`${successRate}%\``,
-                            inline: true
+                            name: '⚡ Kết quả',
+                            value: `• **Vật phẩm:** ${itemData.icon} ${itemData.name}\n• **Tỉ lệ thành công:** ${successRate}%`,
+                            inline: false
                         }
-                    ]);
+                    ])
+                    .setTimestamp()
+                    .setFooter({ 
+                        text: `Chế Tạo • ${interaction.user.username}`, 
+                        iconURL: interaction.user.displayAvatarURL() 
+                    });
+
+                // Show consumed materials
+                const consumedText = requiredItems.map(item => {
+                    const storageInfo = getItemStorageInfo(item.id);
+                    return `${storageInfo.icon} ${item.name} x${item.needed}`;
+                }).join(', ');
+
+                successEmbed.addFields({
+                    name: '� Nguyên liệu đã tiêu tốn',
+                    value: consumedText,
+                    inline: false
+                });
+
+                await interaction.update({ 
+                    embeds: [successEmbed], 
+                    components: [] 
+                });
+
             } else {
-                resultEmbed
-                    .setTitle('💥 Chế tạo thất bại!')
-                    .setDescription(`Không may mắn! Nguyên liệu đã bị tiêu hao.`)
+                // Failure - Show failure message
+                const failureEmbed = new EmbedBuilder()
+                    .setTitle('💥 Chế Tạo Thất Bại!')
+                    .setDescription(`**${interaction.user.username}** đã thất bại trong chế tạo!`)
                     .setColor(0xff4444)
                     .addFields([
                         {
                             name: '💔 Kết quả',
-                            value: `Không nhận được gì`,
-                            inline: true
-                        },
-                        {
-                            name: '📊 Thông tin',
-                            value: `• **Loại:** Chế tạo\n• **Tỉ lệ thành công:** \`${successRate}%\`\n• **Lần sau có thể thành công hơn!**`,
-                            inline: true
+                            value: `• **Vật phẩm:** Không nhận được\n• **Tỉ lệ thành công:** ${successRate}%`,
+                            inline: false
                         }
-                    ]);
-            }
+                    ])
+                    .setTimestamp()
+                    .setFooter({ 
+                        text: `Chế Tạo • ${interaction.user.username}`, 
+                        iconURL: interaction.user.displayAvatarURL() 
+                    });
 
-            await interaction.update({ 
-                embeds: [resultEmbed], 
-                components: [] 
-            });
+                // Show consumed materials
+                const consumedText = requiredItems.map(item => {
+                    const storageInfo = getItemStorageInfo(item.id);
+                    return `${storageInfo.icon} ${item.name} x${item.needed}`;
+                }).join(', ');
+
+                failureEmbed.addFields({
+                    name: '📦 Nguyên liệu đã tiêu tốn',
+                    value: consumedText,
+                    inline: false
+                });
+
+                await interaction.update({ 
+                    embeds: [failureEmbed], 
+                    components: [] 
+                });
+            }
 
         } catch (error) {
             console.error('Error in performCraft:', error);
             await interaction.update({ 
-                content: `❌ Lỗi craft: ${error.message}`,
+                content: `❌ Lỗi chế tạo: ${error.message}`,
                 embeds: [],
                 components: [] 
             });
@@ -357,192 +379,188 @@ module.exports = {
     },
 
     async showRecipes(message, client) {
-        // Tạo các trang với thông tin chi tiết
-        const pages = [];
-        
-        // Page 1: CRAFT - Đan dược
-        const craftPillsEmbed = new EmbedBuilder()
-            .setTitle('🔨 CRAFT - Đan dược')
-            .setDescription('**Chế tạo đan dược từ nguyên liệu + đan phương + đan lò**')
-            .setColor(0x0080ff)
-            .setTimestamp()
-            .setFooter({ 
-                text: `Trang 1/2 • Yêu cầu bởi ${message.author.username}`, 
-                iconURL: message.author.displayAvatarURL() 
+        try {
+            const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType } = require('discord.js');
+
+            // Create recipe pages
+            const pages = [];
+            
+            // Page 1: Đan dược recipes
+            const medicineEmbed = new EmbedBuilder()
+                .setTitle('🧪 Công Thức Chế Tạo - Đan Dược')
+                .setDescription('**Danh sách công thức chế tạo đan dược:**')
+                .setColor(0x00ff88)
+                .setTimestamp()
+                .setFooter({ 
+                    text: `Trang 1/2 • Chế Tạo • ${message.author.username}`, 
+                    iconURL: message.author.displayAvatarURL() 
+                });
+
+            const medicineRecipes = [
+                {
+                    name: '💊 Hạ phẩm đan dược (d1)',
+                    materials: 'Bạch ngọc sương x9, Tụ linh thảo x9, Tử hoa thảo x9, Hồng tú hoa x9',
+                    requirements: 'Hạ phẩm đan phương x1, Đan lò x1',
+                    successRate: '50%'
+                },
+                {
+                    name: '💉 Trung phẩm đan dược (d2)',
+                    materials: 'Bạch ngọc sương x9, Tử hoa thảo x9, Hồng tú hoa x9, Ngũ sắc hoa x9',
+                    requirements: 'Trung phẩm đan phương x1, Đan lò x1',
+                    successRate: '50%'
+                },
+                {
+                    name: '🧪 Thượng phẩm đan dược (d3)',
+                    materials: 'Bạch ngọc sương x9, Hồng tú hoa x9, Ngũ sắc hoa x9, Ngũ sắc thạch x9',
+                    requirements: 'Thượng phẩm đan phương x1, Đan lò x1',
+                    successRate: '50%'
+                },
+                {
+                    name: '⚗️ Tiên phẩm đan dược (d4)',
+                    materials: 'Bạch ngọc sương x9, Ngũ sắc hoa x5, Ngũ sắc thạch x5, Huyết ngọc hoa x5',
+                    requirements: 'Tiên phẩm đan phương x1, Đan lò x1',
+                    successRate: '50%'
+                }
+            ];
+
+            let medicineText = '';
+            medicineRecipes.forEach(recipe => {
+                medicineText += `**${recipe.name}**\n`;
+                medicineText += `📦 Nguyên liệu: ${recipe.materials}\n`;
+                medicineText += `🔧 Yêu cầu: ${recipe.requirements}\n`;
+                medicineText += `🎲 Tỉ lệ thành công: ${recipe.successRate}\n\n`;
             });
 
-        // Filter craft   for pills (d series) only
-        const dCraftRecipes = Object.entries(CRAFT_RECIPES).filter(([itemId]) => 
-            itemId.startsWith('d')
-        );
-        dCraftRecipes.forEach(([itemId, recipe]) => {
-            const itemData = MEDICINES[itemId];
-            
-            if (itemData) {
-                let ingredients = '';
-                if (recipe.materials) {
-                    const materials = Object.entries(recipe.materials).map(([id, qty]) => {
-                        const materialData = FARM_MATERIALS[id];
-                        return `${materialData?.icon} \`${qty}\``;
-                    }).join(' + ');
-                    ingredients += materials;
-                }
-                if (recipe.medicines && Object.keys(recipe.medicines).length > 0) {
-                    if (ingredients) ingredients += ' + ';
-                    const medicines = Object.entries(recipe.medicines).map(([id, qty]) => {
-                        const itemData = SHOP_ITEMS[id];
-                        return `${itemData?.icon} \`${qty}\``;
-                    }).join(' + ');
-                    ingredients += medicines;
-                }
-
-                craftPillsEmbed.addFields({
-                    name: `${itemData.icon} ${itemData.name}`,
-                    value: `**Nguyên liệu:** ${ingredients}\n**Tỉ lệ thành công:** \`${recipe.successRate}%\`\n**Lệnh:** \`!craft ${itemId}\`\n**Mô tả:** Đan dược cao cấp từ nguyên liệu`,
-                    inline: true
-                });
-            }
-        });
-        
-        craftPillsEmbed.addFields({
-            name: '✅ Lưu ý về chế tạo đan dược',
-            value: '• **Đan phương & đan lò:** Mua từ `!shop` bằng linh thạch\n' +
-                   '• **Nguyên liệu:** Thu thập từ `!farm` (1-7)\n' +
-                   '• **Tỉ lệ thành công:** 50% (cần chuẩn bị dự phòng)\n' +
-                   '• **Đan dược cao hơn:** Cần đan phương và nguyên liệu cao hơn',
-            inline: false
-        });
-        pages.push(craftPillsEmbed);
-
-        // Page 2: CRAFT - Linh thạch & Hướng dẫn
-        const craftStonesEmbed = new EmbedBuilder()
-            .setTitle('🔨 CRAFT - Linh thạch & Hướng dẫn')
-            .setDescription('**Chế tạo linh thạch cao cấp và hướng dẫn sử dụng**')
-            .setColor(0xff6600)
-            .setTimestamp()
-            .setFooter({ 
-                text: `Trang 2/2 • Yêu cầu bởi ${message.author.username}`, 
-                iconURL: message.author.displayAvatarURL() 
+            medicineEmbed.addFields({
+                name: '💊 Đan Dược',
+                value: medicineText,
+                inline: false
             });
 
-        // Filter craft   for spirit stones (lt series)
-        const ltCraftRecipes = Object.entries(CRAFT_RECIPES).filter(([itemId]) => 
-            itemId.startsWith('lt')
-        );
-        ltCraftRecipes.forEach(([itemId, recipe]) => {
-            const itemData = SPIRIT_STONES[itemId];
-            
-            if (itemData) {
-                let ingredients = '';
-                if (recipe.materials) {
-                    const materials = Object.entries(recipe.materials).map(([id, qty]) => {
-                        const materialData = SPIRIT_STONES[id] || SHOP_ITEMS[id];
-                        return `${materialData?.icon} \`${qty}\``;
-                    }).join(' + ');
-                    ingredients += materials;
-                }
+            pages.push(medicineEmbed);
 
-                craftStonesEmbed.addFields({
-                    name: `${itemData.icon} ${itemData.name}`,
-                    value: `**Nguyên liệu:** ${ingredients}\n**Tỉ lệ thành công:** \`${recipe.successRate}%\`\n**Lệnh:** \`!craft ${itemId}\`\n**Mô tả:** Linh thạch cần nhiều linh thạch thấp hơn`,
-                    inline: true
+            // Page 2: Linh thạch recipes
+            const stoneEmbed = new EmbedBuilder()
+                .setTitle('� Công Thức Chế Tạo - Linh Thạch')
+                .setDescription('**Danh sách công thức chế tạo linh thạch:**')
+                .setColor(0x00ff88)
+                .setTimestamp()
+                .setFooter({ 
+                    text: `Trang 2/2 • Chế Tạo • ${message.author.username}`, 
+                    iconURL: message.author.displayAvatarURL() 
                 });
-            }
-        });
-        
-        craftStonesEmbed.addFields({
-            name: '💎 Về Linh thạch',
-            value: '• **Tụ linh thạch:** Mua từ `!shop` để craft linh thạch cao\n' +
-                   '• **Linh thạch lt1:** Thu thập từ `!farm` (rất ít)\n' +
-                   '• **Tỉ lệ thành công:** 50% (rủi ro cao)\n' +
-                   '• **Cần rất nhiều:** 9999x linh thạch thấp hơn để craft',
-            inline: false
-        },
-        {
-            name: '📚 Tổng kết hệ thống',
-            value: '🌾 **Farm** → Nguyên liệu (1-7) + lt1\n' +
-                   '🏪 **Shop** → Đan phương, đan lò, tụ linh thạch\n' +
-                   '🔨 **Craft** → Đan dược (d1-d4) + Linh thạch (lt2-lt4)\n' +
-                   '💊 **Sử dụng** → Tăng EXP và đột phá cảnh giới\n\n' +
-                   '💡 **Mẹo:** Luôn chuẩn bị thêm nguyên liệu vì tỉ lệ thành công chỉ 50%!',
-            inline: false
-        });
-        pages.push(craftStonesEmbed);
 
-        // Create navigation buttons
-        const createButtons = (currentPage, totalPages) => {
-            const buttons = [];
-            
-            // Previous button
-            buttons.push(
-                new ButtonBuilder()
-                    .setCustomId('craft_prev')
-                    .setLabel('◀ Trước')
-                    .setStyle(ButtonStyle.Secondary)
-                    .setDisabled(currentPage === 0)
-            );
-            
-            // Page indicator
-            buttons.push(
-                new ButtonBuilder()
-                    .setCustomId('craft_page')
-                    .setLabel(`${currentPage + 1}/${totalPages}`)
-                    .setStyle(ButtonStyle.Primary)
-                    .setDisabled(true)
-            );
-            
-            // Next button
-            buttons.push(
-                new ButtonBuilder()
-                    .setCustomId('craft_next')
-                    .setLabel('Sau ▶')
-                    .setStyle(ButtonStyle.Secondary)
-                    .setDisabled(currentPage === totalPages - 1)
-            );
-            
+            const stoneRecipes = [
+                {
+                    name: '💍 Trung phẩm linh thạch (lt2)',
+                    materials: 'Hạ phẩm linh thạch x9999',
+                    requirements: 'Tụ linh thạch x1',
+                    successRate: '50%'
+                },
+                {
+                    name: '💠 Thượng phẩm linh thạch (lt3)',
+                    materials: 'Trung phẩm linh thạch x9999',
+                    requirements: 'Tụ linh thạch x1',
+                    successRate: '50%'
+                },
+                {
+                    name: '� Tiên phẩm linh thạch (lt4)',
+                    materials: 'Thượng phẩm linh thạch x9999',
+                    requirements: 'Tụ linh thạch x1',
+                    successRate: '50%'
+                }
+            ];
 
-            
-            return new ActionRowBuilder().addComponents(buttons);
-        };
+            let stoneText = '';
+            stoneRecipes.forEach(recipe => {
+                stoneText += `**${recipe.name}**\n`;
+                stoneText += `📦 Nguyên liệu: ${recipe.materials}\n`;
+                stoneText += `🔧 Yêu cầu: ${recipe.requirements}\n`;
+                stoneText += `🎲 Tỉ lệ thành công: ${recipe.successRate}\n\n`;
+            });
 
-        // Send initial message
-        let currentPage = 0;
-        const reply = await message.reply({ 
-            embeds: [pages[currentPage]], 
-            components: [createButtons(currentPage, pages.length)]
-        });
+            stoneEmbed.addFields({
+                name: '💎 Linh Thạch',
+                value: stoneText,
+                inline: false
+            });
 
-        // Handle pagination
-        const collector = reply.createMessageComponentCollector({
-            componentType: ComponentType.Button,
-            time: 300000, // 5 minutes
-            filter: i => i.user.id === message.author.id
-        });
+            pages.push(stoneEmbed);
 
-        collector.on('collect', async interaction => {
-            if (interaction.customId === 'craft_prev' && currentPage > 0) {
-                currentPage--;
-            } else if (interaction.customId === 'craft_next' && currentPage < pages.length - 1) {
-                currentPage++;
-            }
+            // Create navigation buttons
+            const createButtons = (currentPage, totalPages) => {
+                const buttons = [];
+                
+                buttons.push(
+                    new ButtonBuilder()
+                        .setCustomId('craft_recipes_prev')
+                        .setLabel('◀ Trước')
+                        .setStyle(ButtonStyle.Secondary)
+                        .setDisabled(currentPage === 0)
+                );
+                
+                buttons.push(
+                    new ButtonBuilder()
+                        .setCustomId('craft_recipes_page')
+                        .setLabel(`${currentPage + 1}/${totalPages}`)
+                        .setStyle(ButtonStyle.Primary)
+                        .setDisabled(true)
+                );
+                
+                buttons.push(
+                    new ButtonBuilder()
+                        .setCustomId('craft_recipes_next')
+                        .setLabel('Sau ▶')
+                        .setStyle(ButtonStyle.Secondary)
+                        .setDisabled(currentPage === totalPages - 1)
+                );
+                
+                return new ActionRowBuilder().addComponents(buttons);
+            };
 
-            await interaction.update({
-                embeds: [pages[currentPage]],
+            // Send initial message
+            let currentPage = 0;
+            const reply = await message.reply({ 
+                embeds: [pages[currentPage]], 
                 components: [createButtons(currentPage, pages.length)]
             });
-        });
 
-        collector.on('end', () => {
-            // Disable all buttons when expired
-            const disabledButtons = createButtons(currentPage, pages.length);
-            disabledButtons.components.forEach(button => {
-                if (!button.data.disabled) button.setDisabled(true);
+            // Handle pagination
+            const collector = reply.createMessageComponentCollector({
+                componentType: ComponentType.Button,
+                time: 300000, // 5 minutes
+                filter: i => i.user.id === message.author.id
             });
-            
-            reply.edit({ 
-                embeds: [pages[currentPage]], 
-                components: [disabledButtons] 
-            }).catch(() => {});
-        });
+
+            collector.on('collect', async interaction => {
+                if (interaction.customId === 'craft_recipes_prev' && currentPage > 0) {
+                    currentPage--;
+                } else if (interaction.customId === 'craft_recipes_next' && currentPage < pages.length - 1) {
+                    currentPage++;
+                }
+
+                await interaction.update({
+                    embeds: [pages[currentPage]],
+                    components: [createButtons(currentPage, pages.length)]
+                });
+            });
+
+            collector.on('end', () => {
+                // Disable all buttons when expired
+                const disabledButtons = createButtons(currentPage, pages.length);
+                disabledButtons.components.forEach(button => {
+                    if (!button.data.disabled) button.setDisabled(true);
+                });
+                
+                reply.edit({ 
+                    embeds: [pages[currentPage]], 
+                    components: [disabledButtons] 
+                }).catch(() => {});
+            });
+
+        } catch (error) {
+            console.error('Error in showRecipes:', error);
+            await message.reply(`❌ Lỗi hiển thị công thức: ${error.message}`);
+        }
     }
 }; 

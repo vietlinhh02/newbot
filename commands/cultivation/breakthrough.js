@@ -2,13 +2,13 @@ const { getLevelByName, getNextLevel, canBreakthrough, rollBreakthrough, applyBr
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType } = require('discord.js');
 
 module.exports = {
-    name: 'breakthrough',
-    aliases: ['dotpha', 'bt'],
-    description: 'Thử đột phá lên level cao hơn (cần đan dược/linh thạch trong túi)',
-    usage: '!breakthrough',
+    name: 'dotpha',
+    aliases: ['breakthrough', 'bt', 'dotphatuvi', 'dotpha'],
+    description: 'Thử đột phá lên tu vi cao hơn (cần đan dược/linh thạch trong túi)',
+    usage: '!dotpha',
     examples: [
-        '!breakthrough',
         '!dotpha',
+        '!breakthrough',
         '!bt'
     ],
     permissions: 'everyone',
@@ -65,7 +65,7 @@ module.exports = {
                     })
                     .setTimestamp()
                     .setFooter({ 
-                        text: `Breakthrough • ${message.author.username}`, 
+                        text: `Đột Phá • ${message.author.username}`, 
                         iconURL: message.author.displayAvatarURL() 
                     });
 
@@ -74,7 +74,7 @@ module.exports = {
 
             // Create confirmation embed based on risk level
             const requirementsText = formatRequirements(nextLevelData);
-            const hasRisk = currentLevelData.expPenalty > 0 || currentLevelData.itemPenalty > 0;
+            const hasRisk = currentLevelData.expPenalty > 0;
 
             const confirmEmbed = new EmbedBuilder()
                 .setTitle(hasRisk ? '⚠️ Cảnh Báo Đột Phá' : '🎯 Đột Phá An Toàn')
@@ -83,7 +83,7 @@ module.exports = {
                 .addFields([
                     {
                         name: '📊 Thông tin đột phá',
-                        value: `• **Level hiện tại:** ${cultivationUser.currentLevel}\n• **Level mục tiêu:** ${nextLevelData.name}\n• **Tỉ lệ thành công:** **${currentLevelData.breakRate}%**\n• **EXP hiện tại:** ${cultivationUser.exp.toLocaleString()}`,
+                        value: `• **Tu Vi hiện tại:** ${cultivationUser.currentLevel}\n• **Tu Vi mục tiêu:** ${nextLevelData.name}\n• **Tỉ lệ thành công:** **${currentLevelData.breakRate}%**\n• **EXP hiện tại:** ${cultivationUser.exp.toLocaleString()}`,
                         inline: false
                     },
                     {
@@ -94,20 +94,20 @@ module.exports = {
                 ])
                 .setTimestamp()
                 .setFooter({ 
-                    text: `Breakthrough • ${message.author.username}`, 
+                    text: `Đột Phá • ${message.author.username}`, 
                     iconURL: message.author.displayAvatarURL() 
                 });
 
             if (hasRisk) {
                 confirmEmbed.addFields({
                     name: '💀 Nguy cơ nếu thất bại',
-                    value: `• Mất **1-10%** EXP hiện tại (random)\n• Mất **${currentLevelData.itemPenalty}** vật phẩm ngẫu nhiên\n• **Vật phẩm yêu cầu vẫn bị tiêu tốn dù thất bại**`,
+                    value: `• Mất **1-10%** EXP hiện tại (random)\n• **Vật phẩm yêu cầu vẫn bị tiêu tốn dù thất bại**`,
                     inline: false
                 });
             } else {
                 confirmEmbed.addFields({
                     name: '💚 An toàn',
-                    value: 'Không có rủi ro mất EXP hay vật phẩm (chỉ tiêu tốn vật phẩm yêu cầu)',
+                    value: 'Không có rủi ro mất EXP (chỉ tiêu tốn vật phẩm yêu cầu)',
                     inline: false
                 });
             }
@@ -146,7 +146,7 @@ module.exports = {
                         .setColor(0xff4444)
                         .setTimestamp()
                         .setFooter({ 
-                            text: `Breakthrough • ${message.author.username}`, 
+                            text: `Đột Phá • ${message.author.username}`, 
                             iconURL: message.author.displayAvatarURL() 
                         });
 
@@ -179,7 +179,7 @@ module.exports = {
             return; // Exit early since we're handling the breakthrough in the collector
 
         } catch (error) {
-            console.error('Error in breakthrough command:', error);
+            console.error('Error in dotpha command:', error);
             await message.reply(`❌ Lỗi đột phá: ${error.message}`);
         }
     },
@@ -247,13 +247,13 @@ module.exports = {
                     .addFields([
                         {
                             name: '⚡ Kết quả',
-                            value: `• **Level mới:** ${nextLevelData.name}\n• **Role mới:** ${nextLevelData.role}\n• **Tỉ lệ thành công:** ${currentLevelData.breakRate}%`,
+                            value: `• **Tu Vi mới:** ${nextLevelData.name}\n• **Role mới:** ${nextLevelData.role}\n• **Tỉ lệ thành công:** ${currentLevelData.breakRate}%`,
                             inline: false
                         }
                     ])
                     .setTimestamp()
                     .setFooter({ 
-                        text: `Breakthrough • ${interaction.user.username}`, 
+                        text: `Đột Phá • ${interaction.user.username}`, 
                         iconURL: interaction.user.displayAvatarURL() 
                     });
 
@@ -272,7 +272,7 @@ module.exports = {
                 });
 
             } else {
-                // Failure - Apply penalties
+                // Failure - Apply penalties (only EXP loss, no item loss)
                 const penalty = await applyBreakthroughPenalty(client, userId, currentLevelData);
 
                 const failureEmbed = new EmbedBuilder()
@@ -282,13 +282,13 @@ module.exports = {
                     .addFields([
                         {
                             name: '💔 Kết quả',
-                            value: `• **Level:** Vẫn ở ${cultivationUser.currentLevel}\n• **Tỉ lệ thành công:** ${currentLevelData.breakRate}%`,
+                            value: `• **Tu Vi:** Vẫn ở ${cultivationUser.currentLevel}\n• **Tỉ lệ thành công:** ${currentLevelData.breakRate}%`,
                             inline: false
                         }
                     ])
                     .setTimestamp()
                     .setFooter({ 
-                        text: `Breakthrough • ${interaction.user.username}`, 
+                        text: `Đột Phá • ${interaction.user.username}`, 
                         iconURL: interaction.user.displayAvatarURL() 
                     });
 
@@ -302,20 +302,11 @@ module.exports = {
                     });
                 }
 
-                // Show penalties
-                if (penalty.expLost > 0 || penalty.itemsLost.length > 0) {
-                    let penaltyText = '';
-                    if (penalty.expLost > 0) {
-                        // Tính % thực tế đã mất để hiển thị
-                        const actualPercent = Math.round((penalty.expLost / (cultivationUser.exp + penalty.expLost)) * 100);
-                        penaltyText += `💸 Mất **${penalty.expLost} EXP** (${actualPercent}%)\n`;
-                    }
-                    if (penalty.itemsLost.length > 0) {
-                        const itemsText = penalty.itemsLost.map(item => 
-                            `${item.icon || '❓'} ${item.name} x${item.quantity}`
-                        ).join(', ');
-                        penaltyText += `🗑️ Mất vật phẩm: ${itemsText}`;
-                    }
+                // Show penalties (only EXP loss)
+                if (penalty.expLost > 0) {
+                    // Tính % thực tế đã mất để hiển thị
+                    const actualPercent = Math.round((penalty.expLost / (cultivationUser.exp + penalty.expLost)) * 100);
+                    const penaltyText = `💸 Mất **${penalty.expLost} EXP** (${actualPercent}%)`;
 
                     failureEmbed.addFields({
                         name: '🪦 Thiệt hại thêm',
