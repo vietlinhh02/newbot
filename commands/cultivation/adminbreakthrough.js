@@ -70,7 +70,7 @@ module.exports = {
             }
 
             if (!targetLevel) {
-                return message.reply('❌ Không tìm thấy level! Sử dụng `!adminbreakthrough` để xem danh sách các level.');
+                return message.reply('❌ Không tìm thấy tu vi! Sử dụng `!adminbreakthrough` để xem danh sách các tu vi.');
             }
 
             // Get current level index
@@ -82,7 +82,7 @@ module.exports = {
 
             // Check if target level is valid
             if (targetIndex <= currentIndex) {
-                return message.reply(`❌ Không thể đột phá xuống level thấp hơn hoặc cùng level! Level hiện tại: **${cultivationUser.currentLevel}** (${currentIndex + 1})`);
+                return message.reply(`❌ Không thể đột phá xuống tu vi thấp hơn hoặc cùng tu vi! Tu vi hiện tại: **${cultivationUser.currentLevel}** (${currentIndex + 1})`);
             }
 
             // Confirmation dialog
@@ -93,7 +93,7 @@ module.exports = {
                 .addFields([
                     {
                         name: '📊 Thông tin đột phá',
-                        value: `• **Level hiện tại:** ${cultivationUser.currentLevel} (${currentIndex + 1})\n• **Level mục tiêu:** ${targetLevel.name} (${targetIndex + 1})\n• **EXP hiện tại:** ${cultivationUser.exp.toLocaleString()}\n• **EXP sau đột phá:** ${targetLevel.exp.toLocaleString()}`,
+                        value: `• **Tu Vi hiện tại:** ${cultivationUser.currentLevel} (${currentIndex + 1})\n• **Tu Vi mục tiêu:** ${targetLevel.name} (${targetIndex + 1})\n• **EXP hiện tại:** ${cultivationUser.exp.toLocaleString()}\n• **EXP sau đột phá:** ${targetLevel.exp.toLocaleString()}`,
                         inline: false
                     },
                     {
@@ -192,7 +192,7 @@ module.exports = {
                         .addFields([
                             {
                                 name: '🎉 Kết quả',
-                                value: `• **Level mới:** ${targetLevel.name}\n• **EXP test:** 9,999\n• **Đã nhảy qua:** ${targetIndex - currentIndex} level`,
+                                value: `• **Tu Vi mới:** ${targetLevel.name}\n• **EXP test:** 9,999\n• **Đã nhảy qua:** ${targetIndex - currentIndex} tu vi`,
                                 inline: false
                             },
                             {
@@ -269,8 +269,8 @@ module.exports = {
         
         for (let i = 0; i < CULTIVATION_LEVELS.length; i += levelsPerPage) {
             const pageEmbed = new EmbedBuilder()
-                .setTitle('⚡ Admin Breakthrough - Danh sách Level')
-                .setDescription('**Chọn level bạn muốn đột phá đến (Admin Only):**')
+                .setTitle('⚡ Admin Breakthrough - Danh sách Tu Vi')
+                .setDescription('**Chọn tu vi bạn muốn đột phá đến (Admin Only):**')
                 .setColor(0xff6600)
                 .setTimestamp()
                 .setFooter({ 
@@ -301,15 +301,15 @@ module.exports = {
             }
 
             pageEmbed.addFields({
-                name: '📋 Danh sách Level',
+                name: '📋 Danh sách Tu Vi',
                 value: levelsText,
                 inline: false
             });
 
             if (i === 0) {
-                pageEmbed.addFields({
+                pageEmbed.addFields(                {
                     name: '💡 Hướng dẫn sử dụng',
-                    value: '• `!adminbreakthrough <số>` - Đột phá đến level theo số thứ tự\n• `!adminbreakthrough <tên level>` - Đột phá đến level theo tên\n• Ví dụ: `!adminbreakthrough 15` hoặc `!adminbreakthrough Luyện Khí`\n• **EXP sẽ được set thành 9999 sau khi đột phá để test**',
+                    value: '• `!adminbreakthrough <số>` - Đột phá đến tu vi theo số thứ tự\n• `!adminbreakthrough <tên tu vi>` - Đột phá đến tu vi theo tên\n• Ví dụ: `!adminbreakthrough 15` hoặc `!adminbreakthrough Luyện Khí`\n• **EXP sẽ được set thành 9999 sau khi đột phá để test**',
                     inline: false
                 });
             }

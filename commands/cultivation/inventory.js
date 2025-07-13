@@ -197,7 +197,7 @@ module.exports = {
                 .setColor(0x00ff88)
                 .setTimestamp()
                 .setFooter({ 
-                    text: `Level: ${cultivationUser.currentLevel} • EXP: ${cultivationUser.exp.toLocaleString()}`, 
+                    text: `Tu Vi: ${cultivationUser.currentLevel} • EXP: ${cultivationUser.exp.toLocaleString()}`, 
                     iconURL: targetUser.displayAvatarURL() 
                 })
                 .addFields([

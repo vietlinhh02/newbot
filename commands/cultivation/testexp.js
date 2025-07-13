@@ -63,7 +63,7 @@ module.exports = {
                         inline: false
                     },
                     {
-                        name: '🎯 Level hiện tại',
+                        name: '🎯 Tu Vi hiện tại',
                         value: cultivationUser.currentLevel,
                         inline: true
                     },
