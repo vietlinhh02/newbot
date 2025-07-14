@@ -129,19 +129,19 @@ const CRAFT_RECIPES = {
     
     // Linh thạch (lt series) - từ linh thạch cấp thấp hơn + tụ linh thạch
     lt2: {
-        materials: { lt1: 9999, tlt: 1 },
+        materials: { lt1: 99, tlt: 1 },
         medicines: {},
         successRate: 50,
         type: 'craft'
     },
     lt3: {
-        materials: { lt2: 9999, tlt: 1 },
+        materials: { lt2: 99, tlt: 1 },
         medicines: {},
         successRate: 50,
         type: 'craft'
     },
     lt4: {
-        materials: { lt3: 9999, tlt: 1 },
+        materials: { lt3: 99, tlt: 1 },
         medicines: {},
         successRate: 50,
         type: 'craft'

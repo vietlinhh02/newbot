@@ -448,19 +448,19 @@ module.exports = {
             const stoneRecipes = [
                 {
                     name: `${SPIRIT_STONES['lt2'].icon || SPIRIT_STONES['lt2'].fallbackIcon || '💍'} ${SPIRIT_STONES['lt2'].name} (lt2)`,
-                    materials: `${SPIRIT_STONES['lt1'].icon}×9999`,
+                    materials: `${SPIRIT_STONES['lt1'].icon}×99`,
                     requirements: `${SHOP_ITEMS['tlt'].icon}×1`,
                     successRate: '50%'
                 },
                 {
                     name: `${SPIRIT_STONES['lt3'].icon || SPIRIT_STONES['lt3'].fallbackIcon || '💠'} ${SPIRIT_STONES['lt3'].name} (lt3)`,
-                    materials: `${SPIRIT_STONES['lt2'].icon}×9999`,
+                    materials: `${SPIRIT_STONES['lt2'].icon}×99`,
                     requirements: `${SHOP_ITEMS['tlt'].icon}×1`,
                     successRate: '50%'
                 },
                 {
                     name: `${SPIRIT_STONES['lt4'].icon || SPIRIT_STONES['lt4'].fallbackIcon || '🔸'} ${SPIRIT_STONES['lt4'].name} (lt4)`,
-                    materials: `${SPIRIT_STONES['lt3'].icon}×9999`,
+                    materials: `${SPIRIT_STONES['lt3'].icon}×99`,
                     requirements: `${SHOP_ITEMS['tlt'].icon}×1`,
                     successRate: '50%'
                 }
