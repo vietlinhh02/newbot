@@ -5,10 +5,10 @@ module.exports = {
     name: 'khodo',
     aliases: ['inv', 'bag', 'kho', 'inventory', 'tudo'],
     description: 'Xem túi đồ và vật phẩm tu luyện',
-    usage: '!tudo [user]',
+    usage: '!khodo [user]',
     examples: [
-        '!tudo',
-        '!tudo @user',
+        '!khodo',
+        '!khodo @user',
         '!inv @user'
     ],
     permissions: 'everyone',
@@ -220,7 +220,7 @@ module.exports = {
                     },
                     {
                         name: '💡 Gợi ý',
-                        value: '`!thugom` - Thu thập nguyên liệu\n`!shop` - Mua nguyên liệu chế tạo\n`!chetao` - Chế tạo đan dược & linh thạch\n`!dotpha` - Đột phá realm',
+                        value: '`!thugom` - Thu thập nguyên liệu\n`!cuahang` - Mua nguyên liệu chế tạo\n`!chetao` - Chế tạo đan dược & linh thạch\n`!dotpha` - Đột phá realm',
                         inline: false
                     }
                 ]);
@@ -228,7 +228,7 @@ module.exports = {
             await message.reply({ embeds: [inventoryEmbed] });
 
         } catch (error) {
-            console.error('Error in tudo command:', error);
+            console.error('Error in khodo command:', error);
             await message.reply(`❌ Lỗi túi đồ: ${error.message}`);
         }
     }

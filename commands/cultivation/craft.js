@@ -382,70 +382,13 @@ module.exports = {
         try {
             const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType } = require('discord.js');
 
-            // Helper function to format items with icons
-            const formatItemWithIcon = (itemName, quantity) => {
-                // Try to find the item in different data sources
-                let icon = '';
-                
-                // Check farm materials
-                if (FARM_MATERIALS[itemName] || FARM_MATERIALS[itemName.toLowerCase()]) {
-                    const item = FARM_MATERIALS[itemName] || FARM_MATERIALS[itemName.toLowerCase()];
-                    icon = item.icon || item.fallbackIcon || '🌿';
-                }
-                // Check medicines
-                else if (MEDICINES[itemName] || MEDICINES[itemName.toLowerCase()]) {
-                    const item = MEDICINES[itemName] || MEDICINES[itemName.toLowerCase()];
-                    icon = item.icon || item.fallbackIcon || '💊';
-                }
-                // Check spirit stones
-                else if (SPIRIT_STONES[itemName] || SPIRIT_STONES[itemName.toLowerCase()]) {
-                    const item = SPIRIT_STONES[itemName] || SPIRIT_STONES[itemName.toLowerCase()];
-                    icon = item.icon || item.fallbackIcon || '💎';
-                }
-                // Check shop items
-                else if (SHOP_ITEMS[itemName] || SHOP_ITEMS[itemName.toLowerCase()]) {
-                    const item = SHOP_ITEMS[itemName] || SHOP_ITEMS[itemName.toLowerCase()];
-                    icon = item.icon || item.fallbackIcon || '📜';
-                }
-                // Try to match by name (for Vietnamese names)
-                else {
-                    const nameMap = {
-                        'Bạch ngọc sương': FARM_MATERIALS['1'],
-                        'Tụ linh thảo': FARM_MATERIALS['2'],
-                        'Tử hoa thảo': FARM_MATERIALS['3'],
-                        'Hồng tú hoa': FARM_MATERIALS['4'],
-                        'Ngũ sắc hoa': FARM_MATERIALS['5'],
-                        'Ngũ sắc thạch': FARM_MATERIALS['6'],
-                        'Huyết ngọc hoa': FARM_MATERIALS['7'],
-                        'Hạ phẩm linh thạch': SPIRIT_STONES['lt1'],
-                        'Trung phẩm linh thạch': SPIRIT_STONES['lt2'],
-                        'Thượng phẩm linh thạch': SPIRIT_STONES['lt3'],
-                        'Tiên phẩm linh thạch': SPIRIT_STONES['lt4'],
-                        'Hạ phẩm đan phương': SHOP_ITEMS['dp1'],
-                        'Trung phẩm đan phương': SHOP_ITEMS['dp2'],
-                        'Thượng phẩm đan phương': SHOP_ITEMS['dp3'],
-                        'Tiên phẩm đan phương': SHOP_ITEMS['dp4'],
-                        'Đan lò': SHOP_ITEMS['dl'],
-                        'Tụ linh thạch': SHOP_ITEMS['tlt']
-                    };
-                    
-                    if (nameMap[itemName]) {
-                        icon = nameMap[itemName].icon || nameMap[itemName].fallbackIcon || '🔮';
-                    } else {
-                        icon = '🔮'; // Default icon
-                    }
-                }
-                
-                return `${icon}${itemName} x${quantity}`;
-            };
-
             // Create recipe pages
             const pages = [];
             
             // Page 1: Đan dược recipes
             const medicineEmbed = new EmbedBuilder()
-                .setTitle('🧪 Công Thức Chế Tạo - Đan Dược')
-                .setDescription('**Danh sách công thức chế tạo đan dược:**')
+                .setTitle('🧪 Công Thức Chế Tạo Đan Dược')
+                .setDescription('**Danh sách công thức chế tạo đan dược:**\n\n💡 **Hướng dẫn:**\n🛒 Mua vật phẩm: `!cuahang <item_id> [số_lượng]`\n🔨 Chế tạo: `!chetao <item_id>`')
                 .setColor(0x00ff88)
                 .setTimestamp()
                 .setFooter({ 
@@ -453,45 +396,38 @@ module.exports = {
                     iconURL: message.author.displayAvatarURL() 
                 });
 
+            // Medicine recipes format: icon + name + id -> materials needed -> requirements -> success rate
             const medicineRecipes = [
                 {
-                    name: `${MEDICINES['d1'].icon || MEDICINES['d1'].fallbackIcon || '💊'} Hạ phẩm đan dược (d1)`,
-                    materials: `${formatItemWithIcon('Bạch ngọc sương', 9)}, ${formatItemWithIcon('Tụ linh thảo', 9)}, ${formatItemWithIcon('Tử hoa thảo', 9)}, ${formatItemWithIcon('Hồng tú hoa', 9)}`,
-                    requirements: `${formatItemWithIcon('Hạ phẩm đan phương', 1)}, ${formatItemWithIcon('Đan lò', 1)}`,
+                    name: `${MEDICINES['d1'].icon || MEDICINES['d1'].fallbackIcon || '💊'} ${MEDICINES['d1'].name} (d1)`,
+                    materials: `${FARM_MATERIALS['1'].icon}×9 ${FARM_MATERIALS['2'].icon}×9 ${FARM_MATERIALS['3'].icon}×9 ${FARM_MATERIALS['4'].icon}×9`,
+                    requirements: `${SHOP_ITEMS['dp1'].icon}×1 ${SHOP_ITEMS['dl'].icon}×1`,
                     successRate: '50%'
                 },
                 {
-                    name: `${MEDICINES['d2'].icon || MEDICINES['d2'].fallbackIcon || '💉'} Trung phẩm đan dược (d2)`,
-                    materials: `${formatItemWithIcon('Bạch ngọc sương', 9)}, ${formatItemWithIcon('Tử hoa thảo', 9)}, ${formatItemWithIcon('Hồng tú hoa', 9)}, ${formatItemWithIcon('Ngũ sắc hoa', 9)}`,
-                    requirements: `${formatItemWithIcon('Trung phẩm đan phương', 1)}, ${formatItemWithIcon('Đan lò', 1)}`,
+                    name: `${MEDICINES['d2'].icon || MEDICINES['d2'].fallbackIcon || '💉'} ${MEDICINES['d2'].name} (d2)`,
+                    materials: `${FARM_MATERIALS['1'].icon}×9 ${FARM_MATERIALS['3'].icon}×9 ${FARM_MATERIALS['4'].icon}×9 ${FARM_MATERIALS['5'].icon}×9`,
+                    requirements: `${SHOP_ITEMS['dp2'].icon}×1 ${SHOP_ITEMS['dl'].icon}×1`,
                     successRate: '50%'
                 },
                 {
-                    name: `${MEDICINES['d3'].icon || MEDICINES['d3'].fallbackIcon || '🧪'} Thượng phẩm đan dược (d3)`,
-                    materials: `${formatItemWithIcon('Bạch ngọc sương', 9)}, ${formatItemWithIcon('Hồng tú hoa', 9)}, ${formatItemWithIcon('Ngũ sắc hoa', 9)}, ${formatItemWithIcon('Ngũ sắc thạch', 9)}`,
-                    requirements: `${formatItemWithIcon('Thượng phẩm đan phương', 1)}, ${formatItemWithIcon('Đan lò', 1)}`,
+                    name: `${MEDICINES['d3'].icon || MEDICINES['d3'].fallbackIcon || '🧪'} ${MEDICINES['d3'].name} (d3)`,
+                    materials: `${FARM_MATERIALS['1'].icon}×9 ${FARM_MATERIALS['4'].icon}×9 ${FARM_MATERIALS['5'].icon}×9 ${FARM_MATERIALS['6'].icon}×9`,
+                    requirements: `${SHOP_ITEMS['dp3'].icon}×1 ${SHOP_ITEMS['dl'].icon}×1`,
                     successRate: '50%'
                 },
                 {
-                    name: `${MEDICINES['d4'].icon || MEDICINES['d4'].fallbackIcon || '⚗️'} Tiên phẩm đan dược (d4)`,
-                    materials: `${formatItemWithIcon('Bạch ngọc sương', 9)}, ${formatItemWithIcon('Ngũ sắc hoa', 5)}, ${formatItemWithIcon('Ngũ sắc thạch', 5)}, ${formatItemWithIcon('Huyết ngọc hoa', 5)}`,
-                    requirements: `${formatItemWithIcon('Tiên phẩm đan phương', 1)}, ${formatItemWithIcon('Đan lò', 1)}`,
+                    name: `${MEDICINES['d4'].icon || MEDICINES['d4'].fallbackIcon || '⚗️'} ${MEDICINES['d4'].name} (d4)`,
+                    materials: `${FARM_MATERIALS['1'].icon}×9 ${FARM_MATERIALS['5'].icon}×5 ${FARM_MATERIALS['6'].icon}×5 ${FARM_MATERIALS['7'].icon}×5`,
+                    requirements: `${SHOP_ITEMS['dp4'].icon}×1 ${SHOP_ITEMS['dl'].icon}×1`,
                     successRate: '50%'
                 }
             ];
 
-            // Split recipes into individual fields with even shorter text
-            medicineRecipes.forEach((recipe, index) => {
-                // Create shorter versions of materials and requirements
-                const shortMaterials = recipe.materials.split(', ').map(item => {
-                    return item.replace(' x', '×').replace('Bạch ngọc sương', 'BNS').replace('Tụ linh thảo', 'TLT').replace('Tử hoa thảo', 'THT').replace('Hồng tú hoa', 'HTH').replace('Ngũ sắc hoa', 'NSH').replace('Ngũ sắc thạch', 'NST').replace('Huyết ngọc hoa', 'HNH');
-                }).join(', ');
-                
-                const shortRequirements = recipe.requirements.replace('Hạ phẩm đan phương', 'HP ĐP').replace('Trung phẩm đan phương', 'TP ĐP').replace('Thượng phẩm đan phương', 'THP ĐP').replace('Tiên phẩm đan phương', 'TIP ĐP').replace('Đan lò', 'ĐL').replace(' x', '×');
-                
+            medicineRecipes.forEach(recipe => {
                 medicineEmbed.addFields({
-                    name: `${recipe.name}`,
-                    value: `📦 ${shortMaterials}\n🔧 ${shortRequirements}\n🎲 ${recipe.successRate}`,
+                    name: recipe.name,
+                    value: `📦 Nguyên liệu: ${recipe.materials}\n🔧 Vật phẩm cần thiết: ${recipe.requirements}\n🎲 Tỉ lệ thành công: ${recipe.successRate}`,
                     inline: false
                 });
             });
@@ -500,8 +436,8 @@ module.exports = {
 
             // Page 2: Linh thạch recipes
             const stoneEmbed = new EmbedBuilder()
-                .setTitle('💎 Công Thức Chế Tạo - Linh Thạch')
-                .setDescription('**Danh sách công thức chế tạo linh thạch:**')
+                .setTitle('💎 Công Thức Chế Tạo Linh Thạch')
+                .setDescription('**Danh sách công thức chế tạo linh thạch:**\n\n💡 **Hướng dẫn:**\n🛒 Mua vật phẩm: `!cuahang <item_id> [số_lượng]`\n🔨 Chế tạo: `!chetao <item_id>`')
                 .setColor(0x00ff88)
                 .setTimestamp()
                 .setFooter({ 
@@ -511,34 +447,29 @@ module.exports = {
 
             const stoneRecipes = [
                 {
-                    name: `${SPIRIT_STONES['lt2'].icon || SPIRIT_STONES['lt2'].fallbackIcon || '💍'} Trung phẩm linh thạch (lt2)`,
-                    materials: `${formatItemWithIcon('Hạ phẩm linh thạch', 9999)}`,
-                    requirements: `${formatItemWithIcon('Tụ linh thạch', 1)}`,
+                    name: `${SPIRIT_STONES['lt2'].icon || SPIRIT_STONES['lt2'].fallbackIcon || '💍'} ${SPIRIT_STONES['lt2'].name} (lt2)`,
+                    materials: `${SPIRIT_STONES['lt1'].icon}×9999`,
+                    requirements: `${SHOP_ITEMS['tlt'].icon}×1`,
                     successRate: '50%'
                 },
                 {
-                    name: `${SPIRIT_STONES['lt3'].icon || SPIRIT_STONES['lt3'].fallbackIcon || '💠'} Thượng phẩm linh thạch (lt3)`,
-                    materials: `${formatItemWithIcon('Trung phẩm linh thạch', 9999)}`,
-                    requirements: `${formatItemWithIcon('Tụ linh thạch', 1)}`,
+                    name: `${SPIRIT_STONES['lt3'].icon || SPIRIT_STONES['lt3'].fallbackIcon || '💠'} ${SPIRIT_STONES['lt3'].name} (lt3)`,
+                    materials: `${SPIRIT_STONES['lt2'].icon}×9999`,
+                    requirements: `${SHOP_ITEMS['tlt'].icon}×1`,
                     successRate: '50%'
                 },
                 {
-                    name: `${SPIRIT_STONES['lt4'].icon || SPIRIT_STONES['lt4'].fallbackIcon || '🔸'} Tiên phẩm linh thạch (lt4)`,
-                    materials: `${formatItemWithIcon('Thượng phẩm linh thạch', 9999)}`,
-                    requirements: `${formatItemWithIcon('Tụ linh thạch', 1)}`,
+                    name: `${SPIRIT_STONES['lt4'].icon || SPIRIT_STONES['lt4'].fallbackIcon || '🔸'} ${SPIRIT_STONES['lt4'].name} (lt4)`,
+                    materials: `${SPIRIT_STONES['lt3'].icon}×9999`,
+                    requirements: `${SHOP_ITEMS['tlt'].icon}×1`,
                     successRate: '50%'
                 }
             ];
 
-            // Split stone recipes into individual fields with shorter text
-            stoneRecipes.forEach((recipe, index) => {
-                // Create shorter versions
-                const shortMaterials = recipe.materials.replace('Hạ phẩm linh thạch', 'HP LT').replace('Trung phẩm linh thạch', 'TP LT').replace('Thượng phẩm linh thạch', 'THP LT').replace(' x', '×');
-                const shortRequirements = recipe.requirements.replace('Tụ linh thạch', 'TLT').replace(' x', '×');
-                
+            stoneRecipes.forEach(recipe => {
                 stoneEmbed.addFields({
-                    name: `${recipe.name}`,
-                    value: `📦 ${shortMaterials}\n🔧 ${shortRequirements}\n🎲 ${recipe.successRate}`,
+                    name: recipe.name,
+                    value: `📦 Nguyên liệu: ${recipe.materials}\n🔧 Vật phẩm cần thiết: ${recipe.requirements}\n🎲 Tỉ lệ thành công: ${recipe.successRate}`,
                     inline: false
                 });
             });

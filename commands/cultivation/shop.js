@@ -2,13 +2,13 @@ const { SPIRIT_STONES, SHOP_ITEMS } = require('../../utils/cultivationData');
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType } = require('discord.js');
 
 module.exports = {
-    name: 'muahang',
+    name: 'cuahang',
     aliases: ['shop', 'mua', 'muahang'],
     description: 'Mua vật phẩm từ cửa hàng bằng linh thạch',
-    usage: '!muahang [item] [quantity]',
+    usage: '!cua-hang [item] [quantity]',
     examples: [
-        '!muahang - Xem cửa hàng',
-        '!muahang dp1 5 - Mua 5 đan phương hạ phẩm',
+        '!cuahang - Xem cửa hàng',
+        '!cuahang dp1 5 - Mua 5 đan phương hạ phẩm',
         '!shop dl 1 - Mua 1 đan lò'
     ],
     permissions: 'everyone',
@@ -35,7 +35,7 @@ module.exports = {
             // Check if item exists in shop
             const shopItem = SHOP_ITEMS[itemId];
             if (!shopItem) {
-                return message.reply(`❌ Không tìm thấy item "${itemId}" trong cửa hàng! Sử dụng \`!muahang\` để xem danh sách.`);
+                return message.reply(`❌ Không tìm thấy item "${itemId}" trong cửa hàng! Sử dụng \`!cuahang\` để xem danh sách.`);
             }
 
             // Get user data
@@ -63,7 +63,7 @@ module.exports = {
 
             // Show confirmation
             const confirmEmbed = new EmbedBuilder()
-                .setTitle('�️ Xác nhận mua hàng')
+                .setTitle('🛒 Xác nhận mua hàng')
                 .setDescription(`**${message.author.username}** muốn mua **${shopItem.name}**`)
                 .setColor(0x00ff88)
                 .addFields([
@@ -149,7 +149,7 @@ module.exports = {
             });
 
         } catch (error) {
-            console.error('Error in muahang command:', error);
+            console.error('Error in cuahang command:', error);
             await message.reply(`❌ Lỗi mua hàng: ${error.message}`);
         }
     },
@@ -270,8 +270,8 @@ module.exports = {
             
             // Page 1: Đan phương và đan lò
             const medicineEmbed = new EmbedBuilder()
-                .setTitle('🏪 Cửa Hàng - Đan Phương & Đan Lò')
-                .setDescription('**Danh sách đan phương và đan lò có thể mua:**')
+                .setTitle('🏪 Cửa Hàng Đan Phương & Đan Lò')
+                .setDescription('**Danh sách đan phương và đan lò có thể mua:**\n\n💡 **Hướng dẫn:**\n🛒 Mua vật phẩm: `!cuahang <item_id> [số_lượng]`\n⚠️ *Giá sẽ được cập nhật sau*')
                 .setColor(0x00ff88)
                 .setTimestamp()
                 .setFooter({ 
@@ -279,71 +279,30 @@ module.exports = {
                     iconURL: message.author.displayAvatarURL() 
                 });
 
+            // Medicine items - format: icon + name + id -> price + description
             const medicineItems = [
-                {
-                    id: 'dp1',
-                    name: `${SHOP_ITEMS['dp1'].icon || SHOP_ITEMS['dp1'].fallbackIcon || '📜'} Hạ phẩm đan phương (dp1)`,
-                    price: `100 ${linhThachIcon}`,
-                    description: 'Đan phương cấp thấp, dùng để chế tạo đan dược'
-                },
-                {
-                    id: 'dp2',
-                    name: `${SHOP_ITEMS['dp2'].icon || SHOP_ITEMS['dp2'].fallbackIcon || '📃'} Trung phẩm đan phương (dp2)`,
-                    price: `500 ${linhThachIcon}`,
-                    description: 'Đan phương trung bình, dùng để chế tạo đan dược'
-                },
-                {
-                    id: 'dp3',
-                    name: `${SHOP_ITEMS['dp3'].icon || SHOP_ITEMS['dp3'].fallbackIcon || '📋'} Thượng phẩm đan phương (dp3)`,
-                    price: `1000 ${linhThachIcon}`,
-                    description: 'Đan phương cao cấp, dùng để chế tạo đan dược'
-                },
-                {
-                    id: 'dp4',
-                    name: `${SHOP_ITEMS['dp4'].icon || SHOP_ITEMS['dp4'].fallbackIcon || '📊'} Tiên phẩm đan phương (dp4)`,
-                    price: `2000 ${linhThachIcon}`,
-                    description: 'Đan phương tiên phẩm, dùng để chế tạo đan dược'
-                },
-                {
-                    id: 'pdp',
-                    name: `${SHOP_ITEMS['pdp'].icon || SHOP_ITEMS['pdp'].fallbackIcon || '📈'} Phối đan phương (pdp)`,
-                    price: `5000 ${linhThachIcon}`,
-                    description: 'Phối đan phương, dùng để chế tạo đan phương cao cấp'
-                },
-                {
-                    id: 'dl',
-                    name: `${SHOP_ITEMS['dl'].icon || SHOP_ITEMS['dl'].fallbackIcon || '🏺'} Đan lò (dl)`,
-                    price: `1000 ${linhThachIcon}`,
-                    description: 'Đan lò, dùng để chế tạo đan dược'
-                }
+                { id: 'dp1', item: SHOP_ITEMS['dp1'], price: 100 },
+                { id: 'dp2', item: SHOP_ITEMS['dp2'], price: 500 },
+                { id: 'dp3', item: SHOP_ITEMS['dp3'], price: 1000 },
+                { id: 'dp4', item: SHOP_ITEMS['dp4'], price: 2000 },
+                { id: 'pdp', item: SHOP_ITEMS['pdp'], price: 5000 },
+                { id: 'dl', item: SHOP_ITEMS['dl'], price: 1000 }
             ];
 
-            // Split into multiple fields to avoid Discord's 1024 character limit
-            const itemsPerField = 3;
-            for (let i = 0; i < medicineItems.length; i += itemsPerField) {
-                const currentItems = medicineItems.slice(i, i + itemsPerField);
-                let fieldText = '';
-                
-                currentItems.forEach(item => {
-                    fieldText += `**${item.name}**\n`;
-                    fieldText += `💰 ${item.price} • ${item.description}\n\n`;
-                });
-                
-                const fieldName = i === 0 ? '🧪 Đan Phương' : i === 3 ? '🏺 Đan Lò & Khác' : '📦 Vật Phẩm';
-                
+            medicineItems.forEach(({ id, item, price }) => {
                 medicineEmbed.addFields({
-                    name: fieldName,
-                    value: fieldText.trim(),
+                    name: `${item.icon || item.fallbackIcon || '📜'} ${item.name} (${id})`,
+                    value: `💰 Giá: ${linhThachIcon} ${price}\n📝 Mô tả: ${item.description || 'Vật phẩm hỗ trợ chế tạo'}`,
                     inline: false
                 });
-            }
+            });
 
             pages.push(medicineEmbed);
 
             // Page 2: Tụ linh thạch
             const materialEmbed = new EmbedBuilder()
-                .setTitle('🏪 Cửa Hàng - Tụ Linh Thạch')
-                .setDescription('**Danh sách tụ linh thạch có thể mua:**')
+                .setTitle('🏪 Cửa Hàng Tụ Linh Thạch')
+                .setDescription('**Danh sách tụ linh thạch có thể mua:**\n\n💡 **Hướng dẫn:**\n🛒 Mua vật phẩm: `!cuahang <item_id> [số_lượng]`\n⚠️ *Giá sẽ được cập nhật sau*')
                 .setColor(0x00ff88)
                 .setTimestamp()
                 .setFooter({ 
@@ -351,22 +310,12 @@ module.exports = {
                     iconURL: message.author.displayAvatarURL() 
                 });
 
-            const materialItems = [
-                {
-                    id: 'tlt',
-                    name: `${SHOP_ITEMS['tlt'].icon || SHOP_ITEMS['tlt'].fallbackIcon || '💫'} Tụ linh thạch (tlt)`,
-                    price: `10000 ${linhThachIcon}`,
-                    description: 'Tụ linh thạch, dùng để chế tạo linh thạch cao cấp'
-                }
-            ];
-
-            // Use shorter format for material items
-            materialItems.forEach(item => {
-                materialEmbed.addFields({
-                    name: `💎 ${item.name}`,
-                    value: `💰 ${item.price}\n📝 ${item.description}`,
-                    inline: false
-                });
+            // Material items - format: icon + name + id -> price + description
+            const materialItem = SHOP_ITEMS['tlt'];
+            materialEmbed.addFields({
+                name: `${materialItem.icon || materialItem.fallbackIcon || '💫'} ${materialItem.name} (tlt)`,
+                value: `💰 Giá: ${linhThachIcon} 10000\n📝 Mô tả: ${materialItem.description || 'Vật phẩm hỗ trợ chế tạo linh thạch'}`,
+                inline: false
             });
 
             pages.push(materialEmbed);
@@ -449,7 +398,8 @@ module.exports = {
     },
 
     getItemPrice(itemId) {
-        const prices = {
+        // Fixed prices for shop items
+        const defaultPrices = {
             'dp1': 100,   // Hạ phẩm đan phương
             'dp2': 500,   // Trung phẩm đan phương
             'dp3': 1000,  // Thượng phẩm đan phương
@@ -459,7 +409,7 @@ module.exports = {
             'tlt': 10000  // Tụ linh thạch
         };
         
-        return prices[itemId] || 0;
+        return defaultPrices[itemId] || 0;
     },
 
     async getUserLinhThach(client, userId) {
